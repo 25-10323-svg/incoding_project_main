@@ -1,0 +1,1738 @@
+/* Aura Smart Home Custom Neumorphic Styling System */
+
+/* Root Variables - Light Theme Default */
+:root {
+    --bg-primary: #e0e8f6;
+    --bg-card: #e0e8f6;
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    
+    /* Neumorphic Shadows */
+    --shadow-raised: 6px 6px 12px #b8c0cf, -6px -6px 12px #ffffff;
+    --shadow-raised-hover: 3px 3px 6px #b8c0cf, -3px -3px 6px #ffffff;
+    --shadow-sunken: inset 4px 4px 8px #b8c0cf, inset -4px -4px 8px #ffffff;
+    --shadow-flat: 0px 0px 0px transparent;
+
+    /* Accents */
+    --accent-blue: #4a86e8;
+    --accent-blue-shadow: 0 0 15px rgba(74, 134, 232, 0.4);
+    --accent-green: #2ecc71;
+    --accent-green-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+    --accent-red: #e74c3c;
+    --accent-red-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+    --accent-grey: #a0aec0;
+    
+    /* Device Frame Border */
+    --phone-border: #1a202c;
+    --phone-bg: #2d3748;
+    
+    /* Layout Variables */
+    --transition-speed: 0.3s;
+    --transition-curve: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+    --bg-primary: #1a1e26;
+    --bg-card: #1a1e26;
+    --text-primary: #e2e8f0;
+    --text-secondary: #a0aec0;
+    
+    /* Neumorphic Shadows (Dark Mode) */
+    --shadow-raised: 6px 6px 14px #0d0f14, -6px -6px 14px #272d38;
+    --shadow-raised-hover: 3px 3px 7px #0d0f14, -3px -3px 7px #272d38;
+    --shadow-sunken: inset 4px 4px 8px #0d0f14, inset -4px -4px 8px #272d38;
+
+    /* Accents */
+    --accent-blue: #548cf5;
+    --accent-blue-shadow: 0 0 15px rgba(84, 140, 245, 0.5);
+    --accent-green: #2ecc71;
+    --accent-green-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+    --accent-red: #f55a4e;
+    --accent-red-shadow: 0 0 15px rgba(245, 90, 78, 0.5);
+    --accent-grey: #4a5568;
+    
+    /* Device Frame */
+    --phone-border: #2d3748;
+    --phone-bg: #1a202c;
+}
+
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color var(--transition-speed) var(--transition-curve);
+    padding: 20px;
+}
+
+/* App Core Container */
+.app-layout {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Header Area */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    font-size: 1.8rem;
+    color: var(--accent-blue);
+    text-shadow: var(--accent-blue-shadow);
+    animation: pulse-glow 2s infinite ease-in-out;
+}
+
+.logo-area h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.6rem;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Dashboard Grid Layout (Smartphone + Simulator) */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+    .simulation-dashboard {
+        width: 100%;
+        max-width: 480px;
+    }
+}
+
+/* Neumorphic Button Base Styles */
+.btn-neumorphic {
+    background: var(--bg-card);
+    border: none;
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: var(--shadow-raised);
+    transition: all 0.2s var(--transition-curve);
+    outline: none;
+}
+
+.btn-neumorphic:hover {
+    box-shadow: var(--shadow-raised-hover);
+}
+
+.btn-neumorphic:active {
+    box-shadow: var(--shadow-sunken);
+    transform: scale(0.98);
+}
+
+.icon-btn {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+}
+
+.circle-btn {
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Smartphone Simulator Shell */
+.smartphone-frame {
+    background-color: var(--phone-border);
+    border-radius: 40px;
+    padding: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    position: relative;
+    border: 4px solid var(--phone-bg);
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 9 / 18.5; /* Modern aspect ratio */
+    height: 820px;
+}
+
+.phone-screen {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-primary);
+    border-radius: 30px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Phone Status Bar */
+.phone-status-bar {
+    height: 44px;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    z-index: 10;
+}
+
+.phone-status-bar .indicators {
+    display: flex;
+    gap: 6px;
+    font-size: 0.75rem;
+}
+
+/* Screens Slider Viewport */
+.screens-wrapper {
+    display: flex;
+    width: 500%; /* 5 screens * 100% */
+    height: calc(100% - 44px);
+    transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.screen {
+    width: 20%; /* 100% / 5 screens */
+    height: 100%;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.screen-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 24px 24px 24px;
+    overflow-y: auto;
+}
+
+/* Hide scrollbars but keep functionality */
+.screen-content::-webkit-scrollbar {
+    width: 0px;
+}
+
+/* 1번 화면: 메인 대시보드 */
+.dashboard-home {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.welcome-text {
+    margin-bottom: 20px;
+}
+
+.welcome-text h2 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: var(--text-primary);
+}
+
+.welcome-text p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* 4 Grid Cards Style */
+.control-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.card-btn-neumorphic {
+    background: var(--bg-card);
+    border: none;
+    border-radius: 24px;
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    box-shadow: var(--shadow-raised);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.25s var(--transition-curve);
+    outline: none;
+    padding: 15px;
+}
+
+.card-btn-neumorphic:hover {
+    box-shadow: var(--shadow-raised-hover);
+}
+
+.card-btn-neumorphic:active {
+    box-shadow: var(--shadow-sunken);
+    transform: scale(0.96);
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-sunken);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-secondary);
+    transition: all 0.3s var(--transition-curve);
+}
+
+.card-btn-neumorphic:hover .card-icon {
+    transform: scale(1.05);
+}
+
+.card-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+    fill: none;
+}
+
+/* Icon specific hover accents */
+.card-btn-neumorphic:hover .light-icon {
+    color: var(--accent-blue);
+}
+.card-btn-neumorphic:hover .lock-icon {
+    color: #f39c12;
+}
+.card-btn-neumorphic:hover .gas-icon {
+    color: var(--accent-red);
+}
+.card-btn-neumorphic:hover .temp-icon {
+    color: #16a085;
+}
+
+.card-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Plus Add Button in dashboard */
+.add-button-container {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.plus-btn {
+    width: 54px;
+    height: 54px;
+    box-shadow: var(--shadow-raised);
+}
+
+.plus-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Bottom Navigation */
+.phone-bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--bg-card);
+    border-radius: 20px;
+    box-shadow: var(--shadow-raised);
+    padding: 8px 12px;
+    margin-top: auto;
+    gap: 4px;
+}
+
+.phone-bottom-nav .nav-item {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-secondary);
+    flex: 1;
+    padding: 8px 4px;
+    border-radius: 12px;
+    transition: all 0.2s var(--transition-curve);
+    outline: none;
+}
+
+.phone-bottom-nav .nav-item svg.nav-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.phone-bottom-nav .nav-item span {
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.phone-bottom-nav .nav-item:hover {
+    color: var(--text-primary);
+}
+
+.phone-bottom-nav .nav-item.active {
+    box-shadow: var(--shadow-sunken);
+    color: var(--accent-blue);
+}
+
+/* Screen Headers styling */
+.screen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-raised);
+}
+
+.back-btn svg.back-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.screen-header h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+/* 2번 화면: 밝기 조절 UI */
+.slider-card-neumorphic {
+    background: var(--bg-card);
+    border-radius: 20px;
+    box-shadow: var(--shadow-raised);
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slider-icon {
+    width: 22px;
+    height: 22px;
+    color: var(--accent-blue);
+}
+
+.slider-value-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Neumorphic Input Range Styling */
+.slider-wrapper {
+    position: relative;
+    width: 100%;
+    height: 24px;
+    display: flex;
+    align-items: center;
+}
+
+#global-brightness-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--bg-primary);
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1), inset -1px -1px 3px rgba(255, 255, 255, 0.8);
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+
+/* Range slider track fill */
+.slider-track-fill {
+    position: absolute;
+    left: 0;
+    top: 8px;
+    height: 8px;
+    background: var(--accent-blue);
+    border-radius: 4px;
+    z-index: 1;
+    pointer-events: none;
+    box-shadow: var(--accent-blue-shadow);
+}
+
+#global-brightness-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: none;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.15), -2px -2px 5px rgba(255,255,255,1);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+#global-brightness-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+
+#global-brightness-slider::-webkit-slider-thumb:active {
+    background: var(--accent-blue);
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 전체조명 OFF button section */
+.overall-power-section {
+    margin-bottom: 24px;
+}
+
+.overall-power-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    box-shadow: var(--shadow-raised);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.power-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.power-off-btn {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 10px 24px;
+    border-radius: 12px;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-raised);
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    transition: all 0.2s var(--transition-curve);
+    font-size: 0.85rem;
+}
+
+.power-off-btn:active {
+    box-shadow: var(--shadow-sunken);
+    color: var(--accent-red);
+}
+
+/* Rooms Lights Container */
+.rooms-lights-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.room-light-group {
+    background: var(--bg-card);
+    border-radius: 20px;
+    box-shadow: var(--shadow-raised);
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.room-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.room-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+/* Neumorphic Light buttons (Green when active, gray/neumorphic when inactive) */
+.light-toggle-btn, .light-toggle-single-btn {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-raised);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: all 0.25s var(--transition-curve);
+}
+
+.light-toggle-btn:hover, .light-toggle-single-btn:hover {
+    box-shadow: var(--shadow-raised-hover);
+}
+
+/* ON State: Green, sunken, neon glow */
+.light-toggle-btn.active, .light-toggle-single-btn.active {
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sunken);
+    color: var(--accent-green);
+    text-shadow: 0 0 4px rgba(46, 204, 113, 0.2);
+    font-weight: 700;
+}
+
+/* Bathroom styling (two blocks side by side) */
+.bathroom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.bathroom-grid .room-light-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.bathroom-grid .light-toggle-single-btn {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* 3번 화면: 현관 잠금 UI */
+.lock-buttons-pair, .valve-buttons-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.lock-state-card, .valve-state-card {
+    background: var(--bg-card);
+    border: none;
+    border-radius: 24px;
+    aspect-ratio: 0.95 / 1;
+    cursor: pointer;
+    box-shadow: var(--shadow-raised);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.25s var(--transition-curve);
+    outline: none;
+}
+
+.lock-state-card:active, .valve-state-card:active {
+    transform: scale(0.97);
+}
+
+.lock-card-icon, .valve-card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    box-shadow: var(--shadow-sunken);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-secondary);
+    transition: all 0.3s var(--transition-curve);
+}
+
+.lock-card-icon svg, .valve-svg {
+    width: 26px;
+    height: 26px;
+    stroke: currentColor;
+    fill: none;
+    transition: transform 0.3s var(--transition-curve);
+}
+
+.lock-card-label, .valve-card-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Active Open: Green outline or glow */
+.lock-state-card.active, .valve-state-card.active {
+    box-shadow: var(--shadow-sunken);
+}
+
+.lock-state-card.active #btn-door-unlock,
+.lock-state-card.active .lock-card-icon.open {
+    color: var(--accent-green);
+    text-shadow: var(--accent-green-shadow);
+}
+
+.lock-state-card.active .lock-card-icon.close {
+    color: var(--accent-red);
+    text-shadow: var(--accent-red-shadow);
+}
+
+.valve-state-card.active .valve-card-icon.open {
+    color: var(--accent-blue);
+    text-shadow: var(--accent-blue-shadow);
+}
+
+.valve-state-card.active .valve-card-icon.close {
+    color: var(--text-secondary);
+}
+
+/* Secure Lock / Complete Lock Section */
+.secure-lock-card {
+    background: var(--bg-card);
+    border-radius: 24px;
+    box-shadow: var(--shadow-raised);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.secure-title-area {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.secure-accent {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent-red);
+}
+
+.secure-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.secure-time-setting-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.neumorphic-dropdown-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.neumorphic-select {
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
+    outline: none;
+    border-radius: 12px;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sunken);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.dropdown-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.secure-time-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.secure-trigger-btn {
+    width: 100%;
+    padding: 12px 0;
+    font-weight: 700;
+    color: var(--accent-red);
+    box-shadow: var(--shadow-raised);
+}
+
+.secure-trigger-btn.active {
+    box-shadow: var(--shadow-sunken);
+    color: var(--text-secondary);
+}
+
+/* Countdown radial circle styling */
+.secure-countdown-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    animation: fade-in 0.3s ease;
+}
+
+.countdown-radial {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.radial-ring {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+}
+
+.ring-bg {
+    fill: none;
+    stroke: var(--bg-primary);
+    stroke-width: 6;
+}
+
+.ring-fill {
+    fill: none;
+    stroke: var(--accent-red);
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.1s linear;
+}
+
+.countdown-seconds {
+    position: absolute;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--accent-red);
+    font-family: 'Outfit', sans-serif;
+}
+
+.countdown-status-text {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-red);
+    animation: pulse-glow-red 1.5s infinite ease-in-out;
+}
+
+/* 4번 화면: 가스벨브 UI */
+.gas-toggles-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.toggle-card-neumorphic {
+    background: var(--bg-card);
+    border-radius: 20px;
+    box-shadow: var(--shadow-raised);
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+}
+
+.toggle-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.toggle-status-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: var(--accent-green);
+    color: #ffffff;
+    box-shadow: var(--accent-green-shadow);
+}
+
+.toggle-status-badge.off {
+    background: var(--accent-grey);
+    box-shadow: none;
+}
+
+.toggle-description {
+    grid-column: 1 / span 2;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    border-top: 1px solid rgba(0,0,0,0.03);
+    padding-top: 8px;
+}
+
+/* Neumorphic Switch Styling */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-round {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-primary);
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+    transition: .3s var(--transition-curve);
+    border-radius: 34px;
+}
+
+.slider-round:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--bg-card);
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+    transition: .3s var(--transition-curve);
+    border-radius: 50%;
+}
+
+input:checked + .slider-round {
+    background-color: var(--accent-green);
+    box-shadow: var(--accent-green-shadow);
+}
+
+input:checked + .slider-round:before {
+    transform: translateX(24px);
+    background-color: #ffffff;
+}
+
+/* Valve Spin effect when open/close */
+.valve-svg.spin {
+    animation: spin-valve 0.6s var(--transition-curve);
+}
+
+/* 5번 화면: 온도 조절 UI */
+.temp-dial-card {
+    background: var(--bg-card);
+    border-radius: 24px;
+    box-shadow: var(--shadow-raised);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.temp-display {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-raised);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.temp-display::after {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    box-shadow: var(--shadow-sunken);
+}
+
+.temp-circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.temp-circle .label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.temp-circle .value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent-blue);
+    font-family: 'Outfit', sans-serif;
+    margin: 4px 0;
+}
+
+.temp-circle .sub-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.temp-adjust-buttons {
+    display: flex;
+    gap: 24px;
+}
+
+.temp-adjust-btn {
+    width: 46px;
+    height: 46px;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.temp-modes-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    box-shadow: var(--shadow-raised);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.modes-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.modes-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.mode-btn {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-raised);
+    padding: 8px 0;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: all 0.2s var(--transition-curve);
+}
+
+.mode-btn:hover {
+    box-shadow: var(--shadow-raised-hover);
+}
+
+.mode-btn.active {
+    box-shadow: var(--shadow-sunken);
+    color: var(--accent-blue);
+    font-weight: 700;
+}
+
+/* RIGHT SECTION: SIMULATOR DASHBOARD & ENVIRONMENT */
+.simulation-dashboard {
+    height: 820px;
+    display: flex;
+}
+
+.simulation-card-neumorphic {
+    background: var(--bg-card);
+    border-radius: 36px;
+    box-shadow: var(--shadow-raised);
+    width: 100%;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.simulation-card-neumorphic::-webkit-scrollbar {
+    width: 6px;
+}
+
+.simulation-card-neumorphic::-webkit-scrollbar-thumb {
+    background-color: var(--accent-grey);
+    border-radius: 3px;
+}
+
+.sim-header h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.sim-header p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* 2D Floor Plan layout styling */
+.floor-plan-container {
+    background: var(--bg-primary);
+    border-radius: 20px;
+    box-shadow: var(--shadow-sunken);
+    padding: 20px;
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.02);
+}
+
+.floor-plan-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 110px);
+    gap: 10px;
+}
+
+.room-block {
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 2px dashed rgba(160, 174, 192, 0.4);
+    position: relative;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.4s var(--transition-curve);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.03);
+}
+
+.room-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+/* Light bulbs indicators inside simulator */
+.sim-light-indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-grey);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+    position: absolute;
+    transition: all 0.3s var(--transition-curve);
+}
+
+.sim-light-indicator:nth-of-type(1) {
+    top: 10px;
+    right: 10px;
+}
+
+.sim-light-indicator:nth-of-type(2) {
+    top: 10px;
+    right: 28px;
+}
+
+.sim-light-indicator.single {
+    top: 10px;
+    right: 10px;
+}
+
+/* Glowing light indicators when ON */
+.sim-light-indicator.active {
+    background: var(--accent-green);
+    box-shadow: 0 0 12px var(--accent-green);
+}
+
+/* Floor Plan Grid positioning */
+.master-room {
+    grid-column: 1 / span 2;
+    grid-row: 1;
+}
+
+.master-bath {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+.room-a {
+    grid-column: 4;
+    grid-row: 1;
+}
+
+.public-bath {
+    grid-column: 4;
+    grid-row: 2;
+}
+
+.living-room {
+    grid-column: 1 / span 3;
+    grid-row: 2;
+}
+
+.room-b {
+    grid-column: 1;
+    grid-row: 3;
+}
+
+.kitchen {
+    grid-column: 2 / span 2;
+    grid-row: 3;
+}
+
+.entrance {
+    grid-column: 4;
+    grid-row: 3;
+}
+
+/* Room block active background lighting */
+.room-block.light-active {
+    background: radial-gradient(circle, rgba(46, 204, 113, 0.1) 0%, rgba(224, 232, 246, 0.1) 80%);
+    border-color: rgba(46, 204, 113, 0.4);
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.15);
+}
+
+/* Kitchen Sim Details */
+.kitchen-sim-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2px;
+}
+
+.gas-valve-graphic {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-sunken);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-secondary);
+    transition: all 0.5s var(--transition-curve);
+}
+
+.valve-svg-sim {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+}
+
+.gas-valve-graphic.open {
+    color: var(--accent-blue);
+    transform: rotate(0deg);
+}
+
+.gas-valve-graphic.closed {
+    color: var(--accent-red);
+    transform: rotate(90deg);
+}
+
+.kitchen-temp-display {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+}
+
+.kitchen-temp-display.hot {
+    color: var(--accent-red);
+    animation: flash-red 1s infinite alternate;
+}
+
+/* Entrance door lock graphic inside simulator */
+.entrance-door-graphic {
+    width: 100%;
+    padding: 8px 0;
+    border-radius: 8px;
+    background: var(--accent-red);
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    box-shadow: var(--accent-red-shadow);
+    transition: all 0.3s var(--transition-curve);
+    position: relative;
+}
+
+.entrance-door-graphic.unlocked {
+    background: var(--accent-green);
+    box-shadow: var(--accent-green-shadow);
+}
+
+.door-status-text {
+    letter-spacing: 0.5px;
+}
+
+.secure-lock-active-light {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: transparent;
+    top: 4px;
+    right: 4px;
+}
+
+.secure-lock-active-light.active {
+    background: #ffff00;
+    box-shadow: 0 0 8px #ffff00;
+    animation: flash-yellow 0.8s infinite alternate;
+}
+
+/* Simulation Controls Scenarios styling */
+.simulation-scenario-controls h4, .system-logs-container h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.scenario-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.scenario-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    text-align: left;
+    border-radius: 14px;
+}
+
+.scenario-icon {
+    font-size: 1.4rem;
+}
+
+.scenario-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.scenario-text strong {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.scenario-text span {
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+}
+
+/* System Logs Container */
+.log-output-box {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sunken);
+    padding: 14px;
+    height: 120px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.log-line {
+    line-height: 1.4;
+}
+
+.log-line.system { color: var(--text-secondary); }
+.log-line.action { color: var(--accent-blue); font-weight: 600; }
+.log-line.warning { color: var(--accent-red); font-weight: 600; }
+.log-line.success { color: var(--accent-green); font-weight: 600; }
+
+/* Toast Notifications styling */
+.toast-container {
+    position: absolute;
+    bottom: 80px;
+    left: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.toast {
+    background: rgba(26, 30, 38, 0.85);
+    color: #ffffff;
+    backdrop-filter: blur(8px);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: toast-in-out 3s forwards;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toast.error {
+    border-left: 4px solid var(--accent-red);
+}
+
+.toast.success {
+    border-left: 4px solid var(--accent-green);
+}
+
+/* Keyframes and Animations */
+@keyframes pulse-glow {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 2px rgba(74, 134, 232, 0.2));
+    }
+    50% {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 10px rgba(74, 134, 232, 0.7));
+    }
+}
+
+@keyframes spin-valve {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(90deg); }
+}
+
+@keyframes flash-red {
+    0% { background-color: rgba(231, 76, 60, 0.1); }
+    100% { background-color: rgba(231, 76, 60, 0.3); }
+}
+
+@keyframes flash-yellow {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+@keyframes pulse-glow-red {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.shake-animation {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes toast-in-out {
+    0% { opacity: 0; transform: translateY(15px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 거실 에어컨 조절 카드 스타일 */
+.aircon-control-card-neumorphic {
+    background: var(--bg-card);
+    border-radius: 20px;
+    box-shadow: var(--shadow-raised);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.aircon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.aircon-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.aircon-status-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: var(--accent-grey);
+    color: #ffffff;
+    transition: all 0.3s;
+}
+.aircon-status-badge.active {
+    background: var(--accent-blue);
+    box-shadow: var(--accent-blue-shadow);
+}
+.aircon-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.aircon-power-btn {
+    width: 100%;
+    padding: 10px 0;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+.aircon-power-btn.active {
+    box-shadow: var(--shadow-sunken);
+    color: var(--accent-blue);
+}
+.aircon-wind-modes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    animation: fade-in 0.3s ease;
+}
+.wind-btn {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-raised);
+    padding: 6px 0;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+.wind-btn.active {
+    box-shadow: var(--shadow-sunken);
+    color: var(--accent-blue);
+    font-weight: 700;
+}
+.aircon-description {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    border-top: 1px solid rgba(0,0,0,0.03);
+    padding-top: 6px;
+}
+
+/* 시뮬레이터 에어컨 작동 그래픽 */
+.aircon-graphic-sim {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 6px;
+    background: var(--bg-primary);
+    border-radius: 6px;
+    box-shadow: var(--shadow-sunken);
+    font-size: 0.65rem;
+    opacity: 0.4;
+    transition: all 0.3s;
+}
+.aircon-graphic-sim.active {
+    opacity: 1;
+    color: var(--accent-blue);
+    background: rgba(74, 134, 232, 0.1);
+    border: 1px solid rgba(74, 134, 232, 0.3);
+}
+.aircon-graphic-sim.active .fan-icon {
+    display: inline-block;
+    animation: spin 1s infinite linear;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.wind-lines {
+    display: none;
+}
+.aircon-graphic-sim.active .wind-lines {
+    display: inline-block;
+    animation: flow-wind 1.5s infinite linear;
+    letter-spacing: -1px;
+}
+@keyframes flow-wind {
+    0% { opacity: 0.2; transform: translateX(-1px); }
+    50% { opacity: 1; transform: translateX(1px); }
+    100% { opacity: 0.2; transform: translateX(-1px); }
+}
+
+/* 홈화면 외출모드 버튼 스타일 */
+.away-mode-container {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+.away-mode-btn-home {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background: var(--bg-card);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--accent-red);
+    box-shadow: var(--shadow-raised);
+    transition: all 0.2s var(--transition-curve);
+}
+.away-mode-btn-home:hover {
+    box-shadow: var(--shadow-raised-hover);
+}
+.away-mode-btn-home:active {
+    box-shadow: var(--shadow-sunken);
+    transform: scale(0.98);
+}
+.away-icon-home {
+    font-size: 1.2rem;
+}
+
+/* 기기 오프라인(연결 끊김) 스타일 */
+.card-btn-neumorphic.offline {
+    opacity: 0.6;
+    border: 1px dashed var(--accent-red) !important;
+    position: relative;
+}
+.card-btn-neumorphic.offline .card-icon {
+    color: var(--accent-grey) !important;
+    box-shadow: none;
+    background: rgba(0,0,0,0.03);
+}
+.card-btn-neumorphic.offline::after {
+    content: 'OFFLINE';
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 0.55rem;
+    font-weight: 800;
+    color: var(--accent-red);
+    background: rgba(231, 76, 60, 0.08);
+    padding: 1px 4px;
+    border-radius: 4px;
+}
+/* 네트워크 테스트 토글 단추 비활성 스타일 */
+.net-toggle-btn:not(.active) {
+    box-shadow: var(--shadow-sunken);
+    opacity: 0.75;
+}
+.net-toggle-btn:not(.active) .net-status {
+    color: #e53e3e !important;
+}
+
+/* 홈 카드 OFFLINE 상태 */
+.card-btn-neumorphic.card-offline {
+    opacity: 0.55;
+    filter: grayscale(60%);
+    position: relative;
+    pointer-events: none;
+    box-shadow: var(--shadow-sunken);
+}
+
+/* OFFLINE 배지 */
+.offline-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 0.48rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: #e53e3e;
+    padding: 2px 5px;
+    border-radius: 4px;
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+
+
+
