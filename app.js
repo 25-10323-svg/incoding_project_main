@@ -5,13 +5,13 @@ const state = {
     currentScreen: 1,
     brightness: 70, // 10% to 100%
     lights: {
-        livingRoom: [false, false],
-        kitchen: [false, false],  // Added Kitchen Lights
-        roomA: [false, false],
-        roomB: [false, false],
-        masterRoom: [false, false],
-        bathroom: false,       // Single Toggle
-        masterBathroom: false  // Single Toggle
+        livingRoom: false,
+        kitchen: false,
+        roomA: false,
+        roomB: false,
+        masterRoom: false,
+        bathroom: false,
+        masterBathroom: false
     },
     door: {
         status: 'locked', // 'locked' | 'unlocked'
@@ -189,19 +189,21 @@ function updateLightingUI() {
     elements.brightnessValText.textContent = `${state.brightness}%`;
     elements.sliderFill.style.width = `${state.brightness}%`;
 
-    // 1. Update multi-light buttons
+    // 1. Update multi-light buttons (if any)
     elements.lightToggleButtons.forEach(btn => {
         const room = btn.dataset.room;
         const index = parseInt(btn.dataset.index);
-        const isActive = state.lights[room][index];
-        if (isActive) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
+        if (Array.isArray(state.lights[room])) {
+            const isActive = state.lights[room][index];
+            if (isActive) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
         }
     });
 
-    // 2. Update single buttons (Bathrooms)
+    // 2. Update single buttons
     elements.lightSingleButtons.forEach(btn => {
         const room = btn.dataset.room;
         const isActive = state.lights[room];
@@ -312,26 +314,35 @@ elements.btnAllLightsOff.addEventListener('click', () => {
 });
 
 // Toggle individual room lights
+// Toggle multi-button room lights (if any)
 elements.lightToggleButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         const room = btn.dataset.room;
         const index = parseInt(btn.dataset.index);
-        state.lights[room][index] = !state.lights[room][index];
-        
-        const krRoomNames = { livingRoom: '거실', kitchen: '주방', roomA: '방a', roomB: '방b', masterRoom: '안방' };
-        addLog(`${krRoomNames[room]} ${index + 1}조명이 ${state.lights[room][index] ? '켜졌습니다' : '꺼졌습니다'}.`, 'action');
-        
-        updateLightingUI();
+        if (Array.isArray(state.lights[room])) {
+            state.lights[room][index] = !state.lights[room][index];
+            const krRoomNames = { livingRoom: '거실', kitchen: '주방', roomA: '방a', roomB: '방b', masterRoom: '안방' };
+            addLog(`${krRoomNames[room]} ${index + 1}조명이 ${state.lights[room][index] ? '켜졌습니다' : '꺼졌습니다'}.`, 'action');
+            updateLightingUI();
+        }
     });
 });
 
-// Toggle bathroom lights
+// Toggle single room lights (all rooms)
 elements.lightSingleButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         const room = btn.dataset.room;
         state.lights[room] = !state.lights[room];
         
-        const krRoomNames = { bathroom: '화장실', masterBathroom: '안방 화장실' };
+        const krRoomNames = {
+            livingRoom: '거실',
+            kitchen: '주방',
+            roomA: '방a',
+            roomB: '방b',
+            masterRoom: '안방',
+            bathroom: '화장실',
+            masterBathroom: '안방 화장실'
+        };
         addLog(`${krRoomNames[room]} 조명이 ${state.lights[room] ? '켜졌습니다' : '꺼졌습니다'}.`, 'action');
         
         updateLightingUI();
