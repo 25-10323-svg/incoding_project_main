@@ -72,6 +72,7 @@ class SmartHomeSimulator {
     this.mistParticles= null;
     this.ondolPlanes  = [];
     this.labelGroup   = null;
+    this.wallBoxes    = [];
 
     this._build();
     this._bindResize();
@@ -170,6 +171,7 @@ class SmartHomeSimulator {
 
   // ── Walls with precise door gaps ──────────────────────────────────
   _buildWalls() {
+    this.wallBoxes = [];
     const H = 32, T = 1.5;
     const wm = this._mat(0x1e2535, 0.7);
     const im = this._mat(0x252d3d, 0.75);
@@ -178,6 +180,12 @@ class SmartHomeSimulator {
       const w = horiz ? len : T;
       const d = horiz ? T   : len;
       this._box(w, H, d, mat, cx, H / 2, cz);
+      this.wallBoxes.push({
+        minX: cx - w / 2,
+        maxX: cx + w / 2,
+        minZ: cz - d / 2,
+        maxZ: cz + d / 2
+      });
     };
 
     // ── Outer ──
@@ -530,6 +538,24 @@ class SmartHomeSimulator {
     qs('#fps-dpad').classList.add('hidden'); qs('#btn-view-fps').classList.remove('active');
   }
 
+  _checkCollision(nx, nz) {
+    const r = 1.6; // Player collision radius
+    for (let i = 0; i < this.wallBoxes.length; i++) {
+      const b = this.wallBoxes[i];
+      if (nx + r > b.minX && nx - r < b.maxX &&
+          nz + r > b.minZ && nz - r < b.maxZ) {
+        return true;
+      }
+    }
+    // Closed front door collision (X: 45..55, Z: -70)
+    if (!S.door.open) {
+      if (nx + r > 45 && nx - r < 55 && nz + r > -71.5 && nz - r < -68.5) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   _updateFPS(dt) {
     if (!S.fpsMode) return;
     const fwd = new THREE.Vector3(-Math.sin(this.fpsYaw), 0, -Math.cos(this.fpsYaw)), rgt = new THREE.Vector3( Math.cos(this.fpsYaw), 0, -Math.sin(this.fpsYaw)), dir = new THREE.Vector3();
@@ -538,8 +564,25 @@ class SmartHomeSimulator {
     if (this.keys['a'] || this.keys['arrowleft'])  dir.addScaledVector(rgt, -1);
     if (this.keys['d'] || this.keys['arrowright']) dir.addScaledVector(rgt,  1);
     if (dir.lengthSq() > 0) dir.normalize();
-    this.fpsPos.addScaledVector(dir, 45 * dt);
-    this.fpsPos.x = Math.max(-75, Math.min(75, this.fpsPos.x)); this.fpsPos.z = Math.max(-68, Math.min(68, this.fpsPos.z));
+
+    const speed = 45 * dt;
+    const moveX = dir.x * speed;
+    const moveZ = dir.z * speed;
+
+    if (moveX !== 0) {
+      const nextX = Math.max(-78, Math.min(78, this.fpsPos.x + moveX));
+      if (!this._checkCollision(nextX, this.fpsPos.z)) {
+        this.fpsPos.x = nextX;
+      }
+    }
+
+    if (moveZ !== 0) {
+      const nextZ = Math.max(-68, Math.min(68, this.fpsPos.z + moveZ));
+      if (!this._checkCollision(this.fpsPos.x, nextZ)) {
+        this.fpsPos.z = nextZ;
+      }
+    }
+
     this.camera.position.copy(this.fpsPos);
     this.camera.lookAt(new THREE.Vector3(this.fpsPos.x - Math.sin(this.fpsYaw)*Math.cos(this.fpsPitch), 16.5 + Math.sin(this.fpsPitch), this.fpsPos.z - Math.cos(this.fpsYaw)*Math.cos(this.fpsPitch)));
   }
