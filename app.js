@@ -397,17 +397,17 @@ class SmartHomeSimulator {
       return { L, R, axis, span, bx: x, bz: z };
     };
 
-    const curFab = new THREE.MeshStandardMaterial({ color: 0x2d3d55, roughness: 0.9, side: THREE.DoubleSide });
-    this.curtains3d.living = slidePair(0, 69.4, 'x', curFab, 30);
-    this.curtains3d.master = slidePair(55, 69.4, 'x', curFab, 20);
+    const curFab = new THREE.MeshStandardMaterial({ color: 0x4a6b99, roughness: 0.9, side: THREE.DoubleSide });
+    this.curtains3d.living = slidePair(0, 68.5, 'x', curFab, 30);
+    this.curtains3d.master = slidePair(55, 68.5, 'x', curFab, 20);
 
-    const bld = new THREE.MeshStandardMaterial({ color: 0xd4d8e0, side: THREE.DoubleSide });
+    const bld = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, side: THREE.DoubleSide });
     const blindA = new THREE.Mesh(new THREE.PlaneGeometry(16, 14), bld);
-    blindA.position.set(-79.4, 18, 35); blindA.rotation.y = Math.PI/2; this.scene.add(blindA);
+    blindA.position.set(-78.5, 18, 35); blindA.rotation.y = Math.PI/2; this.scene.add(blindA);
     this.curtains3d.rooma = { type: 'blind', mesh: blindA, baseY: 18 };
 
     const blindB = new THREE.Mesh(new THREE.PlaneGeometry(16, 14), bld);
-    blindB.position.set(-79.4, 18, -35); blindB.rotation.y = Math.PI/2; this.scene.add(blindB);
+    blindB.position.set(-78.5, 18, -35); blindB.rotation.y = Math.PI/2; this.scene.add(blindB);
     this.curtains3d.roomb = { type: 'blind', mesh: blindB, baseY: 18 };
   }
 
