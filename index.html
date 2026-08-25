@@ -1,280 +1,285 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>스마트홈 3D 시뮬레이터</title>
   <meta name="description" content="실시간 3D 스마트홈 제어 시뮬레이터 - 조명, 현관문, 커튼, 가스, 냉난방 완전 연동" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
-<!-- =========================================================
+  <!-- =========================================================
      3D VIEWPORT (Full Screen)
      ========================================================= -->
-<div id="viewport">
-  <canvas id="sim-canvas"></canvas>
+  <div id="viewport">
+    <canvas id="sim-canvas"></canvas>
 
-  <!-- TOP HUD: 상단 상태 바 -->
-  <div id="hud-top">
-    <div class="hud-brand">🏠 스마트홈 시뮬레이터</div>
-    <div class="hud-stats">
-      <span id="hud-temp">🌡 24.5°C</span>
-      <span id="hud-humidity">💧 52%</span>
-      <span id="hud-door-status">🔒 현관 잠김</span>
-      <span id="hud-time" id="live-time"></span>
+    <!-- TOP HUD: 상단 상태 바 -->
+    <div id="hud-top">
+      <div class="hud-brand">🏠 스마트홈 시뮬레이터</div>
+      <div class="hud-stats">
+        <span id="hud-temp">🌡 24.5°C</span>
+        <span id="hud-humidity">💧 52%</span>
+        <span id="hud-door-status">🔒 현관 잠김</span>
+        <span id="hud-time" id="live-time"></span>
+      </div>
+      <div class="hud-actions">
+        <button id="btn-away" class="hud-btn">🚶 외출</button>
+        <button id="btn-toggle-panel" class="hud-btn active">📱 패널</button>
+      </div>
     </div>
-    <div class="hud-actions">
-      <button id="btn-away" class="hud-btn">🚶 외출</button>
-      <button id="btn-toggle-panel" class="hud-btn active">📱 패널</button>
+
+    <!-- CAMERA TOOLBAR: 카메라 제어 -->
+    <div id="cam-toolbar">
+      <button class="cam-btn active" id="btn-view-iso" title="전체 뷰">⬛ 전체</button>
+      <button class="cam-btn" id="btn-view-top" title="위에서 보기">⬆ 탑뷰</button>
+      <button class="cam-btn" id="btn-view-fps" title="1인칭 걷기">🚶 1인칭</button>
+      <div class="cam-divider"></div>
+      <button class="cam-btn" id="btn-room-living" title="거실">거실</button>
+      <button class="cam-btn" id="btn-room-kitchen" title="주방">주방</button>
+      <button class="cam-btn" id="btn-room-master" title="안방">안방</button>
+      <button class="cam-btn" id="btn-room-rooma" title="방 A">방 A</button>
+      <button class="cam-btn" id="btn-room-roomb" title="방 B">방 B</button>
+      <button class="cam-btn" id="btn-room-bath" title="욕실">욕실</button>
+      <button class="cam-btn" id="btn-room-entrance" title="현관">현관</button>
+      <div class="cam-divider"></div>
+      <button class="cam-btn toggle" id="btn-roof-toggle" title="지붕 ON/OFF">🏠 지붕</button>
+      <button class="cam-btn toggle" id="btn-labels-toggle" title="방 이름 표시" data-active="true">🏷 이름</button>
     </div>
+
+    <!-- FPS D-PAD (1인칭 모드 전용) -->
+    <div id="fps-dpad" class="hidden">
+      <div class="dpad-row">
+        <button class="dpad-btn" id="dpad-up">▲</button>
+      </div>
+      <div class="dpad-row">
+        <button class="dpad-btn" id="dpad-left">◀</button>
+        <button class="dpad-btn" id="dpad-center">●</button>
+        <button class="dpad-btn" id="dpad-right">▶</button>
+      </div>
+      <div class="dpad-row">
+        <button class="dpad-btn" id="dpad-down">▼</button>
+      </div>
+      <div class="dpad-hint">WASD / 터치</div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast-area"></div>
   </div>
 
-  <!-- CAMERA TOOLBAR: 카메라 제어 -->
-  <div id="cam-toolbar">
-    <button class="cam-btn active" id="btn-view-iso" title="전체 뷰">⬛ 전체</button>
-    <button class="cam-btn" id="btn-view-top" title="위에서 보기">⬆ 탑뷰</button>
-    <button class="cam-btn" id="btn-view-fps" title="1인칭 걷기">🚶 1인칭</button>
-    <div class="cam-divider"></div>
-    <button class="cam-btn" id="btn-room-living" title="거실">거실</button>
-    <button class="cam-btn" id="btn-room-kitchen" title="주방">주방</button>
-    <button class="cam-btn" id="btn-room-master" title="안방">안방</button>
-    <button class="cam-btn" id="btn-room-rooma" title="방 A">방 A</button>
-    <button class="cam-btn" id="btn-room-roomb" title="방 B">방 B</button>
-    <button class="cam-btn" id="btn-room-bath" title="욕실">욕실</button>
-    <button class="cam-btn" id="btn-room-entrance" title="현관">현관</button>
-    <div class="cam-divider"></div>
-    <button class="cam-btn toggle" id="btn-roof-toggle" title="지붕 ON/OFF">🏠 지붕</button>
-    <button class="cam-btn toggle" id="btn-labels-toggle" title="방 이름 표시" data-active="true">🏷 이름</button>
-  </div>
-
-  <!-- FPS D-PAD (1인칭 모드 전용) -->
-  <div id="fps-dpad" class="hidden">
-    <div class="dpad-row">
-      <button class="dpad-btn" id="dpad-up">▲</button>
-    </div>
-    <div class="dpad-row">
-      <button class="dpad-btn" id="dpad-left">◀</button>
-      <button class="dpad-btn" id="dpad-center">●</button>
-      <button class="dpad-btn" id="dpad-right">▶</button>
-    </div>
-    <div class="dpad-row">
-      <button class="dpad-btn" id="dpad-down">▼</button>
-    </div>
-    <div class="dpad-hint">WASD / 터치</div>
-  </div>
-
-  <!-- TOAST -->
-  <div id="toast-area"></div>
-</div>
-
-<!-- =========================================================
+  <!-- =========================================================
      CONTROL PANEL (Right Sidebar)
      ========================================================= -->
-<div id="control-panel">
+  <div id="control-panel">
 
-  <!-- Panel Header -->
-  <div class="panel-header">
-    <div class="panel-logo">📱 리모컨</div>
-    <div id="panel-time" class="panel-clock">--:--</div>
-  </div>
-
-  <!-- Tab Bar -->
-  <div class="tab-bar">
-    <button class="tab-btn active" data-tab="lights">💡 조명</button>
-    <button class="tab-btn" data-tab="door">🚪 현관</button>
-    <button class="tab-btn" data-tab="curtains">🪟 커튼</button>
-    <button class="tab-btn" data-tab="climate">🌡 온도</button>
-    <button class="tab-btn" data-tab="gas">🔥 가스</button>
-  </div>
-
-  <!-- ── TAB: 조명 ── -->
-  <div class="tab-content active" id="tab-lights">
-    <div class="section-title">전체 밝기</div>
-    <div class="brightness-row">
-      <span class="icon">🔅</span>
-      <input type="range" id="brightness-slider" min="10" max="100" value="70" class="slider" />
-      <span class="icon">🔆</span>
-      <span id="brightness-val" class="val-badge">70%</span>
+    <!-- Panel Header -->
+    <div class="panel-header">
+      <div class="panel-logo">📱 리모컨</div>
+      <div id="panel-time" class="panel-clock">--:--</div>
     </div>
 
-    <div class="section-title">방별 조명
-      <button id="btn-all-off" class="mini-btn danger">전체 끄기</button>
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="lights">💡 조명</button>
+      <button class="tab-btn" data-tab="door">🚪 현관</button>
+      <button class="tab-btn" data-tab="curtains">🪟 커튼</button>
+      <button class="tab-btn" data-tab="climate">🌡 온도</button>
+      <button class="tab-btn" data-tab="gas">🔥 가스</button>
     </div>
 
-    <div class="room-light-grid">
-      <div class="room-light-card" data-room="living">
-        <div class="room-icon">🛋</div>
-        <div class="room-name">거실</div>
-        <button class="toggle-btn" data-light="living">꺼짐</button>
+    <!-- ── TAB: 조명 ── -->
+    <div class="tab-content active" id="tab-lights">
+      <div class="section-title">전체 밝기</div>
+      <div class="brightness-row">
+        <span class="icon">🔅</span>
+        <input type="range" id="brightness-slider" min="10" max="100" value="70" class="slider" />
+        <span class="icon">🔆</span>
+        <span id="brightness-val" class="val-badge">70%</span>
       </div>
-      <div class="room-light-card" data-room="kitchen">
-        <div class="room-icon">🍳</div>
-        <div class="room-name">주방</div>
-        <button class="toggle-btn" data-light="kitchen">꺼짐</button>
-      </div>
-      <div class="room-light-card" data-room="master">
-        <div class="room-icon">🛏</div>
-        <div class="room-name">안방</div>
-        <button class="toggle-btn" data-light="master">꺼짐</button>
-      </div>
-      <div class="room-light-card" data-room="rooma">
-        <div class="room-icon">📚</div>
-        <div class="room-name">방 A</div>
-        <button class="toggle-btn" data-light="rooma">꺼짐</button>
-      </div>
-      <div class="room-light-card" data-room="roomb">
-        <div class="room-icon">🛌</div>
-        <div class="room-name">방 B</div>
-        <button class="toggle-btn" data-light="roomb">꺼짐</button>
-      </div>
-      <div class="room-light-card" data-room="bathroom">
-        <div class="room-icon">🚿</div>
-        <div class="room-name">욕실</div>
-        <button class="toggle-btn" data-light="bathroom">꺼짐</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- ── TAB: 현관 ── -->
-  <div class="tab-content" id="tab-door">
-    <div class="section-title">현관문</div>
-    <div class="door-status-box" id="door-status-box">
-      <div class="door-icon" id="door-icon">🔒</div>
-      <div class="door-text" id="door-text">잠겨 있음</div>
-    </div>
-    <div class="btn-row">
-      <button id="btn-door-open" class="action-btn">🔓 열기</button>
-      <button id="btn-door-close" class="action-btn danger">🔒 닫기 & 잠금</button>
-    </div>
-    <div class="section-title" style="margin-top:16px">도어락</div>
-    <div class="btn-row">
-      <button id="btn-lock" class="action-btn danger">🔐 잠금</button>
-      <button id="btn-unlock" class="action-btn">🔑 해제</button>
-    </div>
-  </div>
+      <div class="section-title">방별 조명
+        <button id="btn-all-off" class="mini-btn danger">전체 끄기</button>
+      </div>
 
-  <!-- ── TAB: 커튼 ── -->
-  <div class="tab-content" id="tab-curtains">
-    <div class="section-title">커튼 & 블라인드
-      <div class="mini-btn-row">
-        <button id="btn-curtain-all-open" class="mini-btn">전체 열기</button>
-        <button id="btn-curtain-all-close" class="mini-btn danger">전체 닫기</button>
-      </div>
-    </div>
-    <div class="curtain-list">
-      <div class="curtain-row">
-        <span class="curtain-icon">🪟</span>
-        <span class="curtain-name">거실 커튼</span>
-        <button class="toggle-btn" data-curtain="living">닫힘</button>
-      </div>
-      <div class="curtain-row">
-        <span class="curtain-icon">🪟</span>
-        <span class="curtain-name">안방 암막</span>
-        <button class="toggle-btn" data-curtain="master">닫힘</button>
-      </div>
-      <div class="curtain-row">
-        <span class="curtain-icon">🪟</span>
-        <span class="curtain-name">방 A 블라인드</span>
-        <button class="toggle-btn" data-curtain="rooma">닫힘</button>
-      </div>
-      <div class="curtain-row">
-        <span class="curtain-icon">🪟</span>
-        <span class="curtain-name">방 B 블라인드</span>
-        <button class="toggle-btn" data-curtain="roomb">닫힘</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TAB: 온도/기후 ── -->
-  <div class="tab-content" id="tab-climate">
-    <div class="temp-display">
-      <div class="temp-current" id="temp-current">24.5°C</div>
-      <div class="temp-label">현재 실내 온도</div>
-      <div class="temp-target-row">
-        <button id="btn-temp-minus" class="adj-btn">−</button>
-        <span id="temp-target">22.0°C</span>
-        <button id="btn-temp-plus" class="adj-btn">+</button>
-        <span class="adj-label">목표</span>
+      <div class="room-light-grid">
+        <div class="room-light-card" data-room="living">
+          <div class="room-icon">🛋</div>
+          <div class="room-name">거실</div>
+          <button class="toggle-btn" data-light="living">꺼짐</button>
+        </div>
+        <div class="room-light-card" data-room="kitchen">
+          <div class="room-icon">🍳</div>
+          <div class="room-name">주방</div>
+          <button class="toggle-btn" data-light="kitchen">꺼짐</button>
+        </div>
+        <div class="room-light-card" data-room="master">
+          <div class="room-icon">🛏</div>
+          <div class="room-name">안방</div>
+          <button class="toggle-btn" data-light="master">꺼짐</button>
+        </div>
+        <div class="room-light-card" data-room="rooma">
+          <div class="room-icon">📚</div>
+          <div class="room-name">방 A</div>
+          <button class="toggle-btn" data-light="rooma">꺼짐</button>
+        </div>
+        <div class="room-light-card" data-room="roomb">
+          <div class="room-icon">🛌</div>
+          <div class="room-name">방 B</div>
+          <button class="toggle-btn" data-light="roomb">꺼짐</button>
+        </div>
+        <div class="room-light-card" data-room="bathroom">
+          <div class="room-icon">🚿</div>
+          <div class="room-name">욕실</div>
+          <button class="toggle-btn" data-light="bathroom">꺼짐</button>
+        </div>
       </div>
     </div>
 
-    <div class="section-title">보일러</div>
-    <div class="device-row">
-      <div class="device-info">
-        <span>🔥 스마트 보일러</span>
-        <span id="badge-boiler" class="badge off">OFF</span>
+    <!-- ── TAB: 현관 ── -->
+    <div class="tab-content" id="tab-door">
+      <div class="section-title">현관문</div>
+      <div class="door-status-box" id="door-status-box">
+        <div class="door-icon" id="door-icon">🔒</div>
+        <div class="door-text" id="door-text">잠겨 있음</div>
       </div>
-      <button id="btn-boiler" class="toggle-btn">꺼짐</button>
-    </div>
-    <div id="boiler-extra" class="device-extra hidden">
-      <div class="mode-row">
-        <button class="mode-btn active" data-boiler-mode="indoor">실내난방</button>
-        <button class="mode-btn" data-boiler-mode="ondol">온돌</button>
-        <button class="mode-btn" data-boiler-mode="eco">외출</button>
+      <div class="btn-row">
+        <button id="btn-door-open" class="action-btn">🔓 열기</button>
+        <button id="btn-door-close" class="action-btn danger">🔒 닫기 & 잠금</button>
       </div>
-      <div class="temp-target-row">
-        <button id="btn-boiler-minus" class="adj-btn">−</button>
-        <span id="boiler-target">22.0°C</span>
-        <button id="btn-boiler-plus" class="adj-btn">+</button>
-        <span class="adj-label">설정온도</span>
+      <div class="section-title" style="margin-top:16px">도어락</div>
+      <div class="btn-row">
+        <button id="btn-lock" class="action-btn danger">🔐 잠금</button>
+        <button id="btn-unlock" class="action-btn">🔑 해제</button>
       </div>
     </div>
 
-    <div class="section-title">에어컨</div>
-    <div class="device-row">
-      <div class="device-info">
-        <span>❄ 에어컨</span>
-        <span id="badge-ac" class="badge off">OFF</span>
+    <!-- ── TAB: 커튼 ── -->
+    <div class="tab-content" id="tab-curtains">
+      <div class="section-title">커튼 & 블라인드
+        <div class="mini-btn-row">
+          <button id="btn-curtain-all-open" class="mini-btn">전체 열기</button>
+          <button id="btn-curtain-all-close" class="mini-btn danger">전체 닫기</button>
+        </div>
       </div>
-      <button id="btn-ac" class="toggle-btn">꺼짐</button>
-    </div>
-    <div id="ac-extra" class="device-extra hidden">
-      <div class="mode-row">
-        <button class="mode-btn active" data-wind="low">약풍</button>
-        <button class="mode-btn" data-wind="med">중풍</button>
-        <button class="mode-btn" data-wind="high">강풍</button>
+      <div class="curtain-list">
+        <div class="curtain-row">
+          <span class="curtain-icon">🪟</span>
+          <span class="curtain-name">거실 커튼</span>
+          <button class="toggle-btn" data-curtain="living">닫힘</button>
+        </div>
+        <div class="curtain-row">
+          <span class="curtain-icon">🪟</span>
+          <span class="curtain-name">안방 암막</span>
+          <button class="toggle-btn" data-curtain="master">닫힘</button>
+        </div>
+        <div class="curtain-row">
+          <span class="curtain-icon">🪟</span>
+          <span class="curtain-name">방 A 블라인드</span>
+          <button class="toggle-btn" data-curtain="rooma">닫힘</button>
+        </div>
+        <div class="curtain-row">
+          <span class="curtain-icon">🪟</span>
+          <span class="curtain-name">방 B 블라인드</span>
+          <button class="toggle-btn" data-curtain="roomb">닫힘</button>
+        </div>
       </div>
     </div>
 
-    <div class="section-title">가습기</div>
-    <div class="device-row">
-      <div class="device-info">
-        <span>💨 가습기</span>
-        <span id="hud-humidity-val" class="badge off">52% RH</span>
+    <!-- ── TAB: 온도/기후 ── -->
+    <div class="tab-content" id="tab-climate">
+      <div class="temp-display">
+        <div class="temp-current" id="temp-current">24.5°C</div>
+        <div class="temp-label">현재 실내 온도</div>
+        <div class="temp-target-row">
+          <button id="btn-temp-minus" class="adj-btn">−</button>
+          <span id="temp-target">22.0°C</span>
+          <button id="btn-temp-plus" class="adj-btn">+</button>
+          <span class="adj-label">목표</span>
+        </div>
       </div>
-      <button id="btn-humidifier" class="toggle-btn">꺼짐</button>
-    </div>
-  </div>
 
-  <!-- ── TAB: 가스 ── -->
-  <div class="tab-content" id="tab-gas">
-    <div class="gas-status-box" id="gas-status-box">
-      <div class="gas-icon">🔥</div>
-      <div id="gas-status-text" class="gas-text">가스 잠김 (안전)</div>
-    </div>
-    <div class="btn-row">
-      <button id="btn-gas-open" class="action-btn danger">🔥 가스 열기</button>
-      <button id="btn-gas-close" class="action-btn active">🔒 가스 잠금</button>
-    </div>
-    <div class="section-title" style="margin-top:16px">안전 자동화</div>
-    <div class="toggle-row">
-      <span>외출시 자동 차단</span>
-      <label class="switch"><input type="checkbox" id="sw-auto-gas" checked /><span class="sw-thumb"></span></label>
-    </div>
-    <div class="toggle-row">
-      <span>취침시 자동 차단</span>
-      <label class="switch"><input type="checkbox" id="sw-sleep-gas" checked /><span class="sw-thumb"></span></label>
-    </div>
-  </div>
+      <div class="section-title">보일러</div>
+      <div class="device-row">
+        <div class="device-info">
+          <span>🔥 스마트 보일러</span>
+          <span id="badge-boiler" class="badge off">OFF</span>
+        </div>
+        <button id="btn-boiler" class="toggle-btn">꺼짐</button>
+      </div>
+      <div id="boiler-extra" class="device-extra hidden">
+        <div class="mode-row">
+          <button class="mode-btn active" data-boiler-mode="indoor">실내난방</button>
+          <button class="mode-btn" data-boiler-mode="ondol">온돌</button>
+          <button class="mode-btn" data-boiler-mode="eco">외출</button>
+        </div>
+        <div class="temp-target-row">
+          <button id="btn-boiler-minus" class="adj-btn">−</button>
+          <span id="boiler-target">22.0°C</span>
+          <button id="btn-boiler-plus" class="adj-btn">+</button>
+          <span class="adj-label">설정온도</span>
+        </div>
+      </div>
 
-</div><!-- /control-panel -->
+      <div class="section-title">에어컨</div>
+      <div class="device-row">
+        <div class="device-info">
+          <span>❄ 에어컨</span>
+          <span id="badge-ac" class="badge off">OFF</span>
+        </div>
+        <button id="btn-ac" class="toggle-btn">꺼짐</button>
+      </div>
+      <div id="ac-extra" class="device-extra hidden">
+        <div class="mode-row">
+          <button class="mode-btn active" data-wind="low">약풍</button>
+          <button class="mode-btn" data-wind="med">중풍</button>
+          <button class="mode-btn" data-wind="high">강풍</button>
+        </div>
+      </div>
 
-<!-- Scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="app.js"></script>
+      <div class="section-title">가습기</div>
+      <div class="device-row">
+        <div class="device-info">
+          <span>💨 가습기</span>
+          <span id="hud-humidity-val" class="badge off">52% RH</span>
+        </div>
+        <button id="btn-humidifier" class="toggle-btn">꺼짐</button>
+      </div>
+    </div>
+
+    <!-- ── TAB: 가스 ── -->
+    <div class="tab-content" id="tab-gas">
+      <div class="gas-status-box" id="gas-status-box">
+        <div class="gas-icon">🔥</div>
+        <div id="gas-status-text" class="gas-text">가스 잠김 (안전)</div>
+      </div>
+      <div class="btn-row">
+        <button id="btn-gas-open" class="action-btn danger">🔥 가스 열기</button>
+        <button id="btn-gas-close" class="action-btn active">🔒 가스 잠금</button>
+      </div>
+      <div class="section-title" style="margin-top:16px">안전 자동화</div>
+      <div class="toggle-row">
+        <span>외출시 자동 차단</span>
+        <label class="switch"><input type="checkbox" id="sw-auto-gas" checked /><span class="sw-thumb"></span></label>
+      </div>
+      <div class="toggle-row">
+        <span>취침시 자동 차단</span>
+        <label class="switch"><input type="checkbox" id="sw-sleep-gas" checked /><span class="sw-thumb"></span></label>
+      </div>
+    </div>
+
+  </div><!-- /control-panel -->
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="app.js"></script>
 </body>
+
 </html>
