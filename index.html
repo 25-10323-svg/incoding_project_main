@@ -220,10 +220,6 @@
                                             <svg class="nav-icon"><use href="#icon-adjust"></use></svg>
                                             <span>조절조건</span>
                                         </button>
-                                        <button class="nav-item" onclick="showNotification('실시간 시뮬레이션 동기화 중입니다.')">
-                                            <svg class="nav-icon"><use href="#icon-play"></use></svg>
-                                            <span>시뮬레이션</span>
-                                        </button>
                                         <button class="nav-item" onclick="showConnectedDevicesCount()">
                                             <svg class="nav-icon"><use href="#icon-link"></use></svg>
                                             <span>기기 호환</span>
@@ -359,46 +355,7 @@
                                         </button>
                                     </div>
 
-                                    <!-- Complete Lock Setup -->
-                                    <div class="secure-lock-card">
-                                        <div class="secure-title-area">
-                                            <span class="secure-accent">완전잠금 설정</span>
-                                            <p class="secure-desc">활성화 시간 동안 외부 및 앱에서의 열림 명령이 차단되어 보안이 극대화됩니다.</p>
-                                        </div>
 
-                                        <!-- Dropdown input row matching style -->
-                                        <div class="secure-time-setting-row">
-                                            <div class="neumorphic-dropdown-wrapper">
-                                                <select id="secure-lock-time-select" class="neumorphic-select">
-                                                    <option value="10">10 초</option>
-                                                    <option value="30">30 초</option>
-                                                    <option value="60" selected>1 분 (추천)</option>
-                                                    <option value="120">2 분</option>
-                                                    <option value="300">5 분</option>
-                                                    <option value="600">10 분</option>
-                                                </select>
-                                                <span class="dropdown-arrow">▼</span>
-                                            </div>
-                                            <span class="secure-time-label">동안 완전잠금</span>
-                                        </div>
-
-                                        <!-- Lock Trigger Button -->
-                                        <button class="btn-neumorphic secure-trigger-btn" id="btn-toggle-secure-lock">
-                                            완전잠금 시작
-                                        </button>
-
-                                        <!-- Countdown Status -->
-                                        <div class="secure-countdown-display" id="secure-countdown-container" style="display: none;">
-                                            <div class="countdown-radial">
-                                                <svg class="radial-ring" viewBox="0 0 100 100">
-                                                    <circle class="ring-bg" cx="50" cy="50" r="40"></circle>
-                                                    <circle class="ring-fill" id="countdown-ring-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="0"></circle>
-                                                </svg>
-                                                <span class="countdown-seconds" id="countdown-text">60s</span>
-                                            </div>
-                                            <span class="countdown-status-text">강력 보안 유지 중...</span>
-                                        </div>
-                                    </div>
 
                                     <!-- Bottom Navigation Bar for Screen 2-5 -->
                                     <div class="phone-bottom-nav">
@@ -465,20 +422,7 @@
                                             <p class="toggle-description">외출 시 마다 가스 밸브가 자동으로 잠깁니다.</p>
                                         </div>
 
-                                        <!-- Auto Safe Cut -->
-                                        <div class="toggle-card-neumorphic">
-                                            <div class="toggle-info">
-                                                <span class="toggle-title">*오토 세이프 컷</span>
-                                                <span class="toggle-status-badge" id="badge-auto-safe">ON</span>
-                                            </div>
-                                            <div class="toggle-switch-wrapper">
-                                                <label class="switch">
-                                                    <input type="checkbox" id="switch-auto-safe" checked>
-                                                    <span class="slider-round"></span>
-                                                </label>
-                                            </div>
-                                            <p class="toggle-description">온도감지를 통해 가스가 자동으로 잠깁니다.</p>
-                                        </div>
+
                                     </div>
 
                                     <!-- Bottom Navigation Bar for Screen 2-5 -->
@@ -550,16 +494,7 @@
                                         <p class="aircon-description">에어컨을 켜면 집안 평균 온도가 목표 온도에 도달하도록 자동 제어됩니다.</p>
                                     </div>
 
-                                    <!-- System Modes -->
-                                    <div class="temp-modes-card">
-                                        <span class="modes-title">운영 모드</span>
-                                        <div class="modes-grid">
-                                            <button class="mode-btn active" data-mode="cooling">냉방</button>
-                                            <button class="mode-btn" data-mode="heating">난방</button>
-                                            <button class="mode-btn" data-mode="fan">송풍</button>
-                                            <button class="mode-btn" data-mode="off">꺼짐</button>
-                                        </div>
-                                    </div>
+
 
                                     <!-- Bottom Navigation Bar for Screen 2-5 -->
                                     <div class="phone-bottom-nav">
@@ -660,39 +595,7 @@
                         </div>
                     </div>
 
-                    <!-- Simulation Control Scenario & Status Triggers -->
-                    <div class="simulation-scenario-controls">
-                        <h4>테스트 시나리오 트리거</h4>
-                        <div class="scenario-buttons-grid">
-                            
-                            <!-- Scenario 1: Leaving Home -->
-                            <button class="btn-neumorphic scenario-btn" id="trigger-leave-home">
-                                <span class="scenario-icon">🏃</span>
-                                <div class="scenario-text">
-                                    <strong>외출 모드 실행</strong>
-                                    <span>가스락 연동 체크용</span>
-                                </div>
-                            </button>
 
-                            <!-- Scenario 2: Heat Up Kitchen -->
-                            <button class="btn-neumorphic scenario-btn" id="trigger-kitchen-heat">
-                                <span class="scenario-icon">🔥</span>
-                                <div class="scenario-text">
-                                    <strong>인덕션 화력 상승 (온도↑)</strong>
-                                    <span>가스 세이프컷 체크용</span>
-                                </div>
-                            </button>
-
-                            <!-- Scenario 3: Temperature Reset -->
-                            <button class="btn-neumorphic scenario-btn" id="trigger-reset-sim">
-                                <span class="scenario-icon">🔄</span>
-                                <div class="scenario-text">
-                                    <strong>시뮬레이션 리셋</strong>
-                                    <span>초기 상태로 복구</span>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
 
                     <!-- Network Online/Offline Sim Controls -->
                     <div class="simulation-scenario-controls" style="margin-top: 10px;">

@@ -369,22 +369,26 @@ function updateDoorUI() {
     }
 
     if (state.door.secureLockActive) {
-        elements.simDoorSecureLight.className = 'secure-lock-active-light active';
-        elements.btnToggleSecureLock.textContent = '완전잠금 해제';
-        elements.btnToggleSecureLock.classList.add('active');
-        elements.secureCountdownContainer.style.display = 'flex';
+        if (elements.simDoorSecureLight) elements.simDoorSecureLight.className = 'secure-lock-active-light active';
+        if (elements.btnToggleSecureLock) {
+            elements.btnToggleSecureLock.textContent = '완전잠금 해제';
+            elements.btnToggleSecureLock.classList.add('active');
+        }
+        if (elements.secureCountdownContainer) elements.secureCountdownContainer.style.display = 'flex';
         
-        elements.countdownText.textContent = `${state.door.secureLockTimeRemaining}s`;
+        if (elements.countdownText) elements.countdownText.textContent = `${state.door.secureLockTimeRemaining}s`;
 
         const circumference = 251.2;
         const percentLeft = state.door.secureLockTimeRemaining / state.door.secureLockDuration;
         const strokeOffset = circumference * (1 - percentLeft);
-        elements.countdownRingFill.style.strokeDashoffset = strokeOffset;
+        if (elements.countdownRingFill) elements.countdownRingFill.style.strokeDashoffset = strokeOffset;
     } else {
-        elements.simDoorSecureLight.className = 'secure-lock-active-light';
-        elements.btnToggleSecureLock.textContent = '완전잠금 시작';
-        elements.btnToggleSecureLock.classList.remove('active');
-        elements.secureCountdownContainer.style.display = 'none';
+        if (elements.simDoorSecureLight) elements.simDoorSecureLight.className = 'secure-lock-active-light';
+        if (elements.btnToggleSecureLock) {
+            elements.btnToggleSecureLock.textContent = '완전잠금 시작';
+            elements.btnToggleSecureLock.classList.remove('active');
+        }
+        if (elements.secureCountdownContainer) elements.secureCountdownContainer.style.display = 'none';
     }
 }
 
@@ -420,16 +424,18 @@ elements.btnDoorUnlock.addEventListener('click', () => {
     addLog('현관문 잠금 해제(열림) 명령 실행.', 'action');
 });
 
-elements.btnToggleSecureLock.addEventListener('click', () => {
-    if (state.door.secureLockActive) {
-        cancelSecureLock();
-        showToast('완전잠금이 해제되었습니다.');
-        addLog('완전잠금 상태 강제 해제.', 'action');
-    } else {
-        const duration = parseInt(elements.secureLockSelect.value);
-        startSecureLock(duration);
-    }
-});
+if (elements.btnToggleSecureLock) {
+    elements.btnToggleSecureLock.addEventListener('click', () => {
+        if (state.door.secureLockActive) {
+            cancelSecureLock();
+            showToast('완전잠금이 해제되었습니다.');
+            addLog('완전잠금 상태 강제 해제.', 'action');
+        } else {
+            const duration = elements.secureLockSelect ? parseInt(elements.secureLockSelect.value) : 60;
+            startSecureLock(duration);
+        }
+    });
+}
 
 function startSecureLock(seconds) {
     state.door.status = 'locked';
@@ -485,14 +491,18 @@ function updateGasUI() {
         elements.simGasValve.className = 'gas-valve-graphic closed';
     }
 
-    elements.switchAutoGas.checked = state.gas.autoGasLock;
-    elements.switchAutoSafe.checked = state.gas.autoSafeCut;
+    if (elements.switchAutoGas) elements.switchAutoGas.checked = state.gas.autoGasLock;
+    if (elements.switchAutoSafe) elements.switchAutoSafe.checked = state.gas.autoSafeCut;
 
-    elements.badgeAutoGas.textContent = state.gas.autoGasLock ? 'ON' : 'OFF';
-    elements.badgeAutoGas.className = `toggle-status-badge ${state.gas.autoGasLock ? '' : 'off'}`;
+    if (elements.badgeAutoGas) {
+        elements.badgeAutoGas.textContent = state.gas.autoGasLock ? 'ON' : 'OFF';
+        elements.badgeAutoGas.className = `toggle-status-badge ${state.gas.autoGasLock ? '' : 'off'}`;
+    }
     
-    elements.badgeAutoSafe.textContent = state.gas.autoSafeCut ? 'ON' : 'OFF';
-    elements.badgeAutoSafe.className = `toggle-status-badge ${state.gas.autoSafeCut ? '' : 'off'}`;
+    if (elements.badgeAutoSafe) {
+        elements.badgeAutoSafe.textContent = state.gas.autoSafeCut ? 'ON' : 'OFF';
+        elements.badgeAutoSafe.className = `toggle-status-badge ${state.gas.autoSafeCut ? '' : 'off'}`;
+    }
 }
 
 elements.btnGasOpen.addEventListener('click', () => {
@@ -533,11 +543,13 @@ elements.switchAutoGas.addEventListener('change', (e) => {
     addLog(`오토 가스 락 옵션이 ${state.gas.autoGasLock ? '활성화' : '비활성화'}되었습니다.`, 'action');
 });
 
-elements.switchAutoSafe.addEventListener('change', (e) => {
-    state.gas.autoSafeCut = e.target.checked;
-    updateGasUI();
-    addLog(`오토 세이프 컷 옵션이 ${state.gas.autoSafeCut ? '활성화' : '비활성화'}되었습니다.`, 'action');
-});
+if (elements.switchAutoSafe) {
+    elements.switchAutoSafe.addEventListener('change', (e) => {
+        state.gas.autoSafeCut = e.target.checked;
+        updateGasUI();
+        addLog(`오토 세이프 컷 옵션이 ${state.gas.autoSafeCut ? '활성화' : '비활성화'}되었습니다.`, 'action');
+    });
+}
 
 // 9. Temperature Settings & Aircon Logic (Screen 5)
 function updateTempUI() {
@@ -771,103 +783,109 @@ function executeLeaveHome(source = 'sim') {
 }
 
 // Bind both Home screen button and Simulator button to executeLeaveHome
-elements.btnTriggerLeaveHome.addEventListener('click', () => executeLeaveHome('sim'));
+if (elements.btnTriggerLeaveHome) {
+    elements.btnTriggerLeaveHome.addEventListener('click', () => executeLeaveHome('sim'));
+}
 if (elements.btnAwayModeHome) {
     elements.btnAwayModeHome.addEventListener('click', () => executeLeaveHome('home'));
 }
 
 // Scenario 2: Heat Up Kitchen (주방 온도 급상승)
-elements.btnTriggerKitchenHeat.addEventListener('click', () => {
-    if (kitchenHeatInterval) {
-        clearInterval(kitchenHeatInterval);
-        kitchenHeatInterval = null;
-        elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '인덕션 화력 상승 (온도↑)';
-        addLog('시뮬레이션: 온도 가열을 수동 중지했습니다.', 'system');
-        return;
-    }
-
-    addLog('시뮬레이션: 주방 조리기 가열 시작. 온도가 급상승합니다.', 'warning');
-    elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '가열 중지 (클릭)';
-    
-    kitchenHeatInterval = setInterval(() => {
-        state.temp.rooms.kitchen += 5.0; // Rapid local heating in kitchen
-        updateTempUI();
-
-        // Check if exceeds safety temperature threshold (50°C)
-        if (state.temp.rooms.kitchen >= 50.0) {
+if (elements.btnTriggerKitchenHeat) {
+    elements.btnTriggerKitchenHeat.addEventListener('click', () => {
+        if (kitchenHeatInterval) {
             clearInterval(kitchenHeatInterval);
             kitchenHeatInterval = null;
             elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '인덕션 화력 상승 (온도↑)';
-            
-            addLog(`경고: 주방 온도가 위험 한계선(${state.temp.rooms.kitchen.toFixed(1)}°C)에 도달했습니다!`, 'warning');
-            
-            // Auto Safe Cut triggering
-            if (state.gas.autoSafeCut) {
-                if (state.gas.status === 'open') {
-                    state.gas.status = 'closed';
-                    updateGasUI();
-                    addLog('비상 조치 [오토 세이프 컷]: 과열 감지로 가스 밸브를 비상 자동 차단했습니다!', 'success');
-                    showToast('오토 세이프 컷 발동: 가스 차단!', 'error');
-                } else {
-                    addLog('오토 세이프 컷 감지: 가스 밸브가 이미 닫혀있어 안전 상태입니다.', 'system');
-                }
-            } else {
-                addLog('경고: 오토 세이프 컷이 꺼져있어 가스 밸브가 차단되지 않았습니다! 위험!', 'warning');
-            }
+            addLog('시뮬레이션: 온도 가열을 수동 중지했습니다.', 'system');
+            return;
         }
-    }, 800);
-});
+
+        addLog('시뮬레이션: 주방 조리기 가열 시작. 온도가 급상승합니다.', 'warning');
+        elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '가열 중지 (클릭)';
+        
+        kitchenHeatInterval = setInterval(() => {
+            state.temp.rooms.kitchen += 5.0; // Rapid local heating in kitchen
+            updateTempUI();
+
+            // Check if exceeds safety temperature threshold (50°C)
+            if (state.temp.rooms.kitchen >= 50.0) {
+                clearInterval(kitchenHeatInterval);
+                kitchenHeatInterval = null;
+                elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '인덕션 화력 상승 (온도↑)';
+                
+                addLog(`경고: 주방 온도가 위험 한계선(${state.temp.rooms.kitchen.toFixed(1)}°C)에 도달했습니다!`, 'warning');
+                
+                // Auto Safe Cut triggering
+                if (state.gas.autoSafeCut) {
+                    if (state.gas.status === 'open') {
+                        state.gas.status = 'closed';
+                        updateGasUI();
+                        addLog('비상 조치 [오토 세이프 컷]: 과열 감지로 가스 밸브를 비상 자동 차단했습니다!', 'success');
+                        showToast('오토 세이프 컷 발동: 가스 차단!', 'error');
+                    } else {
+                        addLog('오토 세이프 컷 감지: 가스 밸브가 이미 닫혀있어 안전 상태입니다.', 'system');
+                    }
+                } else {
+                    addLog('경고: 오토 세이프 컷이 꺼져있어 가스 밸브가 차단되지 않았습니다! 위험!', 'warning');
+                }
+            }
+        }, 800);
+    });
+}
 
 // Scenario 3: Reset Simulation (초기 리셋)
-elements.btnTriggerResetSim.addEventListener('click', () => {
-    // Clear all simulation intervals
-    if (kitchenHeatInterval) {
-        clearInterval(kitchenHeatInterval);
-        kitchenHeatInterval = null;
-        elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '인덕션 화력 상승 (온도↑)';
-    }
-    cancelSecureLock();
-
-    // Revert state values
-    state.brightness = 70;
-    Object.keys(state.lights).forEach(room => {
-        if (Array.isArray(state.lights[room])) {
-            state.lights[room] = [false, false];
-        } else {
-            state.lights[room] = false;
+if (elements.btnTriggerResetSim) {
+    elements.btnTriggerResetSim.addEventListener('click', () => {
+        // Clear all simulation intervals
+        if (kitchenHeatInterval) {
+            clearInterval(kitchenHeatInterval);
+            kitchenHeatInterval = null;
+            if (elements.btnTriggerKitchenHeat) elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '인덕션 화력 상승 (온도↑)';
         }
+        cancelSecureLock();
+
+        // Revert state values
+        state.brightness = 70;
+        Object.keys(state.lights).forEach(room => {
+            if (Array.isArray(state.lights[room])) {
+                state.lights[room] = [false, false];
+            } else {
+                state.lights[room] = false;
+            }
+        });
+        state.door.status = 'locked';
+        state.gas.status = 'closed';
+        state.gas.autoGasLock = true;
+        state.gas.autoSafeCut = true;
+        
+        // Reset temperatures
+        state.temp.rooms.livingRoom = 25.0;
+        state.temp.rooms.kitchen = 24.7;
+        state.temp.rooms.roomA = 24.0;
+        state.temp.rooms.roomB = 24.2;
+        state.temp.rooms.masterRoom = 24.6;
+        calculateAverageTemp();
+        
+        state.temp.target = 22.0;
+        state.temp.mode = 'cooling';
+        state.aircon.active = false;
+        state.aircon.wind = 'low';
+
+        // Synchronize UI
+        updateLightingUI();
+        updateDoorUI();
+        updateGasUI();
+        updateTempUI();
+
+        // Log & Toast
+        showToast('시뮬레이터가 초기화되었습니다.');
+        elements.systemLogOutput.innerHTML = `
+            <div class="log-line system">[시스템] Aura Smart Home 시스템 초기화 성공.</div>
+            <div class="log-line system">[시스템] 모든 스마트 기기 감시 대기 중.</div>
+        `;
     });
-    state.door.status = 'locked';
-    state.gas.status = 'closed';
-    state.gas.autoGasLock = true;
-    state.gas.autoSafeCut = true;
-    
-    // Reset temperatures
-    state.temp.rooms.livingRoom = 25.0;
-    state.temp.rooms.kitchen = 24.7;
-    state.temp.rooms.roomA = 24.0;
-    state.temp.rooms.roomB = 24.2;
-    state.temp.rooms.masterRoom = 24.6;
-    calculateAverageTemp();
-    
-    state.temp.target = 22.0;
-    state.temp.mode = 'cooling';
-    state.aircon.active = false;
-    state.aircon.wind = 'low';
-
-    // Synchronize UI
-    updateLightingUI();
-    updateDoorUI();
-    updateGasUI();
-    updateTempUI();
-
-    // Log & Toast
-    showToast('시뮬레이터가 초기화되었습니다.');
-    elements.systemLogOutput.innerHTML = `
-        <div class="log-line system">[시스템] Aura Smart Home 시스템 초기화 성공.</div>
-        <div class="log-line system">[시스템] 모든 스마트 기기 감시 대기 중.</div>
-    `;
-});
+}
 
 // 11. Network Device Management
 // Tracks per-category connection state (true = connected, false = disconnected)
