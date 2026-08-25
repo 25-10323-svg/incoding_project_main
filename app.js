@@ -1,6 +1,6 @@
 /* =====================================================================
    스마트홈 3D 시뮬레이터 — app.js
-   Scale: 10× linear (volume 1000×) | Pyramid Hip Roof | Three.js r128
+   Perfectly Aligned Floor Plan & Walls
    ===================================================================== */
 
 'use strict';
@@ -53,13 +53,6 @@ clock();
 // ─────────────────────────────────────────────────────────────────────
 // 3. THREE.JS 3D SIMULATOR ENGINE
 // ─────────────────────────────────────────────────────────────────────
-
-/*  SCALE GUIDE (all units = decimeters, ~real-world feel)
-    House footprint: 160 × 140 units  (was 16×14, ×10)
-    Wall height    : 32 units          (was 3.2)
-    Eye level      : 16.5 units        (was 1.65)
-    Walk speed     : 45 units/s        (was 4.5)
-*/
 
 class SmartHomeSimulator {
   constructor() {
@@ -164,29 +157,16 @@ class SmartHomeSimulator {
   }
 
   // ── Floors ────────────────────────────────────────────────────────
-  /*
-    Layout (×10 from original):
-    X: -80..+80  (160 wide)
-    Z: -70..+70  (140 deep)
-
-    Zones (cx, cz, w, d):
-    거실:   cx=-30  cz=+25  w=100 d=80
-    주방:   cx=-30  cz=-40  w=100 d=60
-    안방:   cx=-30  cz=+50  w=100 d=40
-    욕실:   cx=+40  cz=+55  w=80  d=30
-    방 A:   cx=+40  cz=+25  w=80  d=80
-    방 B:   cx=-10  cz=-40  w=60  d=60
-    현관:   cx=+50  cz=-40  w=60  d=60
-  */
   _buildFloors() {
+    // Total size: X -80 to 80 (160), Z -70 to +70 (140)
     const defs = [
-      [-30,  25, 100, 80,  0x2a2010], // 거실
-      [-30, -40, 100, 60,  0x1e2830], // 주방
-      [-30,  50, 100, 40,  0x1a1a2a], // 안방
-      [ 40,  55,  80, 30,  0x182018], // 욕실
-      [ 40,  25,  80, 80,  0x1c1a28], // 방 A
-      [-10, -40,  60, 60,  0x1c1a28], // 방 B
-      [ 50, -40,  60, 60,  0x15151f], // 현관
+      [-40,  30, 80, 80,  0x2a2010], // 1. 거실
+      [-40, -40, 80, 60,  0x1e2830], // 2. 주방
+      [ 40,  50, 80, 40,  0x1a1a2a], // 3. 안방
+      [ 20,  15, 40, 30,  0x182018], // 4. 욕실
+      [ 60,   5, 40, 50,  0x1c1a28], // 5. 방 A
+      [ 20, -35, 40, 70,  0x1c1a28], // 6. 방 B
+      [ 60, -45, 40, 50,  0x15151f], // 7. 현관
     ];
     defs.forEach(([cx, cz, w, d, color]) => {
       const geo = new THREE.PlaneGeometry(w, d);
@@ -206,7 +186,6 @@ class SmartHomeSimulator {
     const wm = this._mat(0x1e2535, 0.7);
     const im = this._mat(0x252d3d, 0.75);
 
-    // horiz: true → length along X axis; false → length along Z axis
     const wall = (cx, cz, len, horiz, mat = wm) => {
       const w = horiz ? len : T;
       const d = horiz ? T   : len;
@@ -214,23 +193,41 @@ class SmartHomeSimulator {
     };
 
     // ── Outer perimeter ──
-    wall(  0, -70, 160, true);   // North outer
-    wall(  0,  70, 160, true);   // South outer
-    wall(-80,   0, 140, false);  // West outer
-    wall( 80,   0, 140, false);  // East outer
+    wall(  0, -70, 160, true);   // North
+    wall(  0,  70, 160, true);   // South
+    wall(-80,   0, 140, false);  // West
+    wall( 80,   0, 140, false);  // East
 
-    // ── Interior dividers ──
-    // Vertical (Z-aligned) — left/right block boundary at X=0
-    wall( 0,  50, 40, false, im);  // X=0, top section (안방 | 방A 북쪽)
-    wall( 0,  20, 10, false, im);  // short piece above living↔roomA gap
-    wall( 0, -25, 30, false, im);  // below living passage
-    wall( 0, -55, 30, false, im);  // kitchen | entrance lower
+    // ── Interior dividers (with passage gaps) ──
+    // 1. X=0 divider (Left / Right block)
+    wall(0,  50, 40, false, im); // 안방 vs 거실
+    wall(0,  20, 20, false, im); // 욕실 vs 거실
+    // Gap Z=-10 to 10 (passage from 거실)
+    wall(0, -40, 60, false, im); // 방B vs 주방
 
-    // Horizontal (X-aligned)
-    wall( 0,  30, 160, true, im);  // Living/Bedroom separator (Z=30)
-    wall( 0, -10, 160, true, im);  // Living/Kitchen separator  (Z=-10)
-    wall(40,  30,  80, false, im); // RoomA | Bath/Master split (X=40, upper)
-    wall( 0,  50, 160, true, im);  // Master | Bath line        (Z=50)
+    // 2. Z=-10 divider (거실 vs 주방)
+    wall(-60, -10, 40, true, im);
+    // Gap X=-40 to -20
+    wall(-10, -10, 20, true, im);
+
+    // 3. Z=30 divider (안방 vs 욕실/방A)
+    wall(15, 30, 30, true, im);
+    // Gap X=30 to 50 (안방 문)
+    wall(65, 30, 30, true, im);
+
+    // 4. Z=0 divider (욕실 vs 방B)
+    wall(7.5, 0, 15, true, im);
+    // Gap X=15 to 25 (욕실 문)
+    wall(32.5, 0, 15, true, im);
+
+    // 5. X=40 divider (욕실/방B vs 방A/현관)
+    wall(40, -50, 40, false, im); // 방B vs 현관
+    // Gap Z=-30 to -10 (현관문에서 집 진입)
+    wall(40,   0, 20, false, im); // 방B vs 방A
+    wall(40,  20, 20, false, im); // 욕실 vs 방A
+
+    // 6. Z=-20 divider (방A vs 현관)
+    wall(60, -20, 40, true, im); // solid
   }
 
   // ── Front Door ────────────────────────────────────────────────────
@@ -238,30 +235,30 @@ class SmartHomeSimulator {
     const doorMat  = this._mat(0x3b4a5c, 0.4, 0.1);
     const frameMat = this._mat(0x475569, 0.5, 0.2);
 
-    // Pivot at left hinge edge of door (X=45, Z=-70)
+    // Door is on North wall (Z=-70) at X=65
     this.doorPivot = new THREE.Group();
-    this.doorPivot.position.set(45, 0, -70);
+    this.doorPivot.position.set(65, 0, -70);
     this.scene.add(this.doorPivot);
 
     const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(10, 24, 0.8), doorMat);
     doorMesh.castShadow = true;
-    doorMesh.position.set(5, 12, 0); // door swings around left edge
+    doorMesh.position.set(-5, 12, 0); // swings around right edge
     this.doorPivot.add(doorMesh);
 
     // Frame
-    [[-0.5, 12, 0], [10.5, 12, 0], [5, 25, 0]].forEach(([fx, fy, fz], i) => {
+    [[-10.5, 12, 0], [0.5, 12, 0], [-5, 25, 0]].forEach(([fx, fy, fz], i) => {
       const fw = i === 2 ? 11 : 0.8;
       const fh = i === 2 ? 1  : 24;
       const fd = 1.2;
       const fm = new THREE.Mesh(new THREE.BoxGeometry(fw, fh, fd), frameMat);
-      fm.position.set(45 + fx, fy, -70 + fz);
+      fm.position.set(65 + fx, fy, -70 + fz);
       this.scene.add(fm);
     });
 
     // Lock pad
     const lockMat = this._mat(0x94a3b8, 0.2, 0.9);
     const lp = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.8, 0.4), lockMat);
-    lp.position.set(54, 12, -69.4);
+    lp.position.set(56, 12, -69.4);
     this.scene.add(lp);
   }
 
@@ -284,144 +281,119 @@ class SmartHomeSimulator {
       this.scene.add(frame);
     };
 
-    addWin(-30,  70, true,  24, 14);  // 거실 south window
-    addWin( 40,  70, true,  18, 14);  // 방 A south window
-    addWin(-80,  10, false, 16, 14);  // 거실 west window
-    addWin(-80,  50, false, 14, 14);  // 안방 west window
-    addWin(-50, -70, true,  12, 12);  // 주방 north window
-    addWin(-10, -70, true,  10, 12);  // 방 B north window
-    addWin( 80,  10, false, 20, 14);  // 방 A east window
+    addWin(-40,  70, true,  30, 14);  // 거실 South
+    addWin( 40,  70, true,  20, 14);  // 안방 South
+    addWin(-80,  30, false, 20, 14);  // 거실 West
+    addWin(-80, -40, false, 16, 12);  // 주방 West
+    addWin( 80,   5, false, 16, 14);  // 방 A East
+    addWin( 20, -70, true,  16, 12);  // 방 B North
   }
 
-  // ── Furniture (all ×10 scale) ─────────────────────────────────────
+  // ── Furniture ─────────────────────────────────────────────────────
   _buildFurniture() {
-    // ── 거실 ──
-    this._box(32, 4.5, 9,  this._mat(0x1e3a8a, 0.7), -40, 4.5, 54);  // sofa back
-    this._box(32, 2.0, 8,  this._mat(0x1e3a8a, 0.7), -40, 1.5, 51);  // sofa seat
+    // 거실 (cx=-40, cz=30)
+    this._box(32, 4.5, 9,  this._mat(0x1e3a8a, 0.7), -40, 4.5, 60);  // sofa back
+    this._box(32, 2.0, 8,  this._mat(0x1e3a8a, 0.7), -40, 1.5, 52);  // sofa seat
     this._box(12, 0.4, 6,  this._mat(0x78350f, 0.35),-40, 3.8, 35);  // coffee table
-    this._box(28, 3.5, 4,  this._mat(0x1e293b, 0.4), -40, 1.7, -7);  // TV console
-    this._box(24,13,   0.5,this._mat(0x020617, 0.05),-40, 9.0, -6.5);// TV screen
-    // rug
+    this._box(28, 3.5, 4,  this._mat(0x1e293b, 0.4), -40, 1.7,  5);  // TV console
+    this._box(24,13,   0.5,this._mat(0x020617, 0.05),-40, 9.0,  5.5);// TV screen
     {
       const r = new THREE.Mesh(new THREE.PlaneGeometry(35, 25), this._mat(0x1d3461, 0.95));
       r.rotation.x = -Math.PI / 2; r.position.set(-40, 0.1, 30);
       this.scene.add(r);
     }
-    // AC (wall unit, high on west wall interior)
-    this._box(16, 2.8, 2.2, this._mat(0xe2e8f0, 0.2), -5, 26, 15);
+    this._box(16, 2.8, 2.2, this._mat(0xe2e8f0, 0.2), -75, 26, 30); // AC (West wall)
 
-    // ── 주방 ──
-    this._box(40, 9, 7,   this._mat(0x1e2a3a, 0.4, 0.1), -45, 4.5, -63); // counter
-    this._box(0.5, 9, 45, this._mat(0x1e2a3a, 0.4, 0.1), -73, 4.5, -38); // side counter
-    this._box(40, 0.5, 7.5,this._mat(0x334155,0.15,0.5), -45, 9.3, -63); // countertop
-    this._box(0.5,0.5,45,  this._mat(0x334155,0.15,0.5), -73, 9.3, -38); // side top
-    this._box(6, 0.4, 5,   this._mat(0x1a1a1a, 0.1, 0.6),-35, 9.6,-62.8);// stove
-    this._box(5, 9,  3,    this._mat(0xecf0f1, 0.2),      -76, 18, -42); // boiler
-    this._box(18, 0.8, 9,  this._mat(0x92400e, 0.4),      -42, 7.4, -25);// dining table
-    [-35, -49].forEach(x => this._box(4.5,4.5,4.5,this._mat(0x1e293b,0.6), x, 4.5, -25));
-    this._box(6.5,18,6.5,  this._mat(0xe2e8f0,0.15,0.3),  -76, 9, -28);  // fridge
+    // 주방 (cx=-40, cz=-40)
+    this._box(9,  9,  40, this._mat(0x1e2a3a, 0.4, 0.1), -75, 4.5, -40); // counter W
+    this._box(9.5,0.5,40, this._mat(0x334155,0.15,0.5),  -75, 9.3, -40); // countertop W
+    this._box(5,  0.4, 6, this._mat(0x1a1a1a, 0.1, 0.6), -74, 9.6, -40); // stove
+    this._box(5,  9,   3, this._mat(0xecf0f1, 0.2),      -70, 18, -68);  // boiler
+    this._box(18, 0.8, 9, this._mat(0x92400e, 0.4),      -40, 7.4, -35); // dining table
+    [-35, -45].forEach(x => this._box(4.5,4.5,4.5,this._mat(0x1e293b,0.6), x, 4.5, -35)); // chairs
+    this._box(7,  18, 6.5,this._mat(0xe2e8f0,0.15,0.3),  -25,  9, -65);  // fridge
 
-    // ── 안방 ──
-    this._box(16, 2.8, 21, this._mat(0x1e293b, 0.4), -45, 1.4, 50);  // bed frame
-    this._box(15.5, 2.2,19.5,this._mat(0xf8fafc,0.9),-45, 3.9, 50);  // mattress
-    this._box(16, 7, 1,   this._mat(0x334155, 0.4), -45, 5.5, 39.6); // headboard
-    this._box(5, 22, 12,  this._mat(0x1e293b, 0.4), -76.5,11, 55);   // wardrobe
-    this._box(4, 4.5, 3.5,this._mat(0x334155, 0.5), -35.5, 2.2, 50); // nightstand
+    // 안방 (cx=40, cz=50)
+    this._box(16, 2.8, 21, this._mat(0x1e293b, 0.4), 60, 1.4, 50);  // bed frame
+    this._box(15.5, 2.2,19.5,this._mat(0xf8fafc,0.9),60, 3.9, 50);  // mattress
+    this._box(16, 7, 1,   this._mat(0x334155, 0.4), 60, 5.5, 39.6); // headboard
+    this._box(22, 22, 5,  this._mat(0x1e293b, 0.4), 20, 11, 67);    // wardrobe
 
-    // ── 욕실 ──
-    this._box(14, 5, 7,   this._mat(0xf0f4f8, 0.2), 55, 2.5, 55);   // bathtub
-    this._box(7, 8.2, 4.5,this._mat(0xe2e8f0, 0.2), 32, 4.1, 58);   // vanity
-    this._box(4.2,7.8,6,  this._mat(0xf0f4f8, 0.3), 30, 3.9, 43);   // toilet
+    // 욕실 (cx=20, cz=15)
+    this._box(14, 5, 7,   this._mat(0xf0f4f8, 0.2), 10, 2.5, 20);   // bathtub
+    this._box(7, 8.2, 4.5,this._mat(0xe2e8f0, 0.2), 32, 4.1, 25);   // vanity
+    this._box(4.2,7.8,6,  this._mat(0xf0f4f8, 0.3), 30, 3.9,  5);   // toilet
 
-    // ── 방 A ──
-    this._box(12, 3, 20,  this._mat(0x1e3a8a, 0.7), 65, 1.5, 52);   // bed
-    this._box(11.5,2,18.5,this._mat(0xf8fafc,0.9),  65, 3.5, 52);   // mattress
-    this._box(14, 0.6, 6, this._mat(0x334155, 0.4), 50, 7.2,  2);   // desk
-    this._box(4.5, 4, 4.5,this._mat(0x1e293b, 0.6), 50, 2.0, 8.5);  // chair
-    this._box(1.8,21,9,   this._mat(0x1e293b, 0.5), 78, 10.5, 5);   // bookshelf
+    // 방 A (cx=60, cz=5)
+    this._box(12, 3, 20,  this._mat(0x1e3a8a, 0.7), 70, 1.5, 15);   // bed
+    this._box(11.5,2,18.5,this._mat(0xf8fafc,0.9),  70, 3.5, 15);   // mattress
+    this._box(14, 0.6, 6, this._mat(0x334155, 0.4), 50, 7.2, -5);   // desk
+    this._box(1.8,21,9,   this._mat(0x1e293b, 0.5), 78, 10.5, -5);  // bookshelf
 
-    // ── 방 B ──
-    this._box(12, 3, 20,  this._mat(0x1e3a8a, 0.7), -15, 1.5, -45); // bed
-    this._box(11.5,2,18.5,this._mat(0xf8fafc,0.9),  -15, 3.5, -45); // mattress
-    this._box(10, 0.6, 5.5,this._mat(0x334155,0.4), -15, 7.2, -28); // desk
+    // 방 B (cx=20, cz=-35)
+    this._box(12, 3, 20,  this._mat(0x1e3a8a, 0.7), 10, 1.5, -45);  // bed
+    this._box(11.5,2,18.5,this._mat(0xf8fafc,0.9),  10, 3.5, -45);  // mattress
+    this._box(10, 0.6, 5.5,this._mat(0x334155,0.4), 30, 7.2, -25);  // desk
 
-    // ── 현관 ──
-    this._box(10, 12, 3.5, this._mat(0x1e293b, 0.4), 55, 6,  -40);  // shoe cabinet
-    this._box(1.8, 7, 1.8, this._mat(0x475569,0.3,0.5), 45, 3.5, -58); // umbrella stand
+    // 현관 (cx=60, cz=-45)
+    this._box(10, 12, 3.5, this._mat(0x1e293b, 0.4), 70, 6,  -40);  // shoe cabinet
     {
-      const mat = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), this._mat(0x1a2030, 0.95));
-      mat.rotation.x = -Math.PI / 2; mat.position.set(50, 0.1, -65);
+      const mat = new THREE.Mesh(new THREE.PlaneGeometry(16, 12), this._mat(0x1a2030, 0.95));
+      mat.rotation.x = -Math.PI / 2; mat.position.set(60, 0.1, -60);
       this.scene.add(mat);
     }
   }
 
-  // ── Pyramid Hip Roof (삼각뿔 지붕) ───────────────────────────────
+  // ── Pyramid Hip Roof ──────────────────────────────────────────────
   _buildRoof() {
     this.roofGroup = new THREE.Group();
 
-    // Eave slab (작은 처마 오버행)
+    // Eave slab
     const eaveMat = this._mat(0x0f172a, 0.6, 0.1);
     const eave = new THREE.Mesh(new THREE.BoxGeometry(166, 2, 146), eaveMat);
     eave.position.set(0, 32, 0);
     this.roofGroup.add(eave);
 
-    // Pyramid: 4-sided hip roof
-    const hw = 84;  // half-width  (+2 overhang)
-    const hd = 74;  // half-depth  (+2 overhang)
-    const base = 33; // Y of roof base (just above eave)
-    const peak = 72; // Y of apex
-
+    const hw = 84, hd = 74, base = 33, peak = 72;
     const roofMat = this._mat(0x1e293b, 0.55, 0.15);
-
-    // Build 4 triangular faces manually
     const apex = [0, peak, 0];
     const corners = [
-      [-hw, base, -hd], // 0: NW
-      [ hw, base, -hd], // 1: NE
-      [ hw, base,  hd], // 2: SE
-      [-hw, base,  hd], // 3: SW
+      [-hw, base, -hd], [ hw, base, -hd],
+      [ hw, base,  hd], [-hw, base,  hd],
     ];
 
     const makeFace = (a, b, c) => {
       const geo = new THREE.BufferGeometry();
-      const verts = new Float32Array([
-        a[0], a[1], a[2],
-        b[0], b[1], b[2],
-        c[0], c[1], c[2],
-      ]);
+      const verts = new Float32Array([...a, ...b, ...c]);
       geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
       geo.computeVertexNormals();
       const mesh = new THREE.Mesh(geo, roofMat);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
+      mesh.castShadow = true; mesh.receiveShadow = true;
       return mesh;
     };
 
-    // 4 triangular roof faces
-    this.roofGroup.add(makeFace(corners[0], corners[1], apex)); // North
-    this.roofGroup.add(makeFace(corners[1], corners[2], apex)); // East
-    this.roofGroup.add(makeFace(corners[2], corners[3], apex)); // South
-    this.roofGroup.add(makeFace(corners[3], corners[0], apex)); // West
+    this.roofGroup.add(makeFace(corners[0], corners[1], apex));
+    this.roofGroup.add(makeFace(corners[1], corners[2], apex));
+    this.roofGroup.add(makeFace(corners[2], corners[3], apex));
+    this.roofGroup.add(makeFace(corners[3], corners[0], apex));
 
-    // Ridge cap (top point marker)
-    const capMat = this._mat(0x0f172a, 0.4, 0.3);
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(2, 8, 8), capMat);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(2, 8, 8), this._mat(0x0f172a, 0.4, 0.3));
     cap.position.set(0, peak, 0);
     this.roofGroup.add(cap);
 
-    this.roofGroup.visible = false; // hidden by default
+    this.roofGroup.visible = false;
     this.scene.add(this.roofGroup);
   }
 
-  // ── Ceiling Lamps (×10 scale) ─────────────────────────────────────
+  // ── Ceiling Lamps ─────────────────────────────────────────────────
   _buildLamps() {
     const rooms = {
-      living:   { x: -40, z:  25, color: 0xffeebb, range: 100, y: 31 },
+      living:   { x: -40, z:  30, color: 0xffeebb, range: 100, y: 31 },
       kitchen:  { x: -40, z: -40, color: 0xfff5cc, range:  80, y: 31 },
-      master:   { x: -40, z:  50, color: 0xffe8cc, range:  70, y: 31 },
-      rooma:    { x:  40, z:  25, color: 0xffeebb, range:  80, y: 31 },
-      roomb:    { x: -10, z: -40, color: 0xfff5cc, range:  60, y: 31 },
-      bathroom: { x:  40, z:  55, color: 0xffffff, range:  50, y: 31 },
+      master:   { x:  40, z:  50, color: 0xffe8cc, range:  70, y: 31 },
+      rooma:    { x:  60, z:   5, color: 0xffeebb, range:  80, y: 31 },
+      roomb:    { x:  20, z: -35, color: 0xfff5cc, range:  60, y: 31 },
+      bathroom: { x:  20, z:  15, color: 0xffffff, range:  50, y: 31 },
     };
 
     const stemMat  = this._mat(0x94a3b8, 0.3, 0.7);
@@ -429,23 +401,19 @@ class SmartHomeSimulator {
     this.bulbMatOff = this._mat(0x1e293b, 0.6);
 
     Object.entries(rooms).forEach(([key, r]) => {
-      // Stem
       const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 3.5, 8), stemMat);
       stem.position.set(r.x, r.y + 1.7, r.z);
       this.scene.add(stem);
 
-      // Ring
       const ring = new THREE.Mesh(new THREE.TorusGeometry(2.8, 0.4, 8, 24), stemMat);
       ring.rotation.x = Math.PI / 2;
       ring.position.set(r.x, r.y, r.z);
       this.scene.add(ring);
 
-      // Bulb sphere
       const bulb = new THREE.Mesh(new THREE.SphereGeometry(1.1, 12, 12), this.bulbMatOff);
       bulb.position.set(r.x, r.y - 0.6, r.z);
       this.scene.add(bulb);
 
-      // Point Light
       const pl = new THREE.PointLight(r.color, 0, r.range, 1.6);
       pl.position.set(r.x, r.y - 2, r.z);
       this.scene.add(pl);
@@ -454,13 +422,12 @@ class SmartHomeSimulator {
     });
   }
 
-  // ── Animated Curtains (×10 scale) ────────────────────────────────
+  // ── Animated Curtains ────────────────────────────────────────────
   _buildCurtains() {
     const curFab = new THREE.MeshStandardMaterial({ color: 0x2d3d55, roughness: 0.9, side: THREE.DoubleSide });
     const curBlk = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, roughness: 0.95, side: THREE.DoubleSide });
     const curBld = new THREE.MeshStandardMaterial({ color: 0xd4d8e0, roughness: 0.5, side: THREE.DoubleSide });
 
-    // Sliding pair helper
     const slidePair = (x, z, axis, mat, span) => {
       const halfGeo = new THREE.PlaneGeometry(span / 2 - 0.5, 14);
       const L = new THREE.Mesh(halfGeo, mat);
@@ -472,41 +439,41 @@ class SmartHomeSimulator {
       return { L, R, axis, span, bx: x, bz: z };
     };
 
-    // 거실 south window (Z=70), X-axis sliding
-    this.curtains3d.living = slidePair(-30, 69.4, 'x', curFab, 24);
+    // 거실 South (Z=70), X-axis sliding
+    this.curtains3d.living = slidePair(-40, 69.4, 'x', curFab, 30);
     this.curtains3d.living.L.rotation.y = 0;
     this.curtains3d.living.R.rotation.y = 0;
 
-    // 안방 west window (X=-80), Z-axis sliding
-    this.curtains3d.master = slidePair(-79.4, 50, 'z', curBlk, 14);
-    this.curtains3d.master.L.rotation.y = Math.PI / 2;
-    this.curtains3d.master.R.rotation.y = Math.PI / 2;
+    // 안방 South (Z=70), X-axis sliding
+    this.curtains3d.master = slidePair(40, 69.4, 'x', curBlk, 20);
+    this.curtains3d.master.L.rotation.y = 0;
+    this.curtains3d.master.R.rotation.y = 0;
 
-    // 방 A east window (X=80), blind (scale Y)
-    const blindA = new THREE.Mesh(new THREE.PlaneGeometry(20, 14), curBld);
-    blindA.position.set(79.4, 18, 10);
+    // 방 A East (X=80), blind (scale Y)
+    const blindA = new THREE.Mesh(new THREE.PlaneGeometry(16, 14), curBld);
+    blindA.position.set(79.4, 18, 5);
     blindA.rotation.y = Math.PI / 2;
     this.scene.add(blindA);
     this.curtains3d.rooma = { type: 'blind', mesh: blindA, baseY: 18 };
 
-    // 방 B north window (Z=-70), blind
-    const blindB = new THREE.Mesh(new THREE.PlaneGeometry(10, 12), curBld);
-    blindB.position.set(-10, 18, -69.4);
+    // 방 B North (Z=-70), blind
+    const blindB = new THREE.Mesh(new THREE.PlaneGeometry(16, 12), curBld);
+    blindB.position.set(20, 18, -69.4);
     this.scene.add(blindB);
     this.curtains3d.roomb = { type: 'blind', mesh: blindB, baseY: 18 };
   }
 
-  // ── Particle Effects (×10 scale) ─────────────────────────────────
+  // ── Effects ───────────────────────────────────────────────────────
   _buildEffects() {
-    // AC stream (거실 에어컨 위치: x=-5, z=15)
+    // AC stream (거실 에어컨: x=-75, z=30)
     {
       const cnt = 500;
       const geo = new THREE.BufferGeometry();
       const pos = new Float32Array(cnt * 3);
       for (let i = 0; i < cnt; i++) {
-        pos[i*3]   = -5 + (Math.random() - 0.5) * 4;
+        pos[i*3]   = -75 + (Math.random() - 0.5) * 4;
         pos[i*3+1] = 24.5 - Math.random() * 5;
-        pos[i*3+2] = 15  + (Math.random() - 0.5) * 5;
+        pos[i*3+2] = 30  + (Math.random() - 0.5) * 5;
       }
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       const mat = new THREE.PointsMaterial({ color: 0x7dd3fc, size: 0.4, transparent: true, opacity: 0, blending: THREE.AdditiveBlending });
@@ -514,15 +481,15 @@ class SmartHomeSimulator {
       this.scene.add(this.acParticles);
     }
 
-    // Humidifier mist (x=-40 거실)
+    // Humidifier mist (거실 테이블 위 x=-40, z=35)
     {
       const cnt = 300;
       const geo = new THREE.BufferGeometry();
       const pos = new Float32Array(cnt * 3);
       for (let i = 0; i < cnt; i++) {
         pos[i*3]   = -40 + (Math.random() - 0.5) * 3;
-        pos[i*3+1] = 1 + Math.random() * 8;
-        pos[i*3+2] = 20 + (Math.random() - 0.5) * 3;
+        pos[i*3+1] = 4 + Math.random() * 8;
+        pos[i*3+2] = 35 + (Math.random() - 0.5) * 3;
       }
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       const mat = new THREE.PointsMaterial({ color: 0xe0f2fe, size: 0.5, transparent: true, opacity: 0, blending: THREE.AdditiveBlending });
@@ -530,20 +497,20 @@ class SmartHomeSimulator {
       this.scene.add(this.mistParticles);
     }
 
-    // Stove flame (주방 쿡탑 x=-35, z=-62.8)
+    // Stove flame (주방 x=-74, z=-40)
     {
       const fm = new THREE.MeshBasicMaterial({ color: 0x1d88fe, transparent: true, opacity: 0 });
       const fc = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.8, 8), fm);
-      fc.position.set(-35, 10.6, -62.5);
+      fc.position.set(-74, 10.6, -40);
       this.scene.add(fc);
       this.flameMesh = fc;
     }
 
-    // Ondol heat wireframe planes
+    // Ondol heat planes
     {
       const om = new THREE.MeshBasicMaterial({ color: 0xff4000, wireframe: true, transparent: true, opacity: 0 });
-      [[-30, 25], [-40, -40], [-40, 50], [40, 25], [-10, -40]].forEach(([x, z]) => {
-        const p = new THREE.Mesh(new THREE.PlaneGeometry(50, 50, 8, 8), om.clone());
+      [[-40, 30], [-40, -40], [40, 50], [60, 5], [20, -35]].forEach(([x, z]) => {
+        const p = new THREE.Mesh(new THREE.PlaneGeometry(35, 35, 8, 8), om.clone());
         p.rotation.x = -Math.PI / 2;
         p.position.set(x, 0.2, z);
         this.scene.add(p);
@@ -552,17 +519,17 @@ class SmartHomeSimulator {
     }
   }
 
-  // ── Room Labels ────────────────────────────────────────────────────
+  // ── Labels ────────────────────────────────────────────────────────
   _buildLabels() {
     this.labelGroup = new THREE.Group();
     const defs = [
-      ['거실',       -40,  25],
+      ['거실',       -40,  30],
       ['주방',       -40, -40],
-      ['안방',       -40,  50],
-      ['욕실',        40,  55],
-      ['방 A',        40,  25],
-      ['방 B',       -10, -40],
-      ['현관',        50, -40],
+      ['안방',        40,  50],
+      ['욕실',        20,  15],
+      ['방 A',        60,   5],
+      ['방 B',        20, -35],
+      ['현관',        60, -45],
     ];
 
     defs.forEach(([txt, x, z]) => {
@@ -640,13 +607,13 @@ class SmartHomeSimulator {
     const V = {
       iso:      [ 220, 180, 220,    0, 15,   0],
       top:      [   0, 300,   1,    0,  0,   0],
-      living:   [ -40,  70, 120,  -40, 15,  25],
-      kitchen:  [ -40,  70,-120,  -40, 15, -40],
-      master:   [ -80,  70,  90,  -40, 15,  50],
-      rooma:    [ 100,  70, 100,   40, 15,  25],
-      roomb:    [   0,  70,-110,  -10, 15, -40],
-      bathroom: [  90,  60,  90,   40, 15,  55],
-      entrance: [ 100,  55, -50,   50, 15, -40],
+      living:   [ -40,  70, 130,  -40, 15,  30],
+      kitchen:  [ -40,  70,-140,  -40, 15, -40],
+      master:   [  40,  70, 150,   40, 15,  50],
+      rooma:    [ 160,  70,   5,   60, 15,   5],
+      roomb:    [  20,  70,-130,   20, 15, -35],
+      bathroom: [  20,  60, 110,   20, 15,  15],
+      entrance: [ 160,  55, -45,   60, 15, -45],
     };
     const v = V[name];
     if (v) this._camTo(...v);
@@ -656,7 +623,7 @@ class SmartHomeSimulator {
   _enterFPS() {
     S.fpsMode = true;
     this.orbit.enabled = false;
-    this.fpsPos.set(0, 16.5, 40);
+    this.fpsPos.set(-40, 16.5, 50); // Start in living room
     this.fpsYaw   = 0;
     this.fpsPitch = 0;
     this.camera.position.copy(this.fpsPos);
@@ -725,7 +692,6 @@ class SmartHomeSimulator {
     });
     window.addEventListener('keyup', e => { this.keys[e.key.toLowerCase()] = false; });
 
-    // D-Pad
     [['dpad-up','w'],['dpad-down','s'],['dpad-left','a'],['dpad-right','d']].forEach(([id, key]) => {
       const btn = qs(`#${id}`);
       if (!btn) return;
@@ -759,13 +725,11 @@ class SmartHomeSimulator {
     this._updateFPS(dt);
     if (!S.fpsMode) this.orbit.update();
 
-    // Door swing
     if (this.doorPivot) {
       const tgt = S.door.open ? -Math.PI / 2.05 : 0;
       this.doorPivot.rotation.y += (tgt - this.doorPivot.rotation.y) * 0.1;
     }
 
-    // Curtains
     Object.keys(S.curtains).forEach(key => {
       const c   = this.curtains3d[key];
       const open = S.curtains[key];
@@ -776,7 +740,6 @@ class SmartHomeSimulator {
         c.mesh.scale.y += (tSY - c.mesh.scale.y) * 0.1;
         c.mesh.position.y = c.baseY - (14 * 0.5 * (1 - c.mesh.scale.y));
       } else {
-        // Sliding pair
         const half = c.span / 4;
         const axis = c.axis;
         const base = axis === 'x' ? c.bx : c.bz;
@@ -787,13 +750,11 @@ class SmartHomeSimulator {
       }
     });
 
-    // Ondol
     this.ondolPlanes.forEach(p => {
       const tgt = S.climate.boiler ? (0.28 + 0.18 * Math.sin(t * 4)) : 0;
       p.material.opacity += (tgt - p.material.opacity) * 0.08;
     });
 
-    // AC particles
     if (this.acParticles) {
       const tgt = S.climate.ac ? 0.8 : 0;
       this.acParticles.material.opacity += (tgt - this.acParticles.material.opacity) * 0.08;
@@ -801,19 +762,18 @@ class SmartHomeSimulator {
         const pos = this.acParticles.geometry.attributes.position.array;
         const spd = S.climate.acWind === 'high' ? 0.35 : S.climate.acWind === 'med' ? 0.22 : 0.12;
         for (let i = 0; i < pos.length; i += 3) {
-          pos[i+2] -= spd;
-          pos[i]   += Math.sin(t * 3 + i) * 0.02;
-          if (pos[i+2] < -5) {
-            pos[i]   = -5 + (Math.random() - 0.5) * 4;
+          pos[i]   += spd;
+          pos[i+2] -= Math.sin(t * 3 + i) * 0.02;
+          if (pos[i] > -35) {
+            pos[i]   = -75 + (Math.random() - 0.5) * 4;
             pos[i+1] = 24.5 - Math.random() * 5;
-            pos[i+2] = 15 + (Math.random() - 0.5) * 5;
+            pos[i+2] = 30 + (Math.random() - 0.5) * 5;
           }
         }
         this.acParticles.geometry.attributes.position.needsUpdate = true;
       }
     }
 
-    // Mist
     if (this.mistParticles) {
       const tgt = S.climate.humidifier ? 0.65 : 0;
       this.mistParticles.material.opacity += (tgt - this.mistParticles.material.opacity) * 0.08;
@@ -822,25 +782,22 @@ class SmartHomeSimulator {
         for (let i = 0; i < pos.length; i += 3) {
           pos[i+1] += 0.08;
           pos[i]   += Math.sin(t * 5 + i) * 0.01;
-          if (pos[i+1] > 12) {
+          if (pos[i+1] > 15) {
             pos[i]   = -40 + (Math.random() - 0.5) * 3;
-            pos[i+1] = 1;
-            pos[i+2] = 20 + (Math.random() - 0.5) * 3;
+            pos[i+1] = 4;
+            pos[i+2] = 35 + (Math.random() - 0.5) * 3;
           }
         }
         this.mistParticles.geometry.attributes.position.needsUpdate = true;
       }
     }
 
-    // Flame flicker
     if (this.flameMesh && S.gas.open) {
       const sc = 1 + 0.2 * Math.sin(t * 18);
       this.flameMesh.scale.set(sc, 1 + 0.3 * Math.cos(t * 14), sc);
     }
 
-    // Climate simulation
     this._simClimate(dt);
-
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -867,7 +824,6 @@ class SmartHomeSimulator {
 let sim = null;
 
 function initUI() {
-  // Tabs
   qsa('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
@@ -878,7 +834,6 @@ function initUI() {
     });
   });
 
-  // Panel toggle
   qs('#btn-toggle-panel').addEventListener('click', () => {
     S.panelOpen = !S.panelOpen;
     qs('#control-panel').classList.toggle('hidden', !S.panelOpen);
@@ -893,7 +848,6 @@ function initUI() {
     }, 370);
   });
 
-  // Camera buttons
   const setActiveCam = id => {
     qsa('#cam-toolbar .cam-btn').forEach(b => b.classList.remove('active'));
     qs(`#${id}`)?.classList.add('active');
@@ -927,7 +881,6 @@ function initUI() {
     toast(S.labels ? '🏷 방 이름 ON' : '🏷 방 이름 OFF');
   });
 
-  // Lighting
   qs('#brightness-slider').addEventListener('input', e => {
     S.brightness = parseInt(e.target.value);
     qs('#brightness-val').textContent = `${S.brightness}%`;
@@ -936,17 +889,14 @@ function initUI() {
 
   qs('#btn-all-off').addEventListener('click', () => {
     Object.keys(S.lights).forEach(k => S.lights[k] = false);
-    refreshLightUI();
-    sim.syncLights();
-    toast('전체 조명 소등');
+    refreshLightUI(); sim.syncLights(); toast('전체 조명 소등');
   });
 
   qsa('[data-light]').forEach(btn => {
     btn.addEventListener('click', () => {
       const room = btn.dataset.light;
       S.lights[room] = !S.lights[room];
-      refreshLightUI();
-      sim.syncLights();
+      refreshLightUI(); sim.syncLights();
       toast(`${roomKr(room)} 조명 ${S.lights[room] ? 'ON 💡' : 'OFF'}`);
     });
   });
@@ -960,7 +910,6 @@ function initUI() {
     });
   }
 
-  // Door
   function refreshDoorUI() {
     const box  = qs('#door-status-box');
     const icon = qs('#door-icon');
@@ -979,23 +928,18 @@ function initUI() {
 
   qs('#btn-door-open').addEventListener('click', () => {
     if (S.door.locked) S.door.locked = false;
-    S.door.open = true; refreshDoorUI();
-    toast('🚪 현관문 열림');
+    S.door.open = true; refreshDoorUI(); toast('🚪 현관문 열림');
   });
   qs('#btn-door-close').addEventListener('click', () => {
-    S.door.open = false; S.door.locked = true; refreshDoorUI();
-    toast('🔒 현관문 닫힘 & 잠금');
+    S.door.open = false; S.door.locked = true; refreshDoorUI(); toast('🔒 현관문 닫힘 & 잠금');
   });
   qs('#btn-lock').addEventListener('click', () => {
-    S.door.locked = true; if (S.door.open) S.door.open = false; refreshDoorUI();
-    toast('🔐 도어락 잠금');
+    S.door.locked = true; if (S.door.open) S.door.open = false; refreshDoorUI(); toast('🔐 도어락 잠금');
   });
   qs('#btn-unlock').addEventListener('click', () => {
-    S.door.locked = false; refreshDoorUI();
-    toast('🔑 도어락 해제');
+    S.door.locked = false; refreshDoorUI(); toast('🔑 도어락 해제');
   });
 
-  // Curtains
   function refreshCurtainUI() {
     qsa('[data-curtain]').forEach(btn => {
       const open = S.curtains[btn.dataset.curtain];
@@ -1020,7 +964,6 @@ function initUI() {
     });
   });
 
-  // Climate — temp
   qs('#btn-temp-minus').addEventListener('click', () => {
     S.climate.targetTemp = Math.max(16, S.climate.targetTemp - 0.5);
     qs('#temp-target').textContent = `${S.climate.targetTemp.toFixed(1)}°C`;
@@ -1030,7 +973,6 @@ function initUI() {
     qs('#temp-target').textContent = `${S.climate.targetTemp.toFixed(1)}°C`;
   });
 
-  // Boiler
   qs('#btn-boiler').addEventListener('click', () => {
     S.climate.boiler = !S.climate.boiler;
     const btn = qs('#btn-boiler');
@@ -1057,7 +999,6 @@ function initUI() {
     qs('#boiler-target').textContent = `${S.climate.boilerTarget.toFixed(1)}°C`;
   });
 
-  // AC
   qs('#btn-ac').addEventListener('click', () => {
     S.climate.ac = !S.climate.ac;
     const btn = qs('#btn-ac');
@@ -1076,7 +1017,6 @@ function initUI() {
     });
   });
 
-  // Humidifier
   qs('#btn-humidifier').addEventListener('click', () => {
     S.climate.humidifier = !S.climate.humidifier;
     const btn = qs('#btn-humidifier');
@@ -1085,7 +1025,6 @@ function initUI() {
     toast(`가습기 ${S.climate.humidifier ? 'ON 💨' : 'OFF'}`);
   });
 
-  // Gas
   qs('#btn-gas-open').addEventListener('click', () => {
     S.gas.open = true;
     qs('#gas-status-text').textContent = '가스 열림 ⚠️ 사용중';
@@ -1099,7 +1038,6 @@ function initUI() {
     sim.syncGas(); toast('🔒 가스 안전 잠금');
   });
 
-  // Away mode
   qs('#btn-away').addEventListener('click', () => {
     Object.keys(S.lights).forEach(k => S.lights[k] = false);
     refreshLightUI(); sim.syncLights();
@@ -1110,9 +1048,6 @@ function initUI() {
   });
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// 5. HELPERS
-// ─────────────────────────────────────────────────────────────────────
 function roomKr(k) {
   return { living:'거실', kitchen:'주방', master:'안방', rooma:'방 A', roomb:'방 B', bathroom:'욕실' }[k] || k;
 }
@@ -1120,11 +1055,8 @@ function curtainKr(k) {
   return { living:'거실 커튼', master:'안방 암막', rooma:'방 A 블라인드', roomb:'방 B 블라인드' }[k] || k;
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// 6. BOOT
-// ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   sim = new SmartHomeSimulator();
   initUI();
-  toast('🏠 스마트홈 3D 시뮬레이터 준비 완료 (부피 1000배 스케일)');
+  toast('🏠 스마트홈 3D 시뮬레이터 준비 완료');
 });
