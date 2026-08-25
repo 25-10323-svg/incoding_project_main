@@ -369,35 +369,35 @@ class SmartHomeSimulator {
 
   _createWindTexture() {
     const canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 64;
+    canvas.width = 128;
+    canvas.height = 128;
     const ctx = canvas.getContext('2d');
     
     ctx.strokeStyle = '#38bdf8'; // Sky blue
-    ctx.shadowColor = '#0284c7';
-    ctx.shadowBlur = 6;
+    ctx.shadowColor = '#0ea5e9';
+    ctx.shadowBlur = 10;
 
     // Top gentle wave
-    ctx.lineWidth = 3.5;
+    ctx.lineWidth = 7;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(8, 18);
-    ctx.bezierCurveTo(22, 10, 38, 26, 56, 16);
+    ctx.moveTo(16, 36);
+    ctx.bezierCurveTo(44, 20, 76, 52, 112, 32);
     ctx.stroke();
 
     // Middle main wind swirl
-    ctx.lineWidth = 4.5;
+    ctx.lineWidth = 9;
     ctx.beginPath();
-    ctx.moveTo(4, 32);
-    ctx.bezierCurveTo(20, 20, 38, 44, 52, 30);
-    ctx.bezierCurveTo(58, 24, 60, 18, 50, 20);
+    ctx.moveTo(8, 64);
+    ctx.bezierCurveTo(40, 40, 76, 88, 104, 60);
+    ctx.bezierCurveTo(116, 48, 120, 36, 100, 40);
     ctx.stroke();
 
     // Bottom breeze wave
-    ctx.lineWidth = 3.0;
+    ctx.lineWidth = 6;
     ctx.beginPath();
-    ctx.moveTo(12, 46);
-    ctx.bezierCurveTo(26, 38, 42, 54, 56, 44);
+    ctx.moveTo(24, 92);
+    ctx.bezierCurveTo(52, 76, 84, 108, 112, 88);
     ctx.stroke();
 
     return new THREE.CanvasTexture(canvas);
@@ -407,18 +407,19 @@ class SmartHomeSimulator {
     const pTex = this._createParticleTexture();
     const wTex = this._createWindTexture();
 
-    // AC Wind Stream (Sky blue wind symbols)
-    let geo = new THREE.BufferGeometry(), pos = new Float32Array(350 * 3);
-    for (let i=0; i<350; i++) {
-      pos[i*3]   = -25 + Math.random() * 45;
-      pos[i*3+1] = 25.5 - Math.random() * 10;
-      pos[i*3+2] = 35 + (Math.random() - 0.5) * 20;
+    // AC Wind Stream (Reduced count & larger wind symbols)
+    const count = 65;
+    let geo = new THREE.BufferGeometry(), pos = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      pos[i * 3]     = -25 + Math.random() * 45;
+      pos[i * 3 + 1] = 25.5 - Math.random() * 10;
+      pos[i * 3 + 2] = 35 + (Math.random() - 0.5) * 20;
     }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     this.acParticles = new THREE.Points(geo, new THREE.PointsMaterial({
       map: wTex,
       color: 0x38bdf8,
-      size: 4.2,
+      size: 9.0,
       transparent: true,
       opacity: 0,
       blending: THREE.AdditiveBlending,
