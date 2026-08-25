@@ -407,8 +407,8 @@ class SmartHomeSimulator {
     const pTex = this._createParticleTexture();
     const wTex = this._createWindTexture();
 
-    // AC Wind Stream (Reduced count & larger wind symbols)
-    const count = 65;
+    // AC Wind Stream (Ultra-minimal count: 18 wind gusts)
+    const count = 18;
     let geo = new THREE.BufferGeometry(), pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       pos[i * 3]     = -25 + Math.random() * 45;
@@ -419,7 +419,7 @@ class SmartHomeSimulator {
     this.acParticles = new THREE.Points(geo, new THREE.PointsMaterial({
       map: wTex,
       color: 0x38bdf8,
-      size: 9.0,
+      size: 10.5,
       transparent: true,
       opacity: 0,
       blending: THREE.AdditiveBlending,
