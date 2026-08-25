@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AURA 3D Smart Home Digital Twin</title>
-    <!-- Google Fonts: Outfit & Inter for premium typography -->
+    <!-- Google Fonts: Outfit & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -38,6 +38,19 @@
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
         </symbol>
+        <!-- Curtain / Window -->
+        <symbol id="icon-curtain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <path d="M9 21V9c0-2-3-2-3-2"></path>
+            <path d="M15 21V9c0-2 3-2 3-2"></path>
+        </symbol>
+        <!-- Door Open / Close -->
+        <symbol id="icon-door" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path>
+            <path d="M2 20h20"></path>
+            <circle cx="14" cy="12" r="1"></circle>
+        </symbol>
         <!-- Gas Flame -->
         <symbol id="icon-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
@@ -46,16 +59,12 @@
         <symbol id="icon-temp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
         </symbol>
-        <!-- Droplet -->
-        <symbol id="icon-droplet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-        </symbol>
         <!-- Home -->
         <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </symbol>
-        <!-- Light Bulb (Nav) -->
+        <!-- Light Bulb -->
         <symbol id="icon-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .6 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path>
             <line x1="9" y1="18" x2="15" y2="18"></line>
@@ -79,20 +88,6 @@
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
         </symbol>
-        <!-- Link -->
-        <symbol id="icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-        </symbol>
-        <!-- Adjust Slider -->
-        <symbol id="icon-adjust" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="4" y1="21" x2="4" y2="14"></line>
-            <line x1="4" y1="10" x2="4" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12" y2="3"></line>
-            <line x1="20" y1="21" x2="20" y2="16"></line>
-            <line x1="20" y1="12" x2="20" y2="3"></line>
-        </symbol>
         <!-- Valve SVG -->
         <symbol id="icon-valve" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
@@ -102,14 +97,14 @@
     </svg>
 
     <div class="app-layout">
-        <!-- TOP HEADER / DIGITAL TWIN NAVIGATION -->
+        <!-- TOP HEADER / GLOBAL DIGITAL TWIN NAVIGATION -->
         <header class="main-header">
             <div class="logo-area">
                 <span class="logo-icon">✦</span>
-                <h1>AURA 3D Digital Twin</h1>
+                <h1>AURA 3D Penthouse Digital Twin</h1>
             </div>
 
-            <!-- Global Status Pills -->
+            <!-- Global Real-Time Status Pills -->
             <div class="header-status-summary">
                 <div class="status-pill highlight">
                     <span class="dot"></span>
@@ -124,8 +119,12 @@
                     <span id="hdr-boiler">보일러 대기</span>
                 </div>
                 <div class="status-pill">
-                    <span>🔒</span>
-                    <span id="hdr-door">현관문 잠김</span>
+                    <span>🚪</span>
+                    <span id="hdr-door">현관문 닫힘 (잠김)</span>
+                </div>
+                <div class="status-pill">
+                    <span>🪟</span>
+                    <span id="hdr-curtain">커튼 열림</span>
                 </div>
             </div>
 
@@ -135,495 +134,508 @@
                     <span>🏃</span>
                     <span>외출 모드</span>
                 </button>
+                <button class="btn-phone-toggle" id="btn-toggle-phone-drawer" title="스마트폰 리모컨 토글 (접기/펼치기)">
+                    <span>📱</span>
+                </button>
                 <button class="theme-toggle-btn" id="theme-toggle" title="테마 변경 (라이트/다크)">
                     <span class="theme-icon">🌙</span>
                 </button>
             </div>
         </header>
 
-        <!-- MAIN STAGE (3D Player is Hero 73%, Companion Phone is Widget 27%) -->
-        <main class="main-stage-grid">
+        <!-- FULLSCREEN 3D DIGITAL TWIN STAGE (100% SCREEN OCCUPANCY) -->
+        <main class="fullscreen-3d-stage" id="fullscreen-stage">
             
-            <!-- =========================================================================
-                 LEFT / CENTER HERO SECTION: 3D DIGITAL TWIN VIEWER
-                 ========================================================================= -->
-            <section class="hero-3d-section">
-                <div class="hero-3d-card">
-                    <!-- Three.js Canvas Container -->
-                    <div id="threejs-container" class="threejs-viewport"></div>
+            <!-- Three.js Canvas Viewport Container -->
+            <div id="threejs-container" class="threejs-viewport"></div>
 
-                    <!-- Floating 3D Toolbar (Top Overlay) -->
-                    <div class="floating-3d-toolbar">
-                        <div class="toolbar-left-group">
-                            <span class="toolbar-title-chip">📐 시점 프리셋:</span>
-                            <button class="btn-view-chip active" id="btn-cam-iso">3D 아이소</button>
-                            <button class="btn-view-chip" id="btn-cam-top">2D 평면 탑뷰</button>
-                            <button class="btn-view-chip" id="btn-cam-living">거실 뷰</button>
-                            <button class="btn-view-chip" id="btn-cam-master">안방 뷰</button>
-                            <button class="btn-view-chip" id="btn-cam-kitchen">주방/보일러</button>
-                            <button class="btn-view-chip" id="btn-cam-reset">🔄 시점 리셋</button>
-                        </div>
-                        <div class="toolbar-right-group">
-                            <button class="btn-fx-chip active" id="btn-toggle-ondol-fx">🔥 온돌 바닥열선</button>
-                            <button class="btn-fx-chip active" id="btn-toggle-ac-fx">❄️ 냉기 기류</button>
-                            <button class="btn-fx-chip active" id="btn-toggle-labels-fx">🏷️ 방 라벨</button>
-                        </div>
-                    </div>
-
-                    <!-- Floating Room HUD (Bottom-left Overlay - Click to Inspect Room) -->
-                    <div class="floating-room-hud">
-                        <span class="hud-title">공간 탐색:</span>
-                        <button class="room-focus-chip" data-room-focus="living"><span class="room-dot living"></span> 거실 (창문)</button>
-                        <button class="room-focus-chip" data-room-focus="master"><span class="room-dot master"></span> 안방 (창문)</button>
-                        <button class="room-focus-chip" data-room-focus="roomb"><span class="room-dot roomb"></span> 방 B (발코니)</button>
-                        <button class="room-focus-chip" data-room-focus="rooma"><span class="room-dot rooma"></span> 방 A (창문)</button>
-                        <button class="room-focus-chip" data-room-focus="kitchen"><span class="room-dot kitchen"></span> 주방 & 가스</button>
-                        <button class="room-focus-chip" data-room-focus="bath"><span class="room-dot bath"></span> 공용 욕실</button>
-                        <button class="room-focus-chip" data-room-focus="entrance"><span class="room-dot entrance"></span> 현관 도어</button>
-                    </div>
-
-                    <!-- Floating Live Metrics Badge (Bottom-right Overlay) -->
-                    <div class="floating-live-metrics">
-                        <div class="metric-item">
-                            <span class="metric-label">실내 평균온도</span>
-                            <span class="metric-val" id="hud-temp-val">24.5°C</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="metric-label">실내 습도</span>
-                            <span class="metric-val humidity" id="hud-humidity-val">52%</span>
-                        </div>
-                        <div class="metric-item">
-                            <span class="metric-label">스마트 보일러</span>
-                            <span class="metric-val boiler" id="hud-boiler-val">OFF</span>
-                        </div>
-                    </div>
+            <!-- Floating 3D Toolbar (Top Glass Overlay) -->
+            <div class="floating-3d-toolbar">
+                <div class="toolbar-left-group">
+                    <span class="toolbar-title-chip">📐 시점:</span>
+                    <button class="btn-view-chip active" id="btn-cam-iso">3D 아이소</button>
+                    <button class="btn-view-chip" id="btn-cam-top">2D 탑뷰</button>
+                    <button class="btn-view-chip fps-mode-btn" id="btn-cam-fps" title="WASD 키보드 및 가상 패드로 집안 내부를 직접 걷는 모드">🚶 1인칭 걷기</button>
+                    <button class="btn-view-chip" id="btn-cam-living">거실</button>
+                    <button class="btn-view-chip" id="btn-cam-master">안방</button>
+                    <button class="btn-view-chip" id="btn-cam-kitchen">주방</button>
+                    <button class="btn-view-chip" id="btn-cam-reset">🔄 리셋</button>
                 </div>
-
-                <!-- Bottom Status Dock under 3D viewer (Network Status & Live Logs) -->
-                <div class="hero-bottom-strip">
-                    <div class="network-devices-mini-grid">
-                        <button class="mini-net-btn active" data-device="light" id="net-toggle-light">
-                            <span class="net-indicator"></span>
-                            <span>💡 조명</span>
-                        </button>
-                        <button class="mini-net-btn active" data-device="lock" id="net-toggle-lock">
-                            <span class="net-indicator"></span>
-                            <span>🔒 도어락</span>
-                        </button>
-                        <button class="mini-net-btn active" data-device="gas" id="net-toggle-gas">
-                            <span class="net-indicator"></span>
-                            <span>🔥 가스</span>
-                        </button>
-                        <button class="mini-net-btn active" data-device="temp" id="net-toggle-temp">
-                            <span class="net-indicator"></span>
-                            <span>❄️ 에어컨</span>
-                        </button>
-                        <button class="mini-net-btn active" data-device="boiler" id="net-toggle-boiler">
-                            <span class="net-indicator"></span>
-                            <span>♨️ 보일러</span>
-                        </button>
-                        <button class="mini-net-btn active" data-device="humidity" id="net-toggle-humidity">
-                            <span class="net-indicator"></span>
-                            <span>💧 습도</span>
-                        </button>
-                    </div>
-
-                    <div class="system-logs-dock" id="system-log-output">
-                        <div class="log-line system">[디지털 트윈] AURA 3D 엔진 및 3D 하우스 모델 로드 완료.</div>
-                        <div class="log-line system">[시스템] 모든 스마트 기기(조명, 도어락, 가스, 에어컨, 보일러, 습도) 연동 정상.</div>
-                    </div>
+                <div class="toolbar-right-group">
+                    <button class="btn-fx-chip" id="btn-toggle-roof">🏠 지붕 ON/OFF</button>
+                    <button class="btn-fx-chip active" id="btn-toggle-curtains-fx">🪟 커튼 전체 개폐</button>
+                    <button class="btn-fx-chip active" id="btn-toggle-ondol-fx">🔥 온돌 바닥열선</button>
+                    <button class="btn-fx-chip active" id="btn-toggle-ac-fx">❄️ 냉기 기류</button>
+                    <button class="btn-fx-chip active" id="btn-toggle-labels-fx">🏷️ 방 라벨</button>
                 </div>
-            </section>
+            </div>
 
-            <!-- =========================================================================
-                 RIGHT SECTION: COMPANION SMART CONTROLLER PHONE
-                 ========================================================================= -->
-            <section class="companion-phone-section">
-                <div class="smartphone-frame">
-                    <div class="phone-screen">
+            <!-- Floating Room HUD (Bottom-left Glass Overlay) -->
+            <div class="floating-room-hud">
+                <span class="hud-title">공간 탐색:</span>
+                <button class="room-focus-chip" data-room-focus="living"><span class="room-dot living"></span> 거실 (창문/커튼)</button>
+                <button class="room-focus-chip" data-room-focus="master"><span class="room-dot master"></span> 안방 (창문/커튼)</button>
+                <button class="room-focus-chip" data-room-focus="roomb"><span class="room-dot roomb"></span> 방 B (발코니)</button>
+                <button class="room-focus-chip" data-room-focus="rooma"><span class="room-dot rooma"></span> 방 A (창문/블라인드)</button>
+                <button class="room-focus-chip" data-room-focus="kitchen"><span class="room-dot kitchen"></span> 주방 & 가스</button>
+                <button class="room-focus-chip" data-room-focus="bath"><span class="room-dot bath"></span> 공용 욕실</button>
+                <button class="room-focus-chip" data-room-focus="entrance"><span class="room-dot entrance"></span> 현관 도어</button>
+            </div>
+
+            <!-- 1인칭 시점 (FPS) Virtual D-pad Controller (Shown in FPS Mode) -->
+            <div class="fps-controls-overlay" id="fps-controls-overlay">
+                <span class="fps-overlay-title">🚶 1인칭 보행 조작 (WASD / D-Pad)</span>
+                <div class="dpad-row">
+                    <button class="btn-dpad" id="btn-dpad-up" title="전진 (W)">▲</button>
+                </div>
+                <div class="dpad-row">
+                    <button class="btn-dpad" id="btn-dpad-left" title="좌회전 (A)">◀</button>
+                    <button class="btn-dpad" id="btn-dpad-down" title="후진 (S)">▼</button>
+                    <button class="btn-dpad" id="btn-dpad-right" title="우회전 (D)">▶</button>
+                </div>
+                <span class="fps-help-text">마우스 드래그로 시선 회전 · 키보드 WASD 이동</span>
+            </div>
+
+            <!-- FLOATING COMPANION SMART CONTROLLER (COLLAPSIBLE RIGHT DRAWER) -->
+            <aside class="floating-companion-phone" id="floating-phone">
+                <div class="phone-screen">
+                    
+                    <!-- Phone Status Bar -->
+                    <div class="phone-status-bar">
+                        <span class="time" id="live-phone-time">13:52</span>
+                        <div class="indicators">
+                            <span>📶</span>
+                            <span>🔋 99%</span>
+                        </div>
+                    </div>
+
+                    <!-- Toast Container inside Phone -->
+                    <div id="toast-container" class="toast-container"></div>
+
+                    <!-- SCREENS SLIDER (6 Screens) -->
+                    <div class="screens-wrapper" id="screens-wrapper">
                         
-                        <!-- Status Bar -->
-                        <div class="phone-status-bar">
-                            <span class="time" id="live-phone-time">13:52</span>
-                            <div class="indicators">
-                                <span>📶</span>
-                                <span>🔋 88%</span>
-                            </div>
-                        </div>
-
-                        <!-- Toast Container inside Phone -->
-                        <div id="toast-container" class="toast-container"></div>
-
-                        <!-- SCREENS SLIDER -->
-                        <div class="screens-wrapper" id="screens-wrapper">
-                            
-                            <!-- 1번 화면: 메인 대시보드 (Dashboard) -->
-                            <div class="screen" id="screen-1">
-                                <div class="screen-content dashboard-home">
-                                    <div class="welcome-card">
-                                        <h2>My Smart Home</h2>
-                                        <p>3D Digital Twin Connected</p>
-                                    </div>
-                                    
-                                    <!-- 4 Grid Cards -->
-                                    <div class="control-cards-grid">
-                                        <!-- Light Button -->
-                                        <button class="card-btn-neumorphic" onclick="navigateTo(2)" id="btn-to-light">
-                                            <div class="card-icon light-icon">
-                                                <svg><use href="#icon-sun"></use></svg>
-                                            </div>
-                                            <span class="card-label">조명 제어</span>
-                                        </button>
-
-                                        <!-- Lock Button -->
-                                        <button class="card-btn-neumorphic" onclick="navigateTo(3)" id="btn-to-lock">
-                                            <div class="card-icon lock-icon">
-                                                <svg><use href="#icon-lock"></use></svg>
-                                            </div>
-                                            <span class="card-label">현관 잠금</span>
-                                        </button>
-
-                                        <!-- Gas Button -->
-                                        <button class="card-btn-neumorphic" onclick="navigateTo(4)" id="btn-to-gas">
-                                            <div class="card-icon gas-icon">
-                                                <svg><use href="#icon-flame"></use></svg>
-                                            </div>
-                                            <span class="card-label">가스 밸브</span>
-                                        </button>
-
-                                        <!-- Temp & Climate Button -->
-                                        <button class="card-btn-neumorphic" onclick="navigateTo(5)" id="btn-to-temp">
-                                            <div class="card-icon temp-icon">
-                                                <svg><use href="#icon-temp"></use></svg>
-                                            </div>
-                                            <span class="card-label">온도·습도·난방</span>
-                                        </button>
-                                    </div>
-
-                                    <!-- Away Mode Action Card -->
-                                    <button class="away-mode-btn-phone" id="btn-away-mode-home">
-                                        <span>🏃</span>
-                                        <span>외출 모드 실행 (원클릭)</span>
+                        <!-- 1번 화면: 메인 대시보드 (Dashboard) -->
+                        <div class="screen" id="screen-1">
+                            <div class="screen-content dashboard-home">
+                                <div class="welcome-card">
+                                    <h2>Smart Remote</h2>
+                                    <p>3D Digital Twin Live Connected</p>
+                                </div>
+                                
+                                <div class="control-cards-grid">
+                                    <!-- Light Button -->
+                                    <button class="card-btn-neumorphic" onclick="navigateTo(2)" id="btn-to-light">
+                                        <div class="card-icon light-icon"><svg><use href="#icon-sun"></use></svg></div>
+                                        <span class="card-label">조명 & 전등</span>
                                     </button>
 
-                                    <!-- Bottom Navigation Bar for Screen 1 -->
-                                    <div class="phone-bottom-nav">
-                                        <button class="nav-item active" onclick="showNotification('조절조건 설정이 최적화되었습니다.')">
-                                            <svg class="nav-icon"><use href="#icon-adjust"></use></svg>
-                                            <span>조절조건</span>
-                                        </button>
-                                        <button class="nav-item" onclick="showConnectedDevicesCount()">
-                                            <svg class="nav-icon"><use href="#icon-link"></use></svg>
-                                            <span>기기 호환</span>
-                                        </button>
-                                    </div>
+                                    <!-- Door / Lock Button -->
+                                    <button class="card-btn-neumorphic" onclick="navigateTo(3)" id="btn-to-lock">
+                                        <div class="card-icon lock-icon"><svg><use href="#icon-door"></use></svg></div>
+                                        <span class="card-label">현관문 & 도어락</span>
+                                    </button>
+
+                                    <!-- Curtain Button -->
+                                    <button class="card-btn-neumorphic" onclick="navigateTo(4)" id="btn-to-curtains">
+                                        <div class="card-icon curtain-icon"><svg><use href="#icon-curtain"></use></svg></div>
+                                        <span class="card-label">창문 커튼 제어</span>
+                                    </button>
+
+                                    <!-- Gas Button -->
+                                    <button class="card-btn-neumorphic" onclick="navigateTo(5)" id="btn-to-gas">
+                                        <div class="card-icon gas-icon"><svg><use href="#icon-flame"></use></svg></div>
+                                        <span class="card-label">가스 밸브</span>
+                                    </button>
+                                </div>
+
+                                <!-- Climate Shortcut Card -->
+                                <button class="card-btn-neumorphic" style="width: 100%; flex-direction: row; justify-content: center; gap: 12px;" onclick="navigateTo(6)" id="btn-to-temp">
+                                    <div class="card-icon temp-icon"><svg><use href="#icon-temp"></use></svg></div>
+                                    <span class="card-label" style="font-size: 0.84rem;">온도 · 습도 · 보일러 · 에어컨 제어</span>
+                                </button>
+
+                                <button class="away-mode-btn-phone" id="btn-away-mode-home">
+                                    <span>🏃</span>
+                                    <span>외출 모드 실행 (원클릭)</span>
+                                </button>
+
+                                <div class="phone-bottom-nav">
+                                    <button class="nav-item active" onclick="showNotification('AURA 3D 스마트홈 컨트롤러가 정상 연결되었습니다.')">
+                                        <svg class="nav-icon"><use href="#icon-home"></use></svg>
+                                        <span>홈</span>
+                                    </button>
+                                    <button class="nav-item" onclick="showConnectedDevicesCount()">
+                                        <svg class="nav-icon"><use href="#icon-shield"></use></svg>
+                                        <span>기기 상태</span>
+                                    </button>
                                 </div>
                             </div>
-
-                            <!-- 2번 화면: 밝기 조절 (Lighting Control) -->
-                            <div class="screen" id="screen-2">
-                                <div class="screen-content light-control-screen">
-                                    <div class="screen-header">
-                                        <button class="back-btn" onclick="navigateTo(1)">
-                                            <svg class="back-icon"><use href="#icon-arrow-left"></use></svg>
-                                            <span>뒤로</span>
-                                        </button>
-                                        <h3>조명 및 밝기</h3>
-                                        <div style="width: 40px;"></div>
-                                    </div>
-
-                                    <!-- Global Brightness Slider -->
-                                    <div class="slider-card-neumorphic">
-                                        <div class="slider-header">
-                                            <svg class="slider-icon"><use href="#icon-sun"></use></svg>
-                                            <span class="slider-value-text" id="global-brightness-val">70%</span>
-                                        </div>
-                                        <div class="slider-wrapper">
-                                            <input type="range" id="global-brightness-slider" min="10" max="100" value="70" step="5">
-                                            <div class="slider-track-fill" id="slider-fill" style="width: 70%;"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Overall Power OFF -->
-                                    <div class="overall-power-card">
-                                        <span class="power-title">전체 조명 일괄 끄기</span>
-                                        <button class="power-off-btn" id="btn-all-lights-off">OFF</button>
-                                    </div>
-
-                                    <!-- Rooms Light Matrix -->
-                                    <div class="rooms-lights-container">
-                                        <div class="room-light-group">
-                                            <span class="room-title">거실 조명</span>
-                                            <button class="light-toggle-single-btn" data-room="livingRoom" id="light-living">조명</button>
-                                        </div>
-                                        <div class="room-light-group">
-                                            <span class="room-title">안방 조명</span>
-                                            <button class="light-toggle-single-btn" data-room="masterRoom" id="light-master">조명</button>
-                                        </div>
-                                        <div class="room-light-group">
-                                            <span class="room-title">방 A 조명</span>
-                                            <button class="light-toggle-single-btn" data-room="roomA" id="light-rooma">조명</button>
-                                        </div>
-                                        <div class="room-light-group">
-                                            <span class="room-title">방 B 조명</span>
-                                            <button class="light-toggle-single-btn" data-room="roomB" id="light-roomb">조명</button>
-                                        </div>
-                                        <div class="room-light-group">
-                                            <span class="room-title">주방 / 식당 조명</span>
-                                            <button class="light-toggle-single-btn" data-room="kitchen" id="light-kitchen">조명</button>
-                                        </div>
-                                        <div class="room-light-group">
-                                            <span class="room-title">공용 욕실 조명</span>
-                                            <button class="light-toggle-single-btn" data-room="bathroom" id="light-bath">조명</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="phone-bottom-nav">
-                                        <button class="nav-item" onclick="navigateTo(1)"><svg class="nav-icon"><use href="#icon-home"></use></svg></button>
-                                        <button class="nav-item active" onclick="navigateTo(2)"><svg class="nav-icon"><use href="#icon-bulb"></use></svg></button>
-                                        <button class="nav-item" onclick="navigateTo(3)"><svg class="nav-icon"><use href="#icon-shield"></use></svg></button>
-                                        <button class="nav-item" onclick="navigateTo(4)"><svg class="nav-icon"><use href="#icon-list"></use></svg></button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 3번 화면: 현관 잠금 (Door Lock) -->
-                            <div class="screen" id="screen-3">
-                                <div class="screen-content lock-control-screen">
-                                    <div class="screen-header">
-                                        <button class="back-btn" onclick="navigateTo(1)">
-                                            <svg class="back-icon"><use href="#icon-arrow-left"></use></svg>
-                                            <span>뒤로</span>
-                                        </button>
-                                        <h3>현관 도어락</h3>
-                                        <div style="width: 40px;"></div>
-                                    </div>
-
-                                    <div class="lock-buttons-pair">
-                                        <button class="lock-state-card" id="btn-door-unlock">
-                                            <div class="lock-card-icon open">
-                                                <svg><use href="#icon-unlock"></use></svg>
-                                            </div>
-                                            <span class="lock-card-label">열림 (UNLOCK)</span>
-                                        </button>
-
-                                        <button class="lock-state-card" id="btn-door-lock">
-                                            <div class="lock-card-icon close">
-                                                <svg><use href="#icon-lock"></use></svg>
-                                            </div>
-                                            <span class="lock-card-label">잠금 (LOCK)</span>
-                                        </button>
-                                    </div>
-
-                                    <div class="welcome-card" style="margin-top: 10px;">
-                                        <p style="font-size: 0.72rem; line-height: 1.4; color: var(--text-secondary);">
-                                            3D 평면도의 현관문 상태(회전 개폐 애니메이션 및 잠금 LED)와 실시간 연동됩니다.
-                                        </p>
-                                    </div>
-
-                                    <div class="phone-bottom-nav">
-                                        <button class="nav-item" onclick="navigateTo(1)"><svg class="nav-icon"><use href="#icon-home"></use></svg></button>
-                                        <button class="nav-item" onclick="navigateTo(2)"><svg class="nav-icon"><use href="#icon-bulb"></use></svg></button>
-                                        <button class="nav-item active" onclick="navigateTo(3)"><svg class="nav-icon"><use href="#icon-shield"></use></svg></button>
-                                        <button class="nav-item" onclick="navigateTo(4)"><svg class="nav-icon"><use href="#icon-list"></use></svg></button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 4번 화면: 가스벨브 (Gas Valve) -->
-                            <div class="screen" id="screen-4">
-                                <div class="screen-content gas-control-screen">
-                                    <div class="screen-header">
-                                        <button class="back-btn" onclick="navigateTo(1)">
-                                            <svg class="back-icon"><use href="#icon-arrow-left"></use></svg>
-                                            <span>뒤로</span>
-                                        </button>
-                                        <h3>가스 밸브</h3>
-                                        <div style="width: 40px;"></div>
-                                    </div>
-
-                                    <div class="valve-buttons-pair">
-                                        <button class="valve-state-card" id="btn-gas-open">
-                                            <div class="valve-card-icon open">
-                                                <svg class="valve-svg"><use href="#icon-valve"></use></svg>
-                                            </div>
-                                            <span class="valve-card-label">가스 켬 (OPEN)</span>
-                                        </button>
-
-                                        <button class="valve-state-card" id="btn-gas-close">
-                                            <div class="valve-card-icon close">
-                                                <svg class="valve-svg"><use href="#icon-valve"></use></svg>
-                                            </div>
-                                            <span class="valve-card-label">가스 잠금 (CLOSE)</span>
-                                        </button>
-                                    </div>
-
-                                    <div class="gas-toggles-container">
-                                        <div class="toggle-card-neumorphic">
-                                            <div class="toggle-info">
-                                                <span class="toggle-title">* 오토 가스 락</span>
-                                                <span class="toggle-status-badge" id="badge-auto-gas">ON</span>
-                                            </div>
-                                            <label class="switch">
-                                                <input type="checkbox" id="switch-auto-gas" checked>
-                                                <span class="slider-round"></span>
-                                            </label>
-                                            <p class="toggle-description">외출 모드 실행 시 가스 밸브를 자동으로 잠급니다.</p>
-                                        </div>
-
-                                        <div class="toggle-card-neumorphic">
-                                            <div class="toggle-info">
-                                                <span class="toggle-title">* 과열 자동 차단</span>
-                                                <span class="toggle-status-badge" id="badge-auto-safe">ON</span>
-                                            </div>
-                                            <label class="switch">
-                                                <input type="checkbox" id="switch-auto-safe" checked>
-                                                <span class="slider-round"></span>
-                                            </label>
-                                            <p class="toggle-description">주방 온도가 50°C 이상 과열될 경우 화재 방지를 위해 자동 차단합니다.</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="phone-bottom-nav">
-                                        <button class="nav-item" onclick="navigateTo(1)"><svg class="nav-icon"><use href="#icon-home"></use></svg></button>
-                                        <button class="nav-item" onclick="navigateTo(2)"><svg class="nav-icon"><use href="#icon-bulb"></use></svg></button>
-                                        <button class="nav-item" onclick="navigateTo(3)"><svg class="nav-icon"><use href="#icon-shield"></use></svg></button>
-                                        <button class="nav-item active" onclick="navigateTo(4)"><svg class="nav-icon"><use href="#icon-list"></use></svg></button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 5번 화면: 온도 · 습도 · 보일러 기후 제어 -->
-                            <div class="screen" id="screen-5">
-                                <div class="screen-content temp-control-screen">
-                                    <div class="screen-header">
-                                        <button class="back-btn" onclick="navigateTo(1)">
-                                            <svg class="back-icon"><use href="#icon-arrow-left"></use></svg>
-                                            <span>뒤로</span>
-                                        </button>
-                                        <h3>온도 · 습도 · 보일러</h3>
-                                        <div style="width: 40px;"></div>
-                                    </div>
-
-                                    <!-- 1. Temp Dial -->
-                                    <div class="temp-dial-card">
-                                        <div class="temp-display">
-                                            <div class="temp-circle">
-                                                <span class="label">목표 희망 온도</span>
-                                                <span class="value" id="target-temp-display">22.0°C</span>
-                                                <span class="sub-label" id="current-temp-display">실내 평균 24.5°C</span>
-                                            </div>
-                                        </div>
-                                        <div class="temp-adjust-buttons">
-                                            <button class="temp-adjust-btn" id="btn-temp-minus">-</button>
-                                            <button class="temp-adjust-btn" id="btn-temp-plus">+</button>
-                                        </div>
-                                    </div>
-
-                                    <!-- 2. 스마트 보일러 (바닥 온돌 난방) -->
-                                    <div class="climate-card-neumorphic boiler-control-card">
-                                        <div class="card-header-row">
-                                            <div class="header-left">
-                                                <span class="icon-bubble">♨️</span>
-                                                <div>
-                                                    <span class="card-main-title">스마트 보일러 (난방)</span>
-                                                    <span class="card-sub-title" id="boiler-sub-status">바닥 온돌 연동</span>
-                                                </div>
-                                            </div>
-                                            <span class="status-badge" id="badge-boiler">OFF</span>
-                                        </div>
-
-                                        <button class="boiler-power-btn" id="btn-toggle-boiler">보일러 켜기</button>
-
-                                        <div class="boiler-modes-container" id="boiler-modes-container" style="display: none;">
-                                            <span class="modes-label">난방 모드 선택</span>
-                                            <div class="mode-chips-grid">
-                                                <button class="mode-chip-btn active" data-boiler-mode="indoor" id="boiler-mode-indoor">실내 난방</button>
-                                                <button class="mode-chip-btn" data-boiler-mode="ondol" id="boiler-mode-ondol">온돌(바닥)</button>
-                                                <button class="mode-chip-btn" data-boiler-mode="eco" id="boiler-mode-eco">외출 절전</button>
-                                                <button class="mode-chip-btn" data-boiler-mode="water" id="boiler-mode-water">온수 전용</button>
-                                            </div>
-
-                                            <div class="boiler-temp-adjust-row">
-                                                <span class="sub-adjust-label">보일러 설정 온도</span>
-                                                <div class="sub-adjust-controls">
-                                                    <button class="mini-btn-neumorphic" id="btn-boiler-minus">-</button>
-                                                    <span class="sub-adjust-value" id="boiler-target-val">24.0°C</span>
-                                                    <button class="mini-btn-neumorphic" id="btn-boiler-plus">+</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <p class="climate-desc">가동 시 3D 바닥에 온돌 배관 웜 글로우(Warm Glow)가 연동됩니다.</p>
-                                    </div>
-
-                                    <!-- 3. 실내 습도 케어 -->
-                                    <div class="climate-card-neumorphic humidity-control-card">
-                                        <div class="card-header-row">
-                                            <div class="header-left">
-                                                <span class="icon-bubble">💧</span>
-                                                <div>
-                                                    <span class="card-main-title">실내 습도 케어</span>
-                                                    <span class="card-sub-title" id="humidity-sub-status">쾌적: 40~60% RH</span>
-                                                </div>
-                                            </div>
-                                            <span class="humidity-val-badge" id="current-humidity-badge">52% RH</span>
-                                        </div>
-
-                                        <div class="humidity-modes-container">
-                                            <span class="modes-label">습도 운전 모드</span>
-                                            <div class="mode-chips-grid">
-                                                <button class="mode-chip-btn active" data-hum-mode="auto" id="hum-mode-auto">자동 케어</button>
-                                                <button class="mode-chip-btn" data-hum-mode="humidify" id="hum-mode-humidify">가습</button>
-                                                <button class="mode-chip-btn" data-hum-mode="dehumidify" id="hum-mode-dehumidify">제습</button>
-                                                <button class="mode-chip-btn" data-hum-mode="off" id="hum-mode-off">OFF</button>
-                                            </div>
-
-                                            <div class="humidity-target-row">
-                                                <span class="sub-adjust-label">목표 습도 설정</span>
-                                                <div class="sub-adjust-controls">
-                                                    <button class="mini-btn-neumorphic" id="btn-hum-minus">-</button>
-                                                    <span class="sub-adjust-value" id="target-humidity-val">50% RH</span>
-                                                    <button class="mini-btn-neumorphic" id="btn-hum-plus">+</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <p class="climate-desc">에어컨 냉방 및 가습기/제습기 상태에 따라 실내 습도가 동적으로 제어됩니다.</p>
-                                    </div>
-
-                                    <!-- 4. 거실 에어컨 -->
-                                    <div class="climate-card-neumorphic aircon-control-card">
-                                        <div class="card-header-row">
-                                            <div class="header-left">
-                                                <span class="icon-bubble">❄️</span>
-                                                <div>
-                                                    <span class="card-main-title">거실 에어컨</span>
-                                                    <span class="card-sub-title">냉방 및 송풍</span>
-                                                </div>
-                                            </div>
-                                            <span class="status-badge" id="badge-aircon">OFF</span>
-                                        </div>
-                                        <button class="aircon-power-btn" id="btn-toggle-aircon">에어컨 켜기</button>
-                                        <div class="aircon-wind-modes" id="aircon-wind-container" style="display: none;">
-                                            <button class="wind-btn active" data-wind="low" id="wind-low">약풍</button>
-                                            <button class="wind-btn" data-wind="medium" id="wind-medium">중풍</button>
-                                            <button class="wind-btn" data-wind="high" id="wind-high">강풍</button>
-                                        </div>
-                                        <p class="climate-desc">가동 시 3D 모델에서 거실로 푸른색 냉기 기류 파티클이 방출됩니다.</p>
-                                    </div>
-
-                                    <div class="phone-bottom-nav">
-                                        <button class="nav-item" onclick="navigateTo(1)"><svg class="nav-icon"><use href="#icon-home"></use></svg></button>
-                                        <button class="nav-item" onclick="navigateTo(2)"><svg class="nav-icon"><use href="#icon-bulb"></use></svg></button>
-                                        <button class="nav-item" onclick="navigateTo(3)"><svg class="nav-icon"><use href="#icon-shield"></use></svg></button>
-                                        <button class="nav-item active" onclick="navigateTo(5)"><svg class="nav-icon"><use href="#icon-list"></use></svg></button>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
+
+                        <!-- 2번 화면: 조명 및 전등 제어 -->
+                        <div class="screen" id="screen-2">
+                            <div class="screen-content light-control-screen">
+                                <div class="screen-header">
+                                    <button class="back-btn" onclick="navigateTo(1)">
+                                        <svg class="back-icon"><use href="#icon-arrow-left"></use></svg>
+                                        <span>뒤로</span>
+                                    </button>
+                                    <h3>조명 및 3D 전등</h3>
+                                    <div style="width: 30px;"></div>
+                                </div>
+
+                                <div class="slider-card-neumorphic">
+                                    <div class="slider-header">
+                                        <svg class="slider-icon"><use href="#icon-sun"></use></svg>
+                                        <span class="slider-value-text" id="global-brightness-val">70%</span>
+                                    </div>
+                                    <div class="slider-wrapper">
+                                        <input type="range" id="global-brightness-slider" min="10" max="100" value="70" step="5">
+                                        <div class="slider-track-fill" id="slider-fill" style="width: 70%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="overall-power-card">
+                                    <span class="power-title">전체 조명 일괄 끄기</span>
+                                    <button class="power-off-btn" id="btn-all-lights-off">OFF</button>
+                                </div>
+
+                                <div class="rooms-lights-container">
+                                    <div class="room-light-group">
+                                        <span class="room-title">거실 샹들리에 조명</span>
+                                        <button class="light-toggle-single-btn" data-room="livingRoom" id="light-living">조명</button>
+                                    </div>
+                                    <div class="room-light-group">
+                                        <span class="room-title">안방 실링 & 무드등</span>
+                                        <button class="light-toggle-single-btn" data-room="masterRoom" id="light-master">조명</button>
+                                    </div>
+                                    <div class="room-light-group">
+                                        <span class="room-title">방 A 서재 전등</span>
+                                        <button class="light-toggle-single-btn" data-room="roomA" id="light-rooma">조명</button>
+                                    </div>
+                                    <div class="room-light-group">
+                                        <span class="room-title">방 B 전등</span>
+                                        <button class="light-toggle-single-btn" data-room="roomB" id="light-roomb">조명</button>
+                                    </div>
+                                    <div class="room-light-group">
+                                        <span class="room-title">주방 아일랜드 팬던트등</span>
+                                        <button class="light-toggle-single-btn" data-room="kitchen" id="light-kitchen">조명</button>
+                                    </div>
+                                    <div class="room-light-group">
+                                        <span class="room-title">욕실 다운라이트 & 거울등</span>
+                                        <button class="light-toggle-single-btn" data-room="bathroom" id="light-bath">조명</button>
+                                    </div>
+                                </div>
+
+                                <div class="phone-bottom-nav">
+                                    <button class="nav-item" onclick="navigateTo(1)"><svg class="nav-icon"><use href="#icon-home"></use></svg></button>
+                                    <button class="nav-item active" onclick="navigateTo(2)"><svg class="nav-icon"><use href="#icon-bulb"></use></svg></button>
+                                    <button class="nav-item" onclick="navigateTo(3)"><svg class="nav-icon"><use href="#icon-door"></use></svg></button>
+                                    <button class="nav-item" onclick="navigateTo(4)"><svg class="nav-icon"><use href="#icon-curtain"></use></svg></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3번 화면: 현관문 개폐 & 도어락 제어 -->
+                        <div class="screen" id="screen-3">
+                            <div class="screen-content lock-control-screen">
+                                <div class="screen-header">
+                                    <button class="back-btn" onclick="navigateTo(1)">
+                                        <svg class="back-icon"><use href="#icon-arrow-left"></use></svg>
+                                        <span>뒤로</span>
+                                    </button>
+                                    <h3>현관문 & 도어락</h3>
+                                    <div style="width: 30px;"></div>
+                                </div>
+
+                                <!-- 1. Door Physical Open / Close Toggle -->
+                                <span class="modes-label">현관문 직접 개폐 (3D 연동)</span>
+                                <div class="door-direct-buttons-pair">
+                                    <button class="door-direct-card" id="btn-door-open-phys">
+                                        <div class="door-card-icon open"><svg><use href="#icon-door"></use></svg></div>
+                                        <span class="door-card-label">현관문 열기</span>
+                                    </button>
+
+                                    <button class="door-direct-card active" id="btn-door-close-phys">
+                                        <div class="door-card-icon close"><svg><use href="#icon-door"></use></svg></div>
+                                        <span class="door-card-label">현관문 닫기</span>
+                                    </button>
+                                </div>
+
+                                <!-- 2. Digital Door Lock Status -->
+                                <span class="modes-label" style="margin-top: 6px;">디지털 도어락 잠금 제어</span>
+                                <div class="lock-buttons-pair">
+                                    <button class="lock-state-card" id="btn-door-unlock">
+                                        <div class="lock-card-icon open"><svg><use href="#icon-unlock"></use></svg></div>
+                                        <span class="lock-card-label">잠금 해제 (UNLOCK)</span>
+                                    </button>
+
+                                    <button class="lock-state-card active" id="btn-door-lock">
+                                        <div class="lock-card-icon close"><svg><use href="#icon-lock"></use></svg></div>
+                                        <span class="lock-card-label">도어락 잠금 (LOCK)</span>
+                                    </button>
+                                </div>
+
+                                <div class="welcome-card" style="margin-top: 6px;">
+                                    <p style="font-size: 0.72rem; line-height: 1.4; color: var(--text-secondary);">
+                                        현관문 열기 클릭 시 3D 모델의 현관문이 90도 회전하며 부드럽게 열립니다.
+                                    </p>
+                                </div>
+
+                                <div class="phone-bottom-nav">
+                                    <button class="nav-item" onclick="navigateTo(1)"><svg class="nav-icon"><use href="#icon-home"></use></svg></button>
+                                    <button class="nav-item" onclick="navigateTo(2)"><svg class="nav-icon"><use href="#icon-bulb"></use></svg></button>
+                                    <button class="nav-item active" onclick="navigateTo(3)"><svg class="nav-icon"><use href="#icon-door"></use></svg></button>
+                                    <button class="nav-item" onclick="navigateTo(4)"><svg class="nav-icon"><use href="#icon-curtain"></use></svg></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4번 화면: 스마트 창문 전동 커튼 제어 -->
+                        <div class="screen" id="screen-4">
+                            <div class="screen-content curtain-control-screen">
+                                <div class="screen-header">
+                                    <button class="back-btn" onclick="navigateTo(1)">
+                                        <svg class="back-icon"><use href="#icon-arrow-left"></use></svg>
+                                        <span>뒤로</span>
+                                    </button>
+                                    <h3>스마트 창문 커튼</h3>
+                                    <div style="width: 30px;"></div>
+                                </div>
+
+                                <!-- Overall Curtain Master Button -->
+                                <div class="overall-power-card">
+                                    <span class="power-title">전체 커튼 일괄 제어</span>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button class="power-off-btn" id="btn-all-curtains-open">열기</button>
+                                        <button class="power-off-btn" id="btn-all-curtains-close">닫기</button>
+                                    </div>
+                                </div>
+
+                                <!-- Individual Room Curtain Toggles -->
+                                <div class="curtains-container">
+                                    <div class="curtain-group">
+                                        <span class="room-title">거실 대형창 커튼</span>
+                                        <button class="curtain-toggle-single-btn active" data-curtain="livingRoom" id="curtain-living">열림</button>
+                                    </div>
+                                    <div class="curtain-group">
+                                        <span class="room-title">안방 암막 커튼</span>
+                                        <button class="curtain-toggle-single-btn active" data-curtain="masterRoom" id="curtain-master">열림</button>
+                                    </div>
+                                    <div class="curtain-group">
+                                        <span class="room-title">방 A 롤러 블라인드</span>
+                                        <button class="curtain-toggle-single-btn active" data-curtain="roomA" id="curtain-rooma">열림</button>
+                                    </div>
+                                    <div class="curtain-group">
+                                        <span class="room-title">방 B & 발코니 블라인드</span>
+                                        <button class="curtain-toggle-single-btn active" data-curtain="roomB" id="curtain-roomb">열림</button>
+                                    </div>
+                                </div>
+
+                                <div class="welcome-card">
+                                    <p style="font-size: 0.72rem; line-height: 1.4; color: var(--text-secondary);">
+                                        커튼 상태에 따라 3D 창문 앞의 패브릭 커튼이 좌우로 슬라이딩 개폐됩니다.
+                                    </p>
+                                </div>
+
+                                <div class="phone-bottom-nav">
+                                    <button class="nav-item" onclick="navigateTo(1)"><svg class="nav-icon"><use href="#icon-home"></use></svg></button>
+                                    <button class="nav-item" onclick="navigateTo(2)"><svg class="nav-icon"><use href="#icon-bulb"></use></svg></button>
+                                    <button class="nav-item" onclick="navigateTo(3)"><svg class="nav-icon"><use href="#icon-door"></use></svg></button>
+                                    <button class="nav-item active" onclick="navigateTo(4)"><svg class="nav-icon"><use href="#icon-curtain"></use></svg></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5번 화면: 가스 밸브 제어 -->
+                        <div class="screen" id="screen-5">
+                            <div class="screen-content gas-control-screen">
+                                <div class="screen-header">
+                                    <button class="back-btn" onclick="navigateTo(1)">
+                                        <svg class="back-icon"><use href="#icon-arrow-left"></use></svg>
+                                        <span>뒤로</span>
+                                    </button>
+                                    <h3>가스 밸브</h3>
+                                    <div style="width: 30px;"></div>
+                                </div>
+
+                                <div class="valve-buttons-pair">
+                                    <button class="valve-state-card" id="btn-gas-open">
+                                        <div class="valve-card-icon open"><svg class="valve-svg"><use href="#icon-valve"></use></svg></div>
+                                        <span class="valve-card-label">가스 켬 (OPEN)</span>
+                                    </button>
+
+                                    <button class="valve-state-card active" id="btn-gas-close">
+                                        <div class="valve-card-icon close"><svg class="valve-svg"><use href="#icon-valve"></use></svg></div>
+                                        <span class="valve-card-label">가스 잠금 (CLOSE)</span>
+                                    </button>
+                                </div>
+
+                                <div class="gas-toggles-container">
+                                    <div class="toggle-card-neumorphic">
+                                        <div class="toggle-info">
+                                            <span class="toggle-title">* 오토 가스 락</span>
+                                            <span class="toggle-status-badge" id="badge-auto-gas">ON</span>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="switch-auto-gas" checked>
+                                            <span class="slider-round"></span>
+                                        </label>
+                                        <p class="toggle-description">외출 모드 실행 시 가스 밸브를 자동으로 잠급니다.</p>
+                                    </div>
+
+                                    <div class="toggle-card-neumorphic">
+                                        <div class="toggle-info">
+                                            <span class="toggle-title">* 과열 자동 차단</span>
+                                            <span class="toggle-status-badge" id="badge-auto-safe">ON</span>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="switch-auto-safe" checked>
+                                            <span class="slider-round"></span>
+                                        </label>
+                                        <p class="toggle-description">주방 온도가 50°C 이상 과열될 경우 자동 차단합니다.</p>
+                                    </div>
+                                </div>
+
+                                <div class="phone-bottom-nav">
+                                    <button class="nav-item" onclick="navigateTo(1)"><svg class="nav-icon"><use href="#icon-home"></use></svg></button>
+                                    <button class="nav-item" onclick="navigateTo(2)"><svg class="nav-icon"><use href="#icon-bulb"></use></svg></button>
+                                    <button class="nav-item" onclick="navigateTo(4)"><svg class="nav-icon"><use href="#icon-curtain"></use></svg></button>
+                                    <button class="nav-item active" onclick="navigateTo(5)"><svg class="nav-icon"><use href="#icon-list"></use></svg></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6번 화면: 실내 기후 (온도 · 습도 · 보일러 · 에어컨) -->
+                        <div class="screen" id="screen-6">
+                            <div class="screen-content temp-control-screen">
+                                <div class="screen-header">
+                                    <button class="back-btn" onclick="navigateTo(1)">
+                                        <svg class="back-icon"><use href="#icon-arrow-left"></use></svg>
+                                        <span>뒤로</span>
+                                    </button>
+                                    <h3>온도 · 습도 · 보일러</h3>
+                                    <div style="width: 30px;"></div>
+                                </div>
+
+                                <div class="temp-dial-card">
+                                    <div class="temp-display">
+                                        <div class="temp-circle">
+                                            <span class="label">목표 희망 온도</span>
+                                            <span class="value" id="target-temp-display">22.0°C</span>
+                                            <span class="sub-label" id="current-temp-display">실내 평균 24.5°C</span>
+                                        </div>
+                                    </div>
+                                    <div class="temp-adjust-buttons">
+                                        <button class="temp-adjust-btn" id="btn-temp-minus">-</button>
+                                        <button class="temp-adjust-btn" id="btn-temp-plus">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- 스마트 보일러 -->
+                                <div class="climate-card-neumorphic boiler-control-card">
+                                    <div class="card-header-row">
+                                        <div class="header-left">
+                                            <span class="icon-bubble">♨️</span>
+                                            <div>
+                                                <span class="card-main-title">스마트 보일러 (난방)</span>
+                                                <span class="card-sub-title" id="boiler-sub-status">바닥 온돌 연동</span>
+                                            </div>
+                                        </div>
+                                        <span class="status-badge" id="badge-boiler">OFF</span>
+                                    </div>
+
+                                    <button class="boiler-power-btn" id="btn-toggle-boiler">보일러 켜기</button>
+
+                                    <div class="boiler-modes-container" id="boiler-modes-container" style="display: none;">
+                                        <span class="modes-label">난방 모드 선택</span>
+                                        <div class="mode-chips-grid">
+                                            <button class="mode-chip-btn active" data-boiler-mode="indoor" id="boiler-mode-indoor">실내 난방</button>
+                                            <button class="mode-chip-btn" data-boiler-mode="ondol" id="boiler-mode-ondol">온돌(바닥)</button>
+                                            <button class="mode-chip-btn" data-boiler-mode="eco" id="boiler-mode-eco">외출 절전</button>
+                                            <button class="mode-chip-btn" data-boiler-mode="water" id="boiler-mode-water">온수 전용</button>
+                                        </div>
+
+                                        <div class="boiler-temp-adjust-row">
+                                            <span class="sub-adjust-label">보일러 설정 온도</span>
+                                            <div class="sub-adjust-controls">
+                                                <button class="mini-btn-neumorphic" id="btn-boiler-minus">-</button>
+                                                <span class="sub-adjust-value" id="boiler-target-val">24.0°C</span>
+                                                <button class="mini-btn-neumorphic" id="btn-boiler-plus">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="climate-desc">가동 시 3D 바닥에 온돌 배관 웜 글로우(Warm Glow)가 연동됩니다.</p>
+                                </div>
+
+                                <!-- 실내 습도 케어 -->
+                                <div class="climate-card-neumorphic humidity-control-card">
+                                    <div class="card-header-row">
+                                        <div class="header-left">
+                                            <span class="icon-bubble">💧</span>
+                                            <div>
+                                                <span class="card-main-title">실내 습도 케어</span>
+                                                <span class="card-sub-title" id="humidity-sub-status">쾌적: 40~60% RH</span>
+                                            </div>
+                                        </div>
+                                        <span class="humidity-val-badge" id="current-humidity-badge">52% RH</span>
+                                    </div>
+
+                                    <div class="humidity-modes-container">
+                                        <span class="modes-label">습도 운전 모드</span>
+                                        <div class="mode-chips-grid">
+                                            <button class="mode-chip-btn active" data-hum-mode="auto" id="hum-mode-auto">자동 케어</button>
+                                            <button class="mode-chip-btn" data-hum-mode="humidify" id="hum-mode-humidify">가습</button>
+                                            <button class="mode-chip-btn" data-hum-mode="dehumidify" id="hum-mode-dehumidify">제습</button>
+                                            <button class="mode-chip-btn" data-hum-mode="off" id="hum-mode-off">OFF</button>
+                                        </div>
+
+                                        <div class="humidity-target-row">
+                                            <span class="sub-adjust-label">목표 습도 설정</span>
+                                            <div class="sub-adjust-controls">
+                                                <button class="mini-btn-neumorphic" id="btn-hum-minus">-</button>
+                                                <span class="sub-adjust-value" id="target-humidity-val">50% RH</span>
+                                                <button class="mini-btn-neumorphic" id="btn-hum-plus">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="climate-desc">가습기 가동 시 3D 거실에서 피어오르는 미스트 파티클이 연동됩니다.</p>
+                                </div>
+
+                                <!-- 거실 에어컨 -->
+                                <div class="climate-card-neumorphic aircon-control-card">
+                                    <div class="card-header-row">
+                                        <div class="header-left">
+                                            <span class="icon-bubble">❄️</span>
+                                            <div>
+                                                <span class="card-main-title">거실 에어컨</span>
+                                                <span class="card-sub-title">냉방 및 송풍</span>
+                                            </div>
+                                        </div>
+                                        <span class="status-badge" id="badge-aircon">OFF</span>
+                                    </div>
+                                    <button class="aircon-power-btn" id="btn-toggle-aircon">에어컨 켜기</button>
+                                    <div class="aircon-wind-modes" id="aircon-wind-container" style="display: none;">
+                                        <button class="wind-btn active" data-wind="low" id="wind-low">약풍</button>
+                                        <button class="wind-btn" data-wind="medium" id="wind-medium">중풍</button>
+                                        <button class="wind-btn" data-wind="high" id="wind-high">강풍</button>
+                                    </div>
+                                    <p class="climate-desc">가동 시 3D 거실로 푸른색 냉기 기류 파티클이 방출됩니다.</p>
+                                </div>
+
+                                <div class="phone-bottom-nav">
+                                    <button class="nav-item" onclick="navigateTo(1)"><svg class="nav-icon"><use href="#icon-home"></use></svg></button>
+                                    <button class="nav-item" onclick="navigateTo(2)"><svg class="nav-icon"><use href="#icon-bulb"></use></svg></button>
+                                    <button class="nav-item" onclick="navigateTo(4)"><svg class="nav-icon"><use href="#icon-curtain"></use></svg></button>
+                                    <button class="nav-item active" onclick="navigateTo(6)"><svg class="nav-icon"><use href="#icon-list"></use></svg></button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </section>
+            </aside>
             
         </main>
     </div>
