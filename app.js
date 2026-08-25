@@ -485,30 +485,36 @@ function updateGasUI() {
         elements.btnGasClose.classList.remove('active');
         cardIconOpen.classList.add('open');
         cardIconClose.classList.remove('close');
+    } else {
+        elements.btnGasOpen.classList.remove('active');
+        elements.btnGasClose.classList.add('active');
+        cardIconOpen.classList.remove('open');
+        cardIconClose.classList.add('close');
+    }
 
-        if (elements.simGasValve) {
-            if (state.gas.status === 'open') {
-                elements.simGasValve.className = 'gas-valve-graphic open';
-            } else {
-                elements.simGasValve.className = 'gas-valve-graphic closed';
-            }
-        }
-
-        update3DStove();
-
-        if (elements.switchAutoGas) elements.switchAutoGas.checked = state.gas.autoGasLock;
-        if (elements.switchAutoSafe) elements.switchAutoSafe.checked = state.gas.autoSafeCut;
-
-        if (elements.badgeAutoGas) {
-            elements.badgeAutoGas.textContent = state.gas.autoGasLock ? 'ON' : 'OFF';
-            elements.badgeAutoGas.className = `toggle-status-badge ${state.gas.autoGasLock ? '' : 'off'}`;
-        }
-
-        if (elements.badgeAutoSafe) {
-            elements.badgeAutoSafe.textContent = state.gas.autoSafeCut ? 'ON' : 'OFF';
-            elements.badgeAutoSafe.className = `toggle-status-badge ${state.gas.autoSafeCut ? '' : 'off'}`;
+    if (elements.simGasValve) {
+        if (state.gas.status === 'open') {
+            elements.simGasValve.className = 'gas-valve-graphic open';
+        } else {
+            elements.simGasValve.className = 'gas-valve-graphic closed';
         }
     }
+
+    update3DStove();
+
+    if (elements.switchAutoGas) elements.switchAutoGas.checked = state.gas.autoGasLock;
+    if (elements.switchAutoSafe) elements.switchAutoSafe.checked = state.gas.autoSafeCut;
+
+    if (elements.badgeAutoGas) {
+        elements.badgeAutoGas.textContent = state.gas.autoGasLock ? 'ON' : 'OFF';
+        elements.badgeAutoGas.className = `toggle-status-badge ${state.gas.autoGasLock ? '' : 'off'}`;
+    }
+
+    if (elements.badgeAutoSafe) {
+        elements.badgeAutoSafe.textContent = state.gas.autoSafeCut ? 'ON' : 'OFF';
+        elements.badgeAutoSafe.className = `toggle-status-badge ${state.gas.autoSafeCut ? '' : 'off'}`;
+    }
+}
 
     elements.btnGasOpen.addEventListener('click', () => {
         if (state.gas.status === 'open') {
@@ -1306,108 +1312,114 @@ function updateGasUI() {
         }
     }
 
-    function setViewMode(mode) {
-        document.querySelectorAll('.sim-3d-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(`btn-view-${mode}`)?.classList.add('active');
+function setViewMode(mode) {
+    document.querySelectorAll('.sim-3d-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-view-${mode}`)?.classList.add('active');
 
-        let targetCamPos, targetLookAt;
+    let targetCamPos, targetLookAt;
 
-        if (mode === 'dollhouse') {
-            isRoofVisible3D = false;
-            roofGroup3D.visible = false;
-            targetCamPos = { x: 16, y: 18, z: 20 };
-            targetLookAt = { x: 0, y: 0, z: 0 };
-        } else if (mode === 'full') {
-            isRoofVisible3D = true;
-            roofGroup3D.visible = true;
-            targetCamPos = { x: 20, y: 15, z: 22 };
-            targetLookAt = { x: 0, y: 1.5, z: 0 };
-        } else if (mode === 'top') {
-            isRoofVisible3D = false;
-            roofGroup3D.visible = false;
-            targetCamPos = { x: 0.001, y: 26, z: 0 };
-            targetLookAt = { x: 0, y: 0, z: 0 };
-        } else if (mode === 'fpv') {
-            isRoofVisible3D = false;
-            roofGroup3D.visible = false;
-            targetCamPos = { x: -1.75, y: 1.6, z: 2.2 };
-            targetLookAt = { x: -1.75, y: 1.5, z: -2.0 };
-        }
-
-        const roofText = document.getElementById('roof-btn-text');
-        if (roofText) roofText.innerText = isRoofVisible3D ? '지붕 열기' : '지붕 닫기';
-
-        animateCamera3D(targetCamPos, targetLookAt);
+    if (mode === 'dollhouse') {
+        isRoofVisible3D = false;
+        if (roofGroup3D) roofGroup3D.visible = false;
+        targetCamPos = { x: 16, y: 18, z: 20 };
+        targetLookAt = { x: 0, y: 0, z: 0 };
+    } else if (mode === 'full') {
+        isRoofVisible3D = true;
+        if (roofGroup3D) roofGroup3D.visible = true;
+        targetCamPos = { x: 20, y: 15, z: 22 };
+        targetLookAt = { x: 0, y: 1.5, z: 0 };
+    } else if (mode === 'top') {
+        isRoofVisible3D = false;
+        if (roofGroup3D) roofGroup3D.visible = false;
+        targetCamPos = { x: 0.001, y: 26, z: 0 };
+        targetLookAt = { x: 0, y: 0, z: 0 };
+    } else if (mode === 'fpv') {
+        isRoofVisible3D = false;
+        if (roofGroup3D) roofGroup3D.visible = false;
+        targetCamPos = { x: -1.75, y: 1.6, z: 2.2 };
+        targetLookAt = { x: -1.75, y: 1.5, z: -2.0 };
     }
 
-    function focusRoom(roomKey) {
-        const room = ROOMS_3D[roomKey];
-        if (!room) return;
+    const roofText = document.getElementById('roof-btn-text');
+    if (roofText) roofText.innerText = isRoofVisible3D ? '지붕 열기' : '지붕 닫기';
 
-        const [cx, cy, cz] = room.center;
-        const targetCamPos = { x: cx + 4, y: 7, z: cz + 6 };
-        const targetLookAt = { x: cx, y: 0.8, z: cz };
+    animateCamera3D(targetCamPos, targetLookAt);
+}
 
-        animateCamera3D(targetCamPos, targetLookAt);
-    }
+function focusRoom(roomKey) {
+    const room = ROOMS_3D[roomKey];
+    if (!room) return;
 
-    function toggleRoof() {
-        isRoofVisible3D = !isRoofVisible3D;
-        if (roofGroup3D) roofGroup3D.visible = isRoofVisible3D;
-        const roofText = document.getElementById('roof-btn-text');
-        if (roofText) roofText.innerText = isRoofVisible3D ? '지붕 열기' : '지붕 닫기';
-    }
+    const [cx, cy, cz] = room.center;
+    const targetCamPos = { x: cx + 4, y: 7, z: cz + 6 };
+    const targetLookAt = { x: cx, y: 0.8, z: cz };
 
-    function toggleDayNight() {
-        isNightMode3D = !isNightMode3D;
-        const btnText = document.getElementById('daynight-btn-text');
+    animateCamera3D(targetCamPos, targetLookAt);
+}
 
-        if (isNightMode3D) {
-            scene3D.background = new THREE.Color(0x030712);
-            if (scene3D.fog) scene3D.fog.color.setHex(0x030712);
-            sunLight3D.intensity = 0.15;
-            ambientLight3D.intensity = 0.25;
-            if (btnText) btnText.innerText = '주간 모드';
-        } else {
-            scene3D.background = new THREE.Color(0x0b1120);
-            if (scene3D.fog) scene3D.fog.color.setHex(0x0b1120);
-            sunLight3D.intensity = 1.2;
-            ambientLight3D.intensity = 0.6;
-            if (btnText) btnText.innerText = '야간 모드';
-        }
-    }
+function toggleRoof() {
+    isRoofVisible3D = !isRoofVisible3D;
+    if (roofGroup3D) roofGroup3D.visible = isRoofVisible3D;
+    const roofText = document.getElementById('roof-btn-text');
+    if (roofText) roofText.innerText = isRoofVisible3D ? '지붕 열기' : '지붕 닫기';
+}
 
-    function resetCameraView() {
-        setViewMode('dollhouse');
-    }
+function toggleDayNight() {
+    isNightMode3D = !isNightMode3D;
+    const btnText = document.getElementById('daynight-btn-text');
 
-    function animateCamera3D(targetPos, targetTarget, duration = 1000) {
-        if (!camera3D || !controls3D || typeof TWEEN === 'undefined') return;
-
-        new TWEEN.Tween(camera3D.position)
-            .to(targetPos, duration)
-            .easing(TWEEN.Easing.Cubic.Out)
-            .start();
-
-        new TWEEN.Tween(controls3D.target)
-            .to(targetTarget, duration)
-            .easing(TWEEN.Easing.Cubic.Out)
-            .start();
-    }
-
-    function onWindowResize3D() {
-        const container = document.getElementById('webgl-container');
-        if (!container || !renderer3D || !camera3D) return;
-
-        camera3D.aspect = container.clientWidth / container.clientHeight;
-        camera3D.updateProjectionMatrix();
-        renderer3D.setSize(container.clientWidth, container.clientHeight);
-    }
-
-    function animate3D() {
-        requestAnimationFrame(animate3D);
-        if (typeof TWEEN !== 'undefined') TWEEN.update();
-        if (controls3D) controls3D.update();
-        if (renderer3D && scene3D && camera3D) renderer3D.render(scene3D, camera3D);
+    if (isNightMode3D) {
+        if (scene3D) scene3D.background = new THREE.Color(0x030712);
+        if (scene3D && scene3D.fog) scene3D.fog.color.setHex(0x030712);
+        if (sunLight3D) sunLight3D.intensity = 0.15;
+        if (ambientLight3D) ambientLight3D.intensity = 0.25;
+        if (btnText) btnText.innerText = '주간 모드';
+    } else {
+        if (scene3D) scene3D.background = new THREE.Color(0x0b1120);
+        if (scene3D && scene3D.fog) scene3D.fog.color.setHex(0x0b1120);
+        if (sunLight3D) sunLight3D.intensity = 1.2;
+        if (ambientLight3D) ambientLight3D.intensity = 0.6;
+        if (btnText) btnText.innerText = '야간 모드';
     }
 }
+
+function resetCameraView() {
+    setViewMode('dollhouse');
+}
+
+function animateCamera3D(targetPos, targetTarget, duration = 1000) {
+    if (!camera3D || !controls3D || typeof TWEEN === 'undefined') return;
+
+    new TWEEN.Tween(camera3D.position)
+        .to(targetPos, duration)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .start();
+
+    new TWEEN.Tween(controls3D.target)
+        .to(targetTarget, duration)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .start();
+}
+
+function onWindowResize3D() {
+    const container = document.getElementById('webgl-container');
+    if (!container || !renderer3D || !camera3D) return;
+
+    camera3D.aspect = container.clientWidth / container.clientHeight;
+    camera3D.updateProjectionMatrix();
+    renderer3D.setSize(container.clientWidth, container.clientHeight);
+}
+
+function animate3D() {
+    requestAnimationFrame(animate3D);
+    if (typeof TWEEN !== 'undefined') TWEEN.update();
+    if (controls3D) controls3D.update();
+    if (renderer3D && scene3D && camera3D) renderer3D.render(scene3D, camera3D);
+}
+
+// Attach 3D controls explicitly to window object for inline HTML onclick handlers
+window.setViewMode = setViewMode;
+window.focusRoom = focusRoom;
+window.toggleRoof = toggleRoof;
+window.toggleDayNight = toggleDayNight;
+window.resetCameraView = resetCameraView;
