@@ -1,23 +1,22 @@
-// Aura Smart Home Control Center App Logic
+// AURA 3D Smart Home Digital Twin - Core Application Logic & Three.js Engine
 
-// 1. Application State
+// =========================================================================
+// 1. Central Application State
+// =========================================================================
 const state = {
     currentScreen: 1,
     brightness: 70, // 10% to 100%
     lights: {
         livingRoom: false,
-        kitchen: false,
+        masterRoom: false,
         roomA: false,
         roomB: false,
-        masterRoom: false,
-        bathroom: false,
-        masterBathroom: false
+        kitchen: false,
+        bathroom: false
     },
     door: {
         status: 'locked', // 'locked' | 'unlocked'
-        secureLockActive: false,
-        secureLockDuration: 60, // in seconds
-        secureLockTimeRemaining: 0
+        rotation: 0 // for 3D door animation
     },
     gas: {
         status: 'closed', // 'open' | 'closed'
@@ -25,52 +24,66 @@ const state = {
         autoSafeCut: true
     },
     temp: {
-        current: 24.5, // House average (calculated)
+        current: 24.5, // Apartment average
         target: 22.0,
-        mode: 'cooling', // 'cooling' | 'heating' | 'fan' | 'off'
         rooms: {
             livingRoom: 25.0,
-            kitchen: 24.7,
+            masterRoom: 24.6,
             roomA: 24.0,
             roomB: 24.2,
-            masterRoom: 24.6
+            kitchen: 24.7,
+            bathroom: 24.0
         }
     },
     aircon: {
         active: false,
         wind: 'low' // 'low' | 'medium' | 'high'
+    },
+    boiler: {
+        active: false,
+        mode: 'indoor', // 'indoor' | 'ondol' | 'eco' | 'water'
+        targetTemp: 24.0,
+        ondolTemp: 55.0
+    },
+    humidity: {
+        current: 52.0, // % RH
+        target: 50.0,
+        mode: 'auto' // 'auto' | 'humidify' | 'dehumidify' | 'off'
+    },
+    effects3D: {
+        ondol: true,
+        acWind: true,
+        labels: true
     }
 };
 
-// Timer reference for countdowns and simulations
-let secureLockInterval = null;
-let kitchenHeatInterval = null;
+// Timer references for physical simulations
 let thermodynamicsInterval = null;
+let kitchenHeatInterval = null;
 
+// =========================================================================
 // 2. DOM Elements Cache
+// =========================================================================
 const elements = {
-    // Navigation
+    // Navigation & Global
     screensWrapper: document.getElementById('screens-wrapper'),
     themeToggleBtn: document.getElementById('theme-toggle'),
-    
-    // Light Screen
+    systemLogOutput: document.getElementById('system-log-output'),
+    toastContainer: document.getElementById('toast-container'),
+    livePhoneTime: document.getElementById('live-phone-time'),
+
+    // Screen 2: Light Controls
     brightnessSlider: document.getElementById('global-brightness-slider'),
     brightnessValText: document.getElementById('global-brightness-val'),
     sliderFill: document.getElementById('slider-fill'),
     btnAllLightsOff: document.getElementById('btn-all-lights-off'),
-    lightToggleButtons: document.querySelectorAll('.light-toggle-btn'),
     lightSingleButtons: document.querySelectorAll('.light-toggle-single-btn'),
 
-    // Door Lock Screen
+    // Screen 3: Door Lock
     btnDoorUnlock: document.getElementById('btn-door-unlock'),
     btnDoorLock: document.getElementById('btn-door-lock'),
-    secureLockSelect: document.getElementById('secure-lock-time-select'),
-    btnToggleSecureLock: document.getElementById('btn-toggle-secure-lock'),
-    secureCountdownContainer: document.getElementById('secure-countdown-container'),
-    countdownRingFill: document.getElementById('countdown-ring-fill'),
-    countdownText: document.getElementById('countdown-text'),
 
-    // Gas Valve Screen
+    // Screen 4: Gas Valve
     btnGasOpen: document.getElementById('btn-gas-open'),
     btnGasClose: document.getElementById('btn-gas-close'),
     switchAutoGas: document.getElementById('switch-auto-gas'),
@@ -78,12 +91,31 @@ const elements = {
     badgeAutoGas: document.getElementById('badge-auto-gas'),
     badgeAutoSafe: document.getElementById('badge-auto-safe'),
 
-    // Temp Screen & Aircon Controls
+    // Screen 5: Climate (Temp, Boiler, Humidity, Aircon)
     targetTempDisplay: document.getElementById('target-temp-display'),
     currentTempDisplay: document.getElementById('current-temp-display'),
     btnTempMinus: document.getElementById('btn-temp-minus'),
     btnTempPlus: document.getElementById('btn-temp-plus'),
-    modeButtons: document.querySelectorAll('.mode-btn'),
+
+    // Boiler elements
+    btnToggleBoiler: document.getElementById('btn-toggle-boiler'),
+    badgeBoiler: document.getElementById('badge-boiler'),
+    boilerSubStatus: document.getElementById('boiler-sub-status'),
+    boilerModesContainer: document.getElementById('boiler-modes-container'),
+    boilerModeButtons: document.querySelectorAll('[data-boiler-mode]'),
+    boilerTargetVal: document.getElementById('boiler-target-val'),
+    btnBoilerMinus: document.getElementById('btn-boiler-minus'),
+    btnBoilerPlus: document.getElementById('btn-boiler-plus'),
+
+    // Humidity elements
+    currentHumidityBadge: document.getElementById('current-humidity-badge'),
+    humiditySubStatus: document.getElementById('humidity-sub-status'),
+    humModeButtons: document.querySelectorAll('[data-hum-mode]'),
+    targetHumidityVal: document.getElementById('target-humidity-val'),
+    btnHumMinus: document.getElementById('btn-hum-minus'),
+    btnHumPlus: document.getElementById('btn-hum-plus'),
+
+    // Aircon elements
     btnToggleAircon: document.getElementById('btn-toggle-aircon'),
     badgeAircon: document.getElementById('badge-aircon'),
     airconWindContainer: document.getElementById('aircon-wind-container'),
@@ -91,51 +123,42 @@ const elements = {
     windMediumBtn: document.getElementById('wind-medium'),
     windHighBtn: document.getElementById('wind-high'),
 
-    // Sim Panel Indicators
-    simRooms: {
-        livingRoom: document.getElementById('sim-livingRoom'),
-        kitchen: document.getElementById('sim-kitchen'), // Added kitchen to simRooms
-        roomA: document.getElementById('sim-roomA'),
-        roomB: document.getElementById('sim-roomB'),
-        masterRoom: document.getElementById('sim-masterRoom'),
-        bathroom: document.getElementById('sim-bathroom'),
-        masterBathroom: document.getElementById('sim-masterBathroom')
-    },
-    simGasValve: document.getElementById('sim-gas-valve'),
-    simKitchenTemp: document.getElementById('sim-kitchen-temp'),
-    simDoorStatus: document.getElementById('sim-door-status'),
-    simDoorSecureLight: document.getElementById('sim-door-secure-active-light'),
-    simAirconIndicator: document.getElementById('sim-aircon-indicator'),
+    // Home Screen Trigger
+    btnAwayModeHome: document.getElementById('btn-away-mode-home'),
 
-    // Sim Scenarios
-    btnTriggerLeaveHome: document.getElementById('trigger-leave-home'),
-    btnTriggerKitchenHeat: document.getElementById('trigger-kitchen-heat'),
-    btnTriggerResetSim: document.getElementById('trigger-reset-sim'),
-    btnAwayModeHome: document.getElementById('btn-away-mode-home'), // Added Home Screen Away Button
-
-    // Output Box
-    systemLogOutput: document.getElementById('system-log-output'),
-    toastContainer: document.getElementById('toast-container')
+    // 3D Toolbar elements
+    btnCamIso: document.getElementById('btn-cam-iso'),
+    btnCamTop: document.getElementById('btn-cam-top'),
+    btnCamLiving: document.getElementById('btn-cam-living'),
+    btnCamMaster: document.getElementById('btn-cam-master'),
+    btnCamKitchen: document.getElementById('btn-cam-kitchen'),
+    btnCamReset: document.getElementById('btn-cam-reset'),
+    btnToggleOndolFx: document.getElementById('btn-toggle-ondol-fx'),
+    btnToggleAcFx: document.getElementById('btn-toggle-ac-fx'),
+    btnToggleLabelsFx: document.getElementById('btn-toggle-labels-fx')
 };
 
+// =========================================================================
 // 3. Navigation Engine
+// =========================================================================
 function navigateTo(screenIndex) {
     state.currentScreen = screenIndex;
-    const translatePercentage = -(screenIndex - 1) * 20; // 5 screens = 20% width each
+    const translatePercentage = -(screenIndex - 1) * 20; // 5 screens = 20% each
     elements.screensWrapper.style.transform = `translateX(${translatePercentage}%)`;
-    
-    // Log navigation
+
     const screenNames = {
         1: '홈 대시보드',
-        2: '밝기 조절',
-        3: '현관 잠금',
-        4: '가스벨브',
-        5: '온도 조절'
+        2: '조명 및 밝기',
+        3: '현관 도어락',
+        4: '가스 밸브 제어',
+        5: '온도 · 습도 · 보일러'
     };
     addLog(`화면 이동: ${screenNames[screenIndex]}`, 'action');
 }
 
-// 4. Utility Functions: Logging & Toasting
+// =========================================================================
+// 4. Utility: Logging, Toast & Clock
+// =========================================================================
 function addLog(message, type = 'system') {
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const logLine = document.createElement('div');
@@ -153,20 +176,26 @@ function showToast(message, type = 'success') {
         <span class="toast-message">${message}</span>
     `;
     elements.toastContainer.appendChild(toast);
-    
-    // Auto remove after animation completes
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
+    setTimeout(() => toast.remove(), 3000);
 }
 
-// Shortcut function for notifications
 function showNotification(message) {
     showToast(message, 'success');
     addLog(message, 'system');
 }
 
-// 5. Theme Toggle Logic (Light / Dark)
+function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    if (elements.livePhoneTime) elements.livePhoneTime.textContent = `${hours}:${minutes}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// =========================================================================
+// 5. Theme Toggle Engine (Light / Dark)
+// =========================================================================
 function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -180,30 +209,19 @@ elements.themeToggleBtn.addEventListener('click', () => {
     localStorage.setItem('theme', newTheme);
     elements.themeToggleBtn.querySelector('.theme-icon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
     addLog(`테마 모드가 ${newTheme === 'dark' ? '다크' : '라이트'} 모드로 전환되었습니다.`, 'action');
+    if (threeApp && threeApp.updateTheme) threeApp.updateTheme(newTheme);
 });
 
-// 6. Lighting Control Features (Screen 2)
+// =========================================================================
+// 6. UI Synchronization Functions
+// =========================================================================
+
+// --- 6.1 Lighting UI ---
 function updateLightingUI() {
-    // Set Slider value and fill background
     elements.brightnessSlider.value = state.brightness;
     elements.brightnessValText.textContent = `${state.brightness}%`;
     elements.sliderFill.style.width = `${state.brightness}%`;
 
-    // 1. Update multi-light buttons (if any)
-    elements.lightToggleButtons.forEach(btn => {
-        const room = btn.dataset.room;
-        const index = parseInt(btn.dataset.index);
-        if (Array.isArray(state.lights[room])) {
-            const isActive = state.lights[room][index];
-            if (isActive) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        }
-    });
-
-    // 2. Update single buttons
     elements.lightSingleButtons.forEach(btn => {
         const room = btn.dataset.room;
         const isActive = state.lights[room];
@@ -216,64 +234,9 @@ function updateLightingUI() {
         }
     });
 
-    // 3. Update floor plan visuals in the Simulator
-    updateFloorPlanLights();
+    if (threeApp && threeApp.syncLights) threeApp.syncLights();
 }
 
-function updateFloorPlanLights() {
-    Object.keys(state.lights).forEach(room => {
-        const roomElement = elements.simRooms[room];
-        const status = state.lights[room];
-        let isAnyLightOn = false;
-
-        if (Array.isArray(status)) {
-            // Room has multiple lights
-            status.forEach((isOn, idx) => {
-                const indicator = document.getElementById(`sim-${room}-light-${idx}`);
-                if (indicator) {
-                    if (isOn) {
-                        indicator.classList.add('active');
-                        indicator.style.opacity = `${0.3 + 0.7 * (state.brightness / 100)}`;
-                        indicator.style.boxShadow = `0 0 ${8 + 12 * (state.brightness / 100)}px rgba(46, 204, 113, 1)`;
-                        isAnyLightOn = true;
-                    } else {
-                        indicator.classList.remove('active');
-                        indicator.style.opacity = '1';
-                        indicator.style.boxShadow = 'none';
-                    }
-                }
-            });
-        } else {
-            // Bathroom (Single light)
-            const indicator = document.getElementById(`sim-${room}-light`);
-            if (indicator) {
-                if (status) {
-                    indicator.classList.add('active');
-                    indicator.style.opacity = `${0.3 + 0.7 * (state.brightness / 100)}`;
-                    indicator.style.boxShadow = `0 0 ${8 + 12 * (state.brightness / 100)}px rgba(46, 204, 113, 1)`;
-                    isAnyLightOn = true;
-                } else {
-                    indicator.classList.remove('active');
-                    indicator.style.opacity = '1';
-                    indicator.style.boxShadow = 'none';
-                }
-            }
-        }
-
-        // Apply room-level lighting effect glow
-        if (roomElement) {
-            if (isAnyLightOn) {
-                roomElement.classList.add('light-active');
-                roomElement.style.background = `radial-gradient(circle, rgba(46, 204, 113, ${0.05 + 0.15 * (state.brightness / 100)}) 0%, transparent 80%)`;
-            } else {
-                roomElement.classList.remove('light-active');
-                roomElement.style.background = 'none';
-            }
-        }
-    });
-}
-
-// Bind Lighting events
 elements.brightnessSlider.addEventListener('input', (e) => {
     state.brightness = parseInt(e.target.value);
     updateLightingUI();
@@ -283,73 +246,41 @@ elements.brightnessSlider.addEventListener('change', () => {
     addLog(`전체 조명 밝기가 ${state.brightness}%로 변경되었습니다.`, 'action');
 });
 
-// "All Lights Off" Button Action
 elements.btnAllLightsOff.addEventListener('click', () => {
     let changed = false;
-    
-    // Turn off multi lights
     Object.keys(state.lights).forEach(room => {
-        if (Array.isArray(state.lights[room])) {
-            state.lights[room].forEach((isOn, idx) => {
-                if (isOn) {
-                    state.lights[room][idx] = false;
-                    changed = true;
-                }
-            });
-        } else {
-            if (state.lights[room]) {
-                state.lights[room] = false;
-                changed = true;
-            }
+        if (state.lights[room]) {
+            state.lights[room] = false;
+            changed = true;
         }
     });
-
     if (changed) {
         updateLightingUI();
-        showToast('모든 조명이 꺼졌습니다.');
-        addLog('전체 조명 끄기 버튼이 작동되었습니다.', 'action');
+        showToast('모든 조명이 일괄 소등되었습니다.');
+        addLog('전체 조명 일괄 끄기 실행.', 'action');
     } else {
         showToast('이미 모든 조명이 꺼져 있습니다.', 'error');
     }
 });
 
-// Toggle individual room lights
-// Toggle multi-button room lights (if any)
-elements.lightToggleButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const room = btn.dataset.room;
-        const index = parseInt(btn.dataset.index);
-        if (Array.isArray(state.lights[room])) {
-            state.lights[room][index] = !state.lights[room][index];
-            const krRoomNames = { livingRoom: '거실', kitchen: '주방', roomA: '방a', roomB: '방b', masterRoom: '안방' };
-            addLog(`${krRoomNames[room]} ${index + 1}조명이 ${state.lights[room][index] ? '켜졌습니다' : '꺼졌습니다'}.`, 'action');
-            updateLightingUI();
-        }
-    });
-});
-
-// Toggle single room lights (all rooms)
 elements.lightSingleButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         const room = btn.dataset.room;
         state.lights[room] = !state.lights[room];
-        
-        const krRoomNames = {
+        const krNames = {
             livingRoom: '거실',
-            kitchen: '주방',
-            roomA: '방a',
-            roomB: '방b',
             masterRoom: '안방',
-            bathroom: '화장실',
-            masterBathroom: '안방 화장실'
+            roomA: '방 A',
+            roomB: '방 B',
+            kitchen: '주방',
+            bathroom: '화장실'
         };
-        addLog(`${krRoomNames[room]} 조명이 ${state.lights[room] ? '켜졌습니다' : '꺼졌습니다'}.`, 'action');
-        
+        addLog(`${krNames[room]} 조명이 ${state.lights[room] ? '켜졌습니다' : '꺼졌습니다'}.`, 'action');
         updateLightingUI();
     });
 });
 
-// 7. Door Lock Logic (Screen 3)
+// --- 6.2 Door Lock UI ---
 function updateDoorUI() {
     if (state.door.status === 'unlocked') {
         elements.btnDoorUnlock.classList.add('active');
@@ -358,64 +289,23 @@ function updateDoorUI() {
         elements.btnDoorUnlock.classList.remove('active');
         elements.btnDoorLock.classList.add('active');
     }
-
-    const simDoor = elements.simDoorStatus;
-    if (state.door.status === 'unlocked') {
-        simDoor.className = 'entrance-door-graphic unlocked';
-        simDoor.querySelector('.door-status-text').textContent = 'UNLOCKED';
-    } else {
-        simDoor.className = 'entrance-door-graphic';
-        simDoor.querySelector('.door-status-text').textContent = 'LOCKED';
-    }
-
-    if (state.door.secureLockActive) {
-        if (elements.simDoorSecureLight) elements.simDoorSecureLight.className = 'secure-lock-active-light active';
-        if (elements.btnToggleSecureLock) {
-            elements.btnToggleSecureLock.textContent = '완전잠금 해제';
-            elements.btnToggleSecureLock.classList.add('active');
-        }
-        if (elements.secureCountdownContainer) elements.secureCountdownContainer.style.display = 'flex';
-        
-        if (elements.countdownText) elements.countdownText.textContent = `${state.door.secureLockTimeRemaining}s`;
-
-        const circumference = 251.2;
-        const percentLeft = state.door.secureLockTimeRemaining / state.door.secureLockDuration;
-        const strokeOffset = circumference * (1 - percentLeft);
-        if (elements.countdownRingFill) elements.countdownRingFill.style.strokeDashoffset = strokeOffset;
-    } else {
-        if (elements.simDoorSecureLight) elements.simDoorSecureLight.className = 'secure-lock-active-light';
-        if (elements.btnToggleSecureLock) {
-            elements.btnToggleSecureLock.textContent = '완전잠금 시작';
-            elements.btnToggleSecureLock.classList.remove('active');
-        }
-        if (elements.secureCountdownContainer) elements.secureCountdownContainer.style.display = 'none';
-    }
+    if (threeApp && threeApp.syncDoor) threeApp.syncDoor();
 }
 
 elements.btnDoorLock.addEventListener('click', () => {
     if (state.door.status === 'locked') {
-        showToast('이미 문이 잠겨 있습니다.', 'error');
+        showToast('현관문이 이미 잠겨 있습니다.', 'error');
         return;
     }
     state.door.status = 'locked';
     updateDoorUI();
-    showToast('현관문이 잠겼습니다.');
+    showToast('현관문이 안전하게 잠겼습니다.');
     addLog('현관문 잠금 명령 실행.', 'action');
 });
 
 elements.btnDoorUnlock.addEventListener('click', () => {
-    if (state.door.secureLockActive) {
-        const card = document.querySelector('.secure-lock-card');
-        card.classList.add('shake-animation');
-        setTimeout(() => card.classList.remove('shake-animation'), 500);
-
-        showToast('완전잠금 상태입니다! 열림 실패.', 'error');
-        addLog('경고: 완전잠금 동작 중 열기 시도가 차단되었습니다.', 'warning');
-        return;
-    }
-
     if (state.door.status === 'unlocked') {
-        showToast('이미 잠금이 해제되어 있습니다.', 'error');
+        showToast('현관문이 이미 열려 있습니다.', 'error');
         return;
     }
     state.door.status = 'unlocked';
@@ -424,53 +314,7 @@ elements.btnDoorUnlock.addEventListener('click', () => {
     addLog('현관문 잠금 해제(열림) 명령 실행.', 'action');
 });
 
-if (elements.btnToggleSecureLock) {
-    elements.btnToggleSecureLock.addEventListener('click', () => {
-        if (state.door.secureLockActive) {
-            cancelSecureLock();
-            showToast('완전잠금이 해제되었습니다.');
-            addLog('완전잠금 상태 강제 해제.', 'action');
-        } else {
-            const duration = elements.secureLockSelect ? parseInt(elements.secureLockSelect.value) : 60;
-            startSecureLock(duration);
-        }
-    });
-}
-
-function startSecureLock(seconds) {
-    state.door.status = 'locked';
-    state.door.secureLockActive = true;
-    state.door.secureLockDuration = seconds;
-    state.door.secureLockTimeRemaining = seconds;
-    
-    updateDoorUI();
-    showToast(`${seconds}초 동안 안전 완전잠금이 유지됩니다.`);
-    addLog(`완전잠금 모드 시작 (${seconds}초간 문 열림 차단).`, 'warning');
-
-    if (secureLockInterval) clearInterval(secureLockInterval);
-
-    secureLockInterval = setInterval(() => {
-        state.door.secureLockTimeRemaining--;
-        if (state.door.secureLockTimeRemaining <= 0) {
-            clearInterval(secureLockInterval);
-            state.door.secureLockActive = false;
-            updateDoorUI();
-            showToast('완전잠금이 만료되어 일반 대기 모드로 복귀합니다.');
-            addLog('완전잠금 설정 시간 만료. 도어 정상 대기 상태.', 'success');
-        } else {
-            updateDoorUI();
-        }
-    }, 1000);
-}
-
-function cancelSecureLock() {
-    if (secureLockInterval) clearInterval(secureLockInterval);
-    state.door.secureLockActive = false;
-    state.door.secureLockTimeRemaining = 0;
-    updateDoorUI();
-}
-
-// 8. Gas Valve Control Logic (Screen 4)
+// --- 6.3 Gas Valve UI ---
 function updateGasUI() {
     const cardIconOpen = elements.btnGasOpen.querySelector('.valve-card-icon');
     const cardIconClose = elements.btnGasClose.querySelector('.valve-card-icon');
@@ -480,29 +324,23 @@ function updateGasUI() {
         elements.btnGasClose.classList.remove('active');
         cardIconOpen.classList.add('open');
         cardIconClose.classList.remove('close');
-        
-        elements.simGasValve.className = 'gas-valve-graphic open';
     } else {
         elements.btnGasOpen.classList.remove('active');
         elements.btnGasClose.classList.add('active');
         cardIconOpen.classList.remove('open');
         cardIconClose.classList.add('close');
-        
-        elements.simGasValve.className = 'gas-valve-graphic closed';
     }
 
-    if (elements.switchAutoGas) elements.switchAutoGas.checked = state.gas.autoGasLock;
-    if (elements.switchAutoSafe) elements.switchAutoSafe.checked = state.gas.autoSafeCut;
+    elements.switchAutoGas.checked = state.gas.autoGasLock;
+    elements.switchAutoSafe.checked = state.gas.autoSafeCut;
 
-    if (elements.badgeAutoGas) {
-        elements.badgeAutoGas.textContent = state.gas.autoGasLock ? 'ON' : 'OFF';
-        elements.badgeAutoGas.className = `toggle-status-badge ${state.gas.autoGasLock ? '' : 'off'}`;
-    }
-    
-    if (elements.badgeAutoSafe) {
-        elements.badgeAutoSafe.textContent = state.gas.autoSafeCut ? 'ON' : 'OFF';
-        elements.badgeAutoSafe.className = `toggle-status-badge ${state.gas.autoSafeCut ? '' : 'off'}`;
-    }
+    elements.badgeAutoGas.textContent = state.gas.autoGasLock ? 'ON' : 'OFF';
+    elements.badgeAutoGas.className = `toggle-status-badge ${state.gas.autoGasLock ? '' : 'off'}`;
+
+    elements.badgeAutoSafe.textContent = state.gas.autoSafeCut ? 'ON' : 'OFF';
+    elements.badgeAutoSafe.className = `toggle-status-badge ${state.gas.autoSafeCut ? '' : 'off'}`;
+
+    if (threeApp && threeApp.syncGas) threeApp.syncGas();
 }
 
 elements.btnGasOpen.addEventListener('click', () => {
@@ -510,7 +348,6 @@ elements.btnGasOpen.addEventListener('click', () => {
         showToast('가스 밸브가 이미 열려 있습니다.', 'error');
         return;
     }
-    
     const svgIcon = elements.btnGasOpen.querySelector('.valve-svg');
     svgIcon.classList.add('spin');
     setTimeout(() => svgIcon.classList.remove('spin'), 600);
@@ -526,7 +363,6 @@ elements.btnGasClose.addEventListener('click', () => {
         showToast('가스 밸브가 이미 닫혀 있습니다.', 'error');
         return;
     }
-
     const svgIcon = elements.btnGasClose.querySelector('.valve-svg');
     svgIcon.classList.add('spin');
     setTimeout(() => svgIcon.classList.remove('spin'), 600);
@@ -543,58 +379,39 @@ elements.switchAutoGas.addEventListener('change', (e) => {
     addLog(`오토 가스 락 옵션이 ${state.gas.autoGasLock ? '활성화' : '비활성화'}되었습니다.`, 'action');
 });
 
-if (elements.switchAutoSafe) {
-    elements.switchAutoSafe.addEventListener('change', (e) => {
-        state.gas.autoSafeCut = e.target.checked;
-        updateGasUI();
-        addLog(`오토 세이프 컷 옵션이 ${state.gas.autoSafeCut ? '활성화' : '비활성화'}되었습니다.`, 'action');
-    });
+elements.switchAutoSafe.addEventListener('change', (e) => {
+    state.gas.autoSafeCut = e.target.checked;
+    updateGasUI();
+    addLog(`과열 자동 차단 옵션이 ${state.gas.autoSafeCut ? '활성화' : '비활성화'}되었습니다.`, 'action');
+});
+
+// --- 6.4 Temperature, Boiler, Humidity & Aircon UI ---
+function calculateAverageTemp() {
+    const r = state.temp.rooms;
+    const avg = (r.livingRoom + r.masterRoom + r.roomA + r.roomB + r.kitchen + r.bathroom) / 6;
+    state.temp.current = avg;
 }
 
-// 9. Temperature Settings & Aircon Logic (Screen 5)
 function updateTempUI() {
-    // 1. Calculate and update house average temp display
     calculateAverageTemp();
     elements.targetTempDisplay.textContent = `${state.temp.target.toFixed(1)}°C`;
-    elements.currentTempDisplay.textContent = `집안 평균 ${state.temp.current.toFixed(1)}°C`;
-    
-    // Kitchen room display remains specific to kitchen for the simulation details
-    elements.simKitchenTemp.textContent = `${state.temp.rooms.kitchen.toFixed(1)}°C`;
+    elements.currentTempDisplay.textContent = `실내 평균 ${state.temp.current.toFixed(1)}°C`;
 
-    // Alert color if kitchen temp gets very high
-    if (state.temp.rooms.kitchen >= 50.0) {
-        elements.simKitchenTemp.classList.add('hot');
-    } else {
-        elements.simKitchenTemp.classList.remove('hot');
-    }
-
-    // Highlight mode buttons
-    elements.modeButtons.forEach(btn => {
-        if (btn.dataset.mode === state.temp.mode) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
-
-    // 2. Aircon Controls sync
+    // Sync Aircon
     if (state.aircon.active) {
         elements.badgeAircon.textContent = 'ON';
         elements.badgeAircon.classList.add('active');
         elements.btnToggleAircon.textContent = '에어컨 끄기';
         elements.btnToggleAircon.classList.add('active');
         elements.airconWindContainer.style.display = 'grid';
-        elements.simAirconIndicator.classList.add('active');
     } else {
         elements.badgeAircon.textContent = 'OFF';
         elements.badgeAircon.classList.remove('active');
         elements.btnToggleAircon.textContent = '에어컨 켜기';
         elements.btnToggleAircon.classList.remove('active');
         elements.airconWindContainer.style.display = 'none';
-        elements.simAirconIndicator.classList.remove('active');
     }
 
-    // Update wind speed buttons
     [elements.windLowBtn, elements.windMediumBtn, elements.windHighBtn].forEach(btn => {
         if (btn.dataset.wind === state.aircon.wind) {
             btn.classList.add('active');
@@ -602,15 +419,76 @@ function updateTempUI() {
             btn.classList.remove('active');
         }
     });
+
+    // Sync Boiler UI
+    updateBoilerUI();
+
+    // Sync Humidity UI
+    updateHumidityUI();
+
+    if (threeApp && threeApp.syncThermodynamics) threeApp.syncThermodynamics();
 }
 
-function calculateAverageTemp() {
-    const r = state.temp.rooms;
-    const avg = (r.livingRoom + r.kitchen + r.roomA + r.roomB + r.masterRoom) / 5;
-    state.temp.current = avg;
+function updateBoilerUI() {
+    if (state.boiler.active) {
+        const modeLabels = {
+            indoor: '실내난방 ON',
+            ondol: '온돌바닥 ON',
+            eco: '외출절전 ON',
+            water: '온수전용 ON'
+        };
+        elements.badgeBoiler.textContent = modeLabels[state.boiler.mode] || 'ON';
+        elements.badgeBoiler.classList.add('active');
+        elements.btnToggleBoiler.textContent = '보일러 끄기';
+        elements.btnToggleBoiler.classList.add('active');
+        elements.boilerModesContainer.style.display = 'flex';
+        elements.boilerSubStatus.textContent = `설정: ${state.boiler.targetTemp.toFixed(1)}°C / 바닥 난방 연동`;
+    } else {
+        elements.badgeBoiler.textContent = 'OFF';
+        elements.badgeBoiler.classList.remove('active');
+        elements.btnToggleBoiler.textContent = '보일러 켜기';
+        elements.btnToggleBoiler.classList.remove('active');
+        elements.boilerModesContainer.style.display = 'none';
+        elements.boilerSubStatus.textContent = '바닥 온돌 연동 대기';
+    }
+
+    elements.boilerTargetVal.textContent = `${state.boiler.targetTemp.toFixed(1)}°C`;
+
+    elements.boilerModeButtons.forEach(btn => {
+        if (btn.dataset.boilerMode === state.boiler.mode) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
 }
 
-// Target Temp adjusts
+function updateHumidityUI() {
+    elements.currentHumidityBadge.textContent = `${Math.round(state.humidity.current)}% RH`;
+    elements.targetHumidityVal.textContent = `${Math.round(state.humidity.target)}% RH`;
+
+    const hum = state.humidity.current;
+    if (hum >= 40 && hum <= 60) {
+        elements.humiditySubStatus.textContent = '쾌적 상태 (40~60% RH 유지 중)';
+        elements.currentHumidityBadge.style.color = 'var(--accent-blue)';
+    } else if (hum < 40) {
+        elements.humiditySubStatus.textContent = '건조 주의 (습도 보충 권장)';
+        elements.currentHumidityBadge.style.color = 'var(--accent-red)';
+    } else {
+        elements.humiditySubStatus.textContent = '다습 주의 (제습 권장)';
+        elements.currentHumidityBadge.style.color = 'var(--accent-blue)';
+    }
+
+    elements.humModeButtons.forEach(btn => {
+        if (btn.dataset.humMode === state.humidity.mode) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+// Target Temp Button Listeners
 elements.btnTempMinus.addEventListener('click', () => {
     if (state.temp.target > 16.0) {
         state.temp.target -= 0.5;
@@ -627,20 +505,11 @@ elements.btnTempPlus.addEventListener('click', () => {
     }
 });
 
-elements.modeButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        state.temp.mode = btn.dataset.mode;
-        updateTempUI();
-        const krModes = { cooling: '냉방', heating: '난방', fan: '송풍', off: '꺼짐' };
-        addLog(`냉난방 시스템 운행 모드가 ${krModes[state.temp.mode]} 모드로 변경되었습니다.`, 'action');
-    });
-});
-
-// Aircon actions
+// Aircon Listeners
 elements.btnToggleAircon.addEventListener('click', () => {
     state.aircon.active = !state.aircon.active;
     updateTempUI();
-    addLog(`거실 에어컨을 ${state.aircon.active ? '켰습니다 (목표온도 자동화 동작)' : '껐습니다'}.`, 'action');
+    addLog(`거실 에어컨을 ${state.aircon.active ? '켰습니다 (냉방 시뮬레이션 가동)' : '껐습니다'}.`, 'action');
     showToast(`거실 에어컨 ${state.aircon.active ? 'ON' : 'OFF'}`);
 });
 
@@ -649,259 +518,226 @@ elements.btnToggleAircon.addEventListener('click', () => {
         state.aircon.wind = btn.dataset.wind;
         updateTempUI();
         const krWind = { low: '약풍', medium: '중풍', high: '강풍' };
-        addLog(`에어컨 바람 세기를 ${krWind[state.aircon.wind]}으로 설정했습니다.`, 'action');
+        addLog(`에어컨 풍속을 [${krWind[state.aircon.wind]}]으로 설정했습니다.`, 'action');
     });
 });
 
-// Thermodynamics Engine: Simulates room heating/cooling propagation in real-time
+// Boiler Listeners
+elements.btnToggleBoiler.addEventListener('click', () => {
+    state.boiler.active = !state.boiler.active;
+    updateTempUI();
+    addLog(`스마트 보일러를 ${state.boiler.active ? '가동했습니다 (온돌 바닥 난방 연동)' : '정지했습니다'}.`, 'action');
+    showToast(`스마트 보일러 ${state.boiler.active ? 'ON (온돌 가동)' : 'OFF'}`);
+});
+
+elements.boilerModeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        state.boiler.mode = btn.dataset.boilerMode;
+        updateBoilerUI();
+        const krModes = {
+            indoor: '실내 난방',
+            ondol: '온돌(바닥) 난방',
+            eco: '외출 절전 난방',
+            water: '온수 전용'
+        };
+        addLog(`보일러 난방 모드가 [${krModes[state.boiler.mode]}] 모드로 변경되었습니다.`, 'action');
+    });
+});
+
+elements.btnBoilerMinus.addEventListener('click', () => {
+    if (state.boiler.targetTemp > 18.0) {
+        state.boiler.targetTemp -= 0.5;
+        updateBoilerUI();
+        showToast(`보일러 설정 온도가 ${state.boiler.targetTemp.toFixed(1)}°C로 조정되었습니다.`);
+    }
+});
+
+elements.btnBoilerPlus.addEventListener('click', () => {
+    if (state.boiler.targetTemp < 32.0) {
+        state.boiler.targetTemp += 0.5;
+        updateBoilerUI();
+        showToast(`보일러 설정 온도가 ${state.boiler.targetTemp.toFixed(1)}°C로 조정되었습니다.`);
+    }
+});
+
+// Humidity Listeners
+elements.humModeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        state.humidity.mode = btn.dataset.humMode;
+        updateHumidityUI();
+        const krHum = {
+            auto: '자동 습도 케어',
+            humidify: '가습기 운전',
+            dehumidify: '제습기 운전',
+            off: '습도 케어 OFF'
+        };
+        addLog(`습도 케어 모드가 [${krHum[state.humidity.mode]}] 모드로 전환되었습니다.`, 'action');
+    });
+});
+
+elements.btnHumMinus.addEventListener('click', () => {
+    if (state.humidity.target > 30.0) {
+        state.humidity.target -= 5.0;
+        updateHumidityUI();
+        showToast(`목표 습도가 ${Math.round(state.humidity.target)}% RH로 설정되었습니다.`);
+    }
+});
+
+elements.btnHumPlus.addEventListener('click', () => {
+    if (state.humidity.target < 75.0) {
+        state.humidity.target += 5.0;
+        updateHumidityUI();
+        showToast(`목표 습도가 ${Math.round(state.humidity.target)}% RH로 설정되었습니다.`);
+    }
+});
+
+// =========================================================================
+// 7. Physical Thermodynamics & Climate Engine
+// =========================================================================
 function initThermodynamics() {
     if (thermodynamicsInterval) clearInterval(thermodynamicsInterval);
 
     thermodynamicsInterval = setInterval(() => {
         const rooms = state.temp.rooms;
-        const target = state.temp.target;
-        const mode = state.temp.mode;
-        const airconOn = state.aircon.active;
-        const wind = state.aircon.wind;
+        const ambientTemp = 26.5; // External summer baseline
 
-        // Ambient temperature (26.5°C in summer, drifts here when no AC)
-        const ambientTemp = 26.5;
+        // 1. Aircon cooling in living room
+        if (state.aircon.active) {
+            let speed = 0.06;
+            if (state.aircon.wind === 'medium') speed = 0.12;
+            if (state.aircon.wind === 'high') speed = 0.22;
 
-        // 1. Calculate Aircon cooling/heating in Living Room
-        if (airconOn && mode !== 'off') {
-            let speed = 0.05; // low wind
-            if (wind === 'medium') speed = 0.12;
-            if (wind === 'high') speed = 0.20;
-
-            if (mode === 'cooling') {
-                if (rooms.livingRoom > target) {
-                    rooms.livingRoom = Math.max(target, rooms.livingRoom - speed);
-                } else if (rooms.livingRoom < target - 0.5) {
-                    // Let it warm up slightly back to target
-                    rooms.livingRoom = Math.min(target, rooms.livingRoom + 0.02);
-                }
-            } else if (mode === 'heating') {
-                if (rooms.livingRoom < target) {
-                    rooms.livingRoom = Math.min(target, rooms.livingRoom + speed);
-                } else if (rooms.livingRoom > target + 0.5) {
-                    rooms.livingRoom = Math.max(target, rooms.livingRoom - 0.02);
-                }
+            if (rooms.livingRoom > state.temp.target) {
+                rooms.livingRoom = Math.max(state.temp.target, rooms.livingRoom - speed);
             }
-        } else {
-            // AC is off, rooms slowly drift back towards outdoor ambient temperature
-            const driftSpeed = 0.01;
-            if (rooms.livingRoom < ambientTemp) {
-                rooms.livingRoom = Math.min(ambientTemp, rooms.livingRoom + driftSpeed);
-            } else if (rooms.livingRoom > ambientTemp) {
-                rooms.livingRoom = Math.max(ambientTemp, rooms.livingRoom - driftSpeed);
-            }
+            // AC naturally dehumidifies the air
+            state.humidity.current = Math.max(40, state.humidity.current - 0.2);
         }
 
-        // 2. Heat/Cool propagation to other rooms
-        const propagationRate = 0.03; // speed at which temperature spreads to other rooms
+        // 2. Boiler heating
+        if (state.boiler.active) {
+            const bTarget = state.boiler.targetTemp;
+            const bMode = state.boiler.mode;
+            let heatSpeed = 0.08;
+
+            if (bMode === 'ondol') heatSpeed = 0.14; // Floor heating is strong
+            if (bMode === 'eco') heatSpeed = 0.02; // Minimal frost protection
+
+            Object.keys(rooms).forEach(room => {
+                if (bMode !== 'water') {
+                    if (rooms[room] < bTarget) {
+                        rooms[room] = Math.min(bTarget, rooms[room] + heatSpeed);
+                    }
+                }
+            });
+            // Heating slightly lowers relative humidity
+            state.humidity.current = Math.max(35, state.humidity.current - 0.1);
+        }
+
+        // 3. Ambient drift when no climate control active
+        if (!state.aircon.active && !state.boiler.active) {
+            Object.keys(rooms).forEach(room => {
+                const diff = ambientTemp - rooms[room];
+                rooms[room] += diff * 0.01;
+            });
+        }
+
+        // 4. Room heat propagation (Living room to other rooms)
+        const propRate = 0.03;
         Object.keys(rooms).forEach(room => {
-            if (room === 'livingRoom') return; // Living room is controlled directly by AC
-
-            // If kitchen heater scenario is NOT currently running, kitchen drifts towards living room.
-            // If kitchen is heating up, kitchen is simulated in the kitchen event block, but still spreads heat slightly.
-            if (room === 'kitchen' && kitchenHeatInterval) {
-                // Kitchen heats up rapidly, spreads heat to livingRoom slightly
-                rooms.livingRoom += (rooms.kitchen - rooms.livingRoom) * 0.01;
-                return;
+            if (room !== 'livingRoom' && (!kitchenHeatInterval || room !== 'kitchen')) {
+                const diff = rooms.livingRoom - rooms[room];
+                rooms[room] += diff * propRate;
             }
-
-            // Normal room propagation (rooms try to match living room temp)
-            const diff = rooms.livingRoom - rooms[room];
-            rooms[room] += diff * propagationRate;
-
-            // Ambient drift for rooms (small factor trying to pull rooms to ambient)
-            rooms[room] += (ambientTemp - rooms[room]) * 0.002;
         });
 
-        // 3. Sync GUI
+        // 5. Humidity adjustment
+        if (state.humidity.mode === 'auto') {
+            const humDiff = state.humidity.target - state.humidity.current;
+            state.humidity.current += humDiff * 0.05;
+        } else if (state.humidity.mode === 'humidify') {
+            if (state.humidity.current < 70) state.humidity.current += 0.4;
+        } else if (state.humidity.mode === 'dehumidify') {
+            if (state.humidity.current > 40) state.humidity.current -= 0.4;
+        } else {
+            // Drifts to natural baseline 50%
+            state.humidity.current += (50.0 - state.humidity.current) * 0.01;
+        }
+
+        // Sync GUI
         updateTempUI();
     }, 1000);
 }
 
-// 10. Simulation Scenario Triggers (Right Panel)
-
-// Shared function to trigger Away Mode (외출 모드)
-function executeLeaveHome(source = 'sim') {
-    const isHomeBtn = (source === 'home');
-    addLog(`외출 이벤트가 실행되었습니다. (${isHomeBtn ? '홈 화면' : '시뮬레이터'}에서 기동)`, 'action');
-    showToast('외출 모드 가동!');
+// =========================================================================
+// 8. Automation Scenarios: Away Mode & Kitchen Overheat
+// =========================================================================
+function executeLeaveHome(source = 'home') {
+    addLog(`외출 자동화 시나리오가 실행되었습니다. (출처: ${source === 'home' ? '스마트폰 홈' : '시뮬레이터'})`, 'action');
+    showToast('외출 모드 가동! (전체 소등, 도어락 잠금, 가스 차단, 에어컨 OFF, 보일러 외출난방)');
 
     // 1. Shut off all lights
-    let lightsShut = false;
     Object.keys(state.lights).forEach(room => {
-        if (Array.isArray(state.lights[room])) {
-            state.lights[room].forEach((isOn, idx) => {
-                if (isOn) {
-                    state.lights[room][idx] = false;
-                    lightsShut = true;
-                }
-            });
-        } else {
-            if (state.lights[room]) {
-                state.lights[room] = false;
-                lightsShut = true;
-            }
-        }
+        state.lights[room] = false;
     });
-    if (lightsShut) {
-        updateLightingUI();
-        addLog('외출 자동화: 전 객실 조명을 일괄 소등했습니다.', 'success');
-    }
+    updateLightingUI();
+    addLog('외출 자동화: 전 객실 조명을 일괄 소등했습니다.', 'success');
 
-    // 2. Auto lock door
+    // 2. Lock front door
     if (state.door.status === 'unlocked') {
         state.door.status = 'locked';
         updateDoorUI();
-        addLog('외출 자동화: 현관문을 잠갔습니다.', 'success');
+        addLog('외출 자동화: 현관문을 안전하게 잠갔습니다.', 'success');
     }
 
-    // 3. Auto Gas Lock Action
+    // 3. Auto Gas Lock
     if (state.gas.autoGasLock) {
         if (state.gas.status === 'open') {
             state.gas.status = 'closed';
             updateGasUI();
             addLog('외출 자동화 [오토 가스 락]: 가스밸브를 자동 차단했습니다.', 'success');
-            showToast('오토 가스 락 동작: 가스밸브 잠금');
-        } else {
-            addLog('외출 자동화 [오토 가스 락]: 가스밸브가 이미 잠겨있어 유지합니다.', 'system');
         }
-    } else {
-        addLog('외출 이벤트: 오토 가스 락 비활성화 상태로 가스밸브 상태를 유지합니다.', 'warning');
     }
 
-    // 4. Auto turn off AC
+    // 4. Turn off AC
     if (state.aircon.active) {
         state.aircon.active = false;
         updateTempUI();
-        addLog('외출 자동화: 전력 절감을 위해 에어컨 운행을 중지했습니다.', 'success');
+        addLog('외출 자동화: 전력 절감을 위해 에어컨을 껐습니다.', 'success');
+    }
+
+    // 5. Switch Boiler to Eco (외출 절전) mode
+    if (state.boiler.active) {
+        state.boiler.mode = 'eco';
+        state.boiler.targetTemp = 18.0;
+        updateBoilerUI();
+        addLog('외출 자동화: 보일러를 외출 절전 모드(18°C 동파방지)로 전환했습니다.', 'success');
     }
 }
 
-// Bind both Home screen button and Simulator button to executeLeaveHome
-if (elements.btnTriggerLeaveHome) {
-    elements.btnTriggerLeaveHome.addEventListener('click', () => executeLeaveHome('sim'));
-}
 if (elements.btnAwayModeHome) {
     elements.btnAwayModeHome.addEventListener('click', () => executeLeaveHome('home'));
 }
 
-// Scenario 2: Heat Up Kitchen (주방 온도 급상승)
-if (elements.btnTriggerKitchenHeat) {
-    elements.btnTriggerKitchenHeat.addEventListener('click', () => {
-        if (kitchenHeatInterval) {
-            clearInterval(kitchenHeatInterval);
-            kitchenHeatInterval = null;
-            elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '인덕션 화력 상승 (온도↑)';
-            addLog('시뮬레이션: 온도 가열을 수동 중지했습니다.', 'system');
-            return;
-        }
-
-        addLog('시뮬레이션: 주방 조리기 가열 시작. 온도가 급상승합니다.', 'warning');
-        elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '가열 중지 (클릭)';
-        
-        kitchenHeatInterval = setInterval(() => {
-            state.temp.rooms.kitchen += 5.0; // Rapid local heating in kitchen
-            updateTempUI();
-
-            // Check if exceeds safety temperature threshold (50°C)
-            if (state.temp.rooms.kitchen >= 50.0) {
-                clearInterval(kitchenHeatInterval);
-                kitchenHeatInterval = null;
-                elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '인덕션 화력 상승 (온도↑)';
-                
-                addLog(`경고: 주방 온도가 위험 한계선(${state.temp.rooms.kitchen.toFixed(1)}°C)에 도달했습니다!`, 'warning');
-                
-                // Auto Safe Cut triggering
-                if (state.gas.autoSafeCut) {
-                    if (state.gas.status === 'open') {
-                        state.gas.status = 'closed';
-                        updateGasUI();
-                        addLog('비상 조치 [오토 세이프 컷]: 과열 감지로 가스 밸브를 비상 자동 차단했습니다!', 'success');
-                        showToast('오토 세이프 컷 발동: 가스 차단!', 'error');
-                    } else {
-                        addLog('오토 세이프 컷 감지: 가스 밸브가 이미 닫혀있어 안전 상태입니다.', 'system');
-                    }
-                } else {
-                    addLog('경고: 오토 세이프 컷이 꺼져있어 가스 밸브가 차단되지 않았습니다! 위험!', 'warning');
-                }
-            }
-        }, 800);
-    });
-}
-
-// Scenario 3: Reset Simulation (초기 리셋)
-if (elements.btnTriggerResetSim) {
-    elements.btnTriggerResetSim.addEventListener('click', () => {
-        // Clear all simulation intervals
-        if (kitchenHeatInterval) {
-            clearInterval(kitchenHeatInterval);
-            kitchenHeatInterval = null;
-            if (elements.btnTriggerKitchenHeat) elements.btnTriggerKitchenHeat.querySelector('strong').textContent = '인덕션 화력 상승 (온도↑)';
-        }
-        cancelSecureLock();
-
-        // Revert state values
-        state.brightness = 70;
-        Object.keys(state.lights).forEach(room => {
-            if (Array.isArray(state.lights[room])) {
-                state.lights[room] = [false, false];
-            } else {
-                state.lights[room] = false;
-            }
-        });
-        state.door.status = 'locked';
-        state.gas.status = 'closed';
-        state.gas.autoGasLock = true;
-        state.gas.autoSafeCut = true;
-        
-        // Reset temperatures
-        state.temp.rooms.livingRoom = 25.0;
-        state.temp.rooms.kitchen = 24.7;
-        state.temp.rooms.roomA = 24.0;
-        state.temp.rooms.roomB = 24.2;
-        state.temp.rooms.masterRoom = 24.6;
-        calculateAverageTemp();
-        
-        state.temp.target = 22.0;
-        state.temp.mode = 'cooling';
-        state.aircon.active = false;
-        state.aircon.wind = 'low';
-
-        // Synchronize UI
-        updateLightingUI();
-        updateDoorUI();
-        updateGasUI();
-        updateTempUI();
-
-        // Log & Toast
-        showToast('시뮬레이터가 초기화되었습니다.');
-        elements.systemLogOutput.innerHTML = `
-            <div class="log-line system">[시스템] Aura Smart Home 시스템 초기화 성공.</div>
-            <div class="log-line system">[시스템] 모든 스마트 기기 감시 대기 중.</div>
-        `;
-    });
-}
-
-// 11. Network Device Management
-// Tracks per-category connection state (true = connected, false = disconnected)
+// =========================================================================
+// 9. Network Device Simulation Management
+// =========================================================================
 const networkState = {
     light: true,
     lock: true,
     gas: true,
-    temp: true
+    temp: true,
+    boiler: true,
+    humidity: true
 };
 
-// Per-category device counts (how many devices belong to each group)
 const deviceCounts = {
-    light: 4,  // 거실, 주방, 방A, 방B, 안방 → simplified as 4 groups
-    lock: 2,   // 현관 도어락 + 보안 잠금 모듈
-    gas: 3,    // 가스밸브 센서 + 오토세이프 + 자동차단
-    temp: 3    // 에어컨 본체 + 온도센서 × 2
+    light: 6,
+    lock: 1,
+    gas: 2,
+    temp: 2,
+    boiler: 1,
+    humidity: 1
 };
 
 function getTotalConnected() {
@@ -914,42 +750,10 @@ function getTotalDevices() {
     return Object.values(deviceCounts).reduce((a, b) => a + b, 0);
 }
 
-// Update the home-screen card visuals based on network state
-function updateCardNetworkUI() {
-    const cardMap = {
-        light: document.getElementById('btn-to-light'),
-        lock: document.getElementById('btn-to-lock'),
-        gas: document.getElementById('btn-to-gas'),
-        temp: document.getElementById('btn-to-temp')
-    };
-
-    Object.keys(networkState).forEach(key => {
-        const card = cardMap[key];
-        if (!card) return;
-        if (networkState[key]) {
-            card.classList.remove('card-offline');
-            // Remove offline badge if present
-            const badge = card.querySelector('.offline-badge');
-            if (badge) badge.remove();
-        } else {
-            card.classList.add('card-offline');
-            // Add offline badge if not already present
-            if (!card.querySelector('.offline-badge')) {
-                const badge = document.createElement('span');
-                badge.className = 'offline-badge';
-                badge.textContent = 'OFFLINE';
-                card.appendChild(badge);
-            }
-        }
-    });
-}
-
-// Toggle connection state for a device category
 function toggleNetworkDevice(deviceKey) {
     networkState[deviceKey] = !networkState[deviceKey];
     const isConnected = networkState[deviceKey];
 
-    // Update the simulator panel button UI
     const btn = document.getElementById(`net-toggle-${deviceKey}`);
     const statusLabel = document.getElementById(`net-status-${deviceKey}`);
 
@@ -965,42 +769,30 @@ function toggleNetworkDevice(deviceKey) {
         }
     }
 
-    // Reflect offline state on home cards
-    updateCardNetworkUI();
-
-    // Log and toast
     const labelMap = {
         light: '💡 조명',
         lock: '🔒 도어락',
         gas: '🔥 가스밸브',
-        temp: '❄️ 에어컨'
+        temp: '❄️ 에어컨',
+        boiler: '♨️ 스마트 보일러',
+        humidity: '💧 습도센서'
     };
     const label = labelMap[deviceKey] || deviceKey;
     const msg = isConnected
-        ? `${label} 연결이 복구되었습니다.`
-        : `${label} 연결이 끊겼습니다. (OFFLINE)`;
-    showToast(msg);
-    addLog(isConnected ? 'system' : 'warning', msg);
+        ? `${label} 통신 연결이 정상 복구되었습니다.`
+        : `${label} 통신 연결이 끊겼습니다 (OFFLINE).`;
+    showToast(msg, isConnected ? 'success' : 'error');
+    addLog(msg, isConnected ? 'system' : 'warning');
 }
 
-// Show connected device count when "기기 호환" nav tab is clicked
 function showConnectedDevicesCount() {
     const connected = getTotalConnected();
     const total = getTotalDevices();
-
-    const disconnectedCategories = Object.keys(networkState)
-        .filter(k => !networkState[k])
-        .map(k => ({ light: '조명', lock: '도어락', gas: '가스밸브', temp: '에어컨' }[k]));
-
-    let message = `현재 ${connected}개 / ${total}개 기기가 연결되어 있습니다.`;
-    if (disconnectedCategories.length > 0) {
-        message += ` (연결 끊김: ${disconnectedCategories.join(', ')})`;
-    }
-    showToast(message);
-    addLog('system', `[기기호환] ${message}`);
+    const msg = `스마트홈 기기 호환: 총 ${connected}개 / ${total}개 기기가 정상 연결되어 있습니다.`;
+    showToast(msg);
+    addLog(msg, 'system');
 }
 
-// Wire up the simulator panel network toggle buttons
 document.addEventListener('DOMContentLoaded', () => {
     const netBtns = document.querySelectorAll('.net-toggle-btn');
     netBtns.forEach(btn => {
@@ -1011,15 +803,699 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// 12. Initial Startup
+// =========================================================================
+// 10. Three.js 3D Digital Twin Simulation Engine
+// =========================================================================
+class ThreeJSSimulator {
+    constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        if (!this.container) return;
+
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.controls = null;
+        this.lights = {};
+        this.materials = {};
+        this.doorMesh = null;
+        this.acParticles = null;
+        this.ondolMeshGroup = null;
+        this.stoveFlame = null;
+        this.roomLabelsGroup = null;
+        this.isAnimatingCamera = false;
+
+        this.init();
+    }
+
+    init() {
+        const width = this.container.clientWidth;
+        const height = this.container.clientHeight;
+
+        // 1. Scene Setup
+        this.scene = new THREE.Scene();
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        this.scene.background = new THREE.Color(isDark ? 0x141820 : 0xdde6f3);
+        this.scene.fog = new THREE.FogExp2(isDark ? 0x141820 : 0xdde6f3, 0.015);
+
+        // 2. Camera Setup
+        this.camera = new THREE.PerspectiveCamera(42, width / height, 0.5, 500);
+        this.camera.position.set(22, 25, 22);
+
+        // 3. WebGL Renderer
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setSize(width, height);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.1;
+        this.container.appendChild(this.renderer.domElement);
+
+        // 4. Orbit Controls
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.05;
+        this.controls.maxPolarAngle = Math.PI / 2.05; // don't go below floor
+        this.controls.minDistance = 8;
+        this.controls.maxDistance = 70;
+        this.controls.target.set(0, 1, 0);
+
+        // 5. Global Illumination (Sun + Ambient)
+        this.ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 0.35 : 0.65);
+        this.scene.add(this.ambientLight);
+
+        this.sunLight = new THREE.DirectionalLight(0xfff8ee, 0.7);
+        this.sunLight.position.set(20, 35, 15);
+        this.sunLight.castShadow = true;
+        this.sunLight.shadow.mapSize.width = 1024;
+        this.sunLight.shadow.mapSize.height = 1024;
+        this.sunLight.shadow.bias = -0.001;
+        this.scene.add(this.sunLight);
+
+        // 6. Build the 3D Apartment Architectural Model matching User Sketch
+        this.buildMaterials();
+        this.buildHouseModel();
+        this.buildOndolHeatingGrid();
+        this.buildACParticleStream();
+        this.buildStoveFlame();
+        this.buildRoomLabels();
+
+        // 7. Bind Resize & Toolbar Controls
+        window.addEventListener('resize', () => this.onResize());
+        this.bindToolbar();
+
+        // 8. Start Render Loop
+        this.animate = this.animate.bind(this);
+        requestAnimationFrame(this.animate);
+    }
+
+    buildMaterials() {
+        this.materials = {
+            floorWood: new THREE.MeshStandardMaterial({ color: 0xd8c8b0, roughness: 0.4, metalness: 0.05 }),
+            floorTile: new THREE.MeshStandardMaterial({ color: 0xe8ecf0, roughness: 0.2, metalness: 0.1 }),
+            floorBath: new THREE.MeshStandardMaterial({ color: 0x95a5a6, roughness: 0.3, metalness: 0.1 }),
+            floorBalcony: new THREE.MeshStandardMaterial({ color: 0xbdc3c7, roughness: 0.6 }),
+            wallCutaway: new THREE.MeshStandardMaterial({ color: 0xf4f7f9, roughness: 0.5 }),
+            wallDark: new THREE.MeshStandardMaterial({ color: 0x34495e, roughness: 0.4 }),
+            glassWindow: new THREE.MeshPhysicalMaterial({
+                color: 0x88ccff,
+                transparent: true,
+                opacity: 0.45,
+                roughness: 0.1,
+                transmission: 0.8,
+                thickness: 0.5
+            }),
+            windowRedMarker: new THREE.MeshStandardMaterial({ color: 0xe74c3c, roughness: 0.3 }),
+            furnitureFabric: new THREE.MeshStandardMaterial({ color: 0x3498db, roughness: 0.8 }),
+            furnitureWood: new THREE.MeshStandardMaterial({ color: 0x8e583e, roughness: 0.5 }),
+            furnitureWhite: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 }),
+            metalChrome: new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.8, roughness: 0.2 }),
+            doorWood: new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.4 })
+        };
+    }
+
+    buildHouseModel() {
+        const root = new THREE.Group();
+
+        // Helper: create a cutaway wall box
+        const createWall = (x, z, w, d, h = 2.4, colorMat = this.materials.wallCutaway) => {
+            const wallGeo = new THREE.BoxGeometry(w, h, d);
+            const wall = new THREE.Mesh(wallGeo, colorMat);
+            wall.position.set(x, h / 2, z);
+            wall.castShadow = true;
+            wall.receiveShadow = true;
+            root.add(wall);
+            return wall;
+        };
+
+        // Helper: create a window with red sketch indicator
+        const createWindow = (x, z, w, d, h = 1.6) => {
+            const frameGeo = new THREE.BoxGeometry(w, 0.15, d);
+            const frame = new THREE.Mesh(frameGeo, this.materials.windowRedMarker);
+            frame.position.set(x, 1.2, z);
+            root.add(frame);
+
+            const glassGeo = new THREE.BoxGeometry(w, h, d);
+            const glass = new THREE.Mesh(glassGeo, this.materials.glassWindow);
+            glass.position.set(x, 1.2, z);
+            root.add(glass);
+        };
+
+        // =====================================================================
+        // ROOM FLOORS (Exact coordinates matching user's layout)
+        // =====================================================================
+
+        // 1. 거실 (Living Room) - Center: (2, 5), size (12, 14)
+        const livingFloorGeo = new THREE.PlaneGeometry(12, 14);
+        const livingFloor = new THREE.Mesh(livingFloorGeo, this.materials.floorWood);
+        livingFloor.rotation.x = -Math.PI / 2;
+        livingFloor.position.set(2, 0.01, 5);
+        livingFloor.receiveShadow = true;
+        root.add(livingFloor);
+
+        // 2. 안방 (Master Room) - Middle-Left: (-9, 1.5), size (10, 9)
+        const masterFloorGeo = new THREE.PlaneGeometry(10, 9);
+        const masterFloor = new THREE.Mesh(masterFloorGeo, this.materials.floorWood);
+        masterFloor.rotation.x = -Math.PI / 2;
+        masterFloor.position.set(-9, 0.01, 1.5);
+        masterFloor.receiveShadow = true;
+        root.add(masterFloor);
+
+        // 3. 방 B (Room B) - Top-Left: (-8, -7.5), size (8, 9)
+        const roomBFloorGeo = new THREE.PlaneGeometry(8, 9);
+        const roomBFloor = new THREE.Mesh(roomBFloorGeo, this.materials.floorWood);
+        roomBFloor.rotation.x = -Math.PI / 2;
+        roomBFloor.position.set(-8, 0.01, -7.5);
+        roomBFloor.receiveShadow = true;
+        root.add(roomBFloor);
+
+        // 3b. 발코니 / 베란다 (Balcony attached to Room B) - Outer Left: (-13, -7.5), size (2, 9)
+        const balconyFloorGeo = new THREE.PlaneGeometry(2, 9);
+        const balconyFloor = new THREE.Mesh(balconyFloorGeo, this.materials.floorBalcony);
+        balconyFloor.rotation.x = -Math.PI / 2;
+        balconyFloor.position.set(-13, 0.01, -7.5);
+        balconyFloor.receiveShadow = true;
+        root.add(balconyFloor);
+
+        // 4. 화장실 (Bathroom) - Bottom-Left: (-9, 9), size (10, 6)
+        const bathFloorGeo = new THREE.PlaneGeometry(10, 6);
+        const bathFloor = new THREE.Mesh(bathFloorGeo, this.materials.floorBath);
+        bathFloor.rotation.x = -Math.PI / 2;
+        bathFloor.position.set(-9, 0.01, 9);
+        bathFloor.receiveShadow = true;
+        root.add(bathFloor);
+
+        // 5. 주방 & 식당 (Kitchen & Dining) - Top-Center: (1, -7.5), size (10, 9)
+        const kitchenFloorGeo = new THREE.PlaneGeometry(10, 9);
+        const kitchenFloor = new THREE.Mesh(kitchenFloorGeo, this.materials.floorTile);
+        kitchenFloor.rotation.x = -Math.PI / 2;
+        kitchenFloor.position.set(1, 0.01, -7.5);
+        kitchenFloor.receiveShadow = true;
+        root.add(kitchenFloor);
+
+        // 6. 현관 (Entrance) - Top-Right: (10, -7.5), size (8, 9)
+        const entranceFloorGeo = new THREE.PlaneGeometry(8, 9);
+        const entranceFloor = new THREE.Mesh(entranceFloorGeo, this.materials.floorTile);
+        entranceFloor.rotation.x = -Math.PI / 2;
+        entranceFloor.position.set(10, 0.01, -7.5);
+        entranceFloor.receiveShadow = true;
+        root.add(entranceFloor);
+
+        // 7. 방 A (Room A) - Bottom-Right: (10, 5), size (8, 14)
+        const roomAFloorGeo = new THREE.PlaneGeometry(8, 14);
+        const roomAFloor = new THREE.Mesh(roomAFloorGeo, this.materials.floorWood);
+        roomAFloor.rotation.x = -Math.PI / 2;
+        roomAFloor.position.set(10, 0.01, 5);
+        roomAFloor.receiveShadow = true;
+        root.add(roomAFloor);
+
+        // =====================================================================
+        // WALLS & WINDOWS (Cutaway Style)
+        // =====================================================================
+
+        // Exterior Perimeter Walls
+        createWall(-14, 2, 0.4, 20); // Far Left Wall
+        createWall(-9, 12, 10, 0.4); // Bathroom Bottom Wall
+        createWall(2, 12, 12, 0.4);  // Living Room Bottom Wall (Has Large Window)
+        createWindow(2, 12, 6, 0.3, 1.8); // 거실 대형 창문 (Red marker)
+
+        createWall(10, 12, 8, 0.4);  // Room A Bottom Wall
+        createWall(14, 5, 0.4, 14);  // Room A Right Wall
+        createWindow(14, 5, 0.3, 4, 1.6); // 방 A 창문 (Red marker)
+
+        createWall(14, -7.5, 0.4, 9); // Entrance Right Wall
+        createWall(10, -12, 8, 0.4);  // Entrance Top Wall
+        createWall(1, -12, 10, 0.4);  // Kitchen Top Wall
+        createWall(-8, -12, 8, 0.4);  // Room B Top Wall
+        createWall(-14, -7.5, 0.4, 9); // Balcony Outer Wall
+        createWindow(-14, -7.5, 0.3, 6, 1.6); // 발코니 창문
+
+        // Interior Dividing Walls
+        createWall(-4, 0, 0.3, 24); // Master/RoomB/Bath vs Living/Kitchen Divider Wall
+        createWall(-9, -3, 10, 0.3); // Room B vs Master Room Divider
+        createWall(-9, 6, 10, 0.3);  // Master Room vs Bathroom Divider
+        createWindow(-14, 1.5, 0.3, 4, 1.6); // 안방 외벽 창문 (Red marker)
+
+        createWall(-12, -7.5, 0.1, 9, 2.4, this.materials.glassWindow); // Room B to Balcony Glass Sliding Door
+        createWall(6, 0, 0.3, 24); // Living/Kitchen vs Entrance/RoomA Divider Wall
+        createWall(1, -2, 10, 0.3); // Kitchen vs Living Room Divider (Half Open Bar)
+        createWall(10, -2, 8, 0.3); // Entrance vs Room A Divider
+
+        // =====================================================================
+        // ENTRANCE DOOR (Animated Pivot)
+        // =====================================================================
+        const doorFrame = new THREE.Group();
+        doorFrame.position.set(10, 0, -12);
+        const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.3, 0.15), this.materials.doorWood);
+        doorMesh.position.set(1.1, 1.15, 0); // pivot at edge
+        doorMesh.castShadow = true;
+        doorFrame.add(doorMesh);
+        root.add(doorFrame);
+        this.doorMesh = doorFrame;
+
+        // =====================================================================
+        // 3D FURNISHINGS & APPLIANCES
+        // =====================================================================
+
+        // 1. 거실 가구 (Sofa, Table, TV, Wall AC)
+        const sofaGeo = new THREE.BoxGeometry(5, 0.9, 2.2);
+        const sofa = new THREE.Mesh(sofaGeo, this.materials.furnitureFabric);
+        sofa.position.set(2, 0.45, 3);
+        sofa.castShadow = true;
+        root.add(sofa);
+
+        const coffeeTable = new THREE.Mesh(new THREE.BoxGeometry(3, 0.4, 1.4), this.materials.furnitureWood);
+        coffeeTable.position.set(2, 0.2, 5.5);
+        coffeeTable.castShadow = true;
+        root.add(coffeeTable);
+
+        const tvUnit = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.5, 0.8), this.materials.furnitureWhite);
+        tvUnit.position.set(2, 0.25, 9.5);
+        root.add(tvUnit);
+
+        const tvScreen = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.8, 0.1), this.materials.wallDark);
+        tvScreen.position.set(2, 1.6, 9.7);
+        root.add(tvScreen);
+
+        // Smart AC Unit on Living Room Wall
+        const acUnit = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.7, 0.4), this.materials.furnitureWhite);
+        acUnit.position.set(5.5, 2.0, 3);
+        root.add(acUnit);
+        this.acUnitMesh = acUnit;
+
+        // 2. 안방 가구 (Master Bed, Wardrobe)
+        const masterBed = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.8, 5.5), this.materials.furnitureFabric);
+        masterBed.position.set(-9, 0.4, 2);
+        masterBed.castShadow = true;
+        root.add(masterBed);
+
+        const headboard = new THREE.Mesh(new THREE.BoxGeometry(4.8, 1.6, 0.4), this.materials.furnitureWood);
+        headboard.position.set(-9, 0.8, -0.7);
+        root.add(headboard);
+
+        // 3. 방 B 가구 (Single Bed, Desk)
+        const bedB = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.7, 4.5), this.materials.furnitureFabric);
+        bedB.position.set(-6, 0.35, -8);
+        bedB.castShadow = true;
+        root.add(bedB);
+
+        const deskB = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.8, 1.2), this.materials.furnitureWood);
+        deskB.position.set(-10, 0.4, -4);
+        root.add(deskB);
+
+        // 4. 방 A 가구 (Single Bed, Desk)
+        const bedA = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.7, 4.5), this.materials.furnitureFabric);
+        bedA.position.set(11, 0.35, 6);
+        bedA.castShadow = true;
+        root.add(bedA);
+
+        const deskA = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.8, 1.2), this.materials.furnitureWood);
+        deskA.position.set(8, 0.4, 0);
+        root.add(deskA);
+
+        // 5. 주방 가구 (Kitchen Counter, Gas Stove, Dining Table, Smart Boiler Box)
+        const counterL = new THREE.Mesh(new THREE.BoxGeometry(6, 1.0, 1.5), this.materials.furnitureWhite);
+        counterL.position.set(0, 0.5, -10.5);
+        counterL.castShadow = true;
+        root.add(counterL);
+
+        // Smart Boiler unit mounted on kitchen wall
+        const boilerBox = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.8, 0.5), this.materials.furnitureWhite);
+        boilerBox.position.set(-3.2, 1.5, -11.5);
+        root.add(boilerBox);
+
+        // Dining Table
+        const diningTable = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.9, 2), this.materials.furnitureWood);
+        diningTable.position.set(1, 0.45, -5.5);
+        diningTable.castShadow = true;
+        root.add(diningTable);
+
+        // 6. 욕실 가구 (Bathtub, Vanity, Toilet)
+        const bathtub = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.9, 1.6), this.materials.furnitureWhite);
+        bathtub.position.set(-11.5, 0.45, 9.5);
+        root.add(bathtub);
+
+        const vanity = new THREE.Mesh(new THREE.BoxGeometry(2, 0.9, 1.2), this.materials.furnitureWhite);
+        vanity.position.set(-6, 0.45, 7.5);
+        root.add(vanity);
+
+        // =====================================================================
+        // ROOM POINT LIGHTS
+        // =====================================================================
+        const createRoomLight = (roomKey, x, y, z) => {
+            const pLight = new THREE.PointLight(0xfff3d6, 0, 14, 1.5);
+            pLight.position.set(x, y, z);
+            pLight.castShadow = false;
+            root.add(pLight);
+
+            // Ceiling fixture mesh
+            const fixture = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.1, 16), this.materials.furnitureWhite);
+            fixture.position.set(x, y + 0.3, z);
+            root.add(fixture);
+
+            this.lights[roomKey] = pLight;
+        };
+
+        createRoomLight('livingRoom', 2, 2.8, 5);
+        createRoomLight('masterRoom', -9, 2.8, 1.5);
+        createRoomLight('roomA', 10, 2.8, 5);
+        createRoomLight('roomB', -8, 2.8, -7.5);
+        createRoomLight('kitchen', 1, 2.8, -7.5);
+        createRoomLight('bathroom', -9, 2.8, 9);
+
+        this.scene.add(root);
+        this.houseRoot = root;
+    }
+
+    buildOndolHeatingGrid() {
+        const group = new THREE.Group();
+
+        const createOndolPlane = (x, z, w, d) => {
+            const geo = new THREE.PlaneGeometry(w - 0.4, d - 0.4, 12, 12);
+            const mat = new THREE.MeshBasicMaterial({
+                color: 0xff3b30,
+                wireframe: true,
+                transparent: true,
+                opacity: 0
+            });
+            const plane = new THREE.Mesh(geo, mat);
+            plane.rotation.x = -Math.PI / 2;
+            plane.position.set(x, 0.03, z);
+            group.add(plane);
+            return plane;
+        };
+
+        this.ondolPlanes = [
+            createOndolPlane(2, 5, 12, 14),   // 거실
+            createOndolPlane(-9, 1.5, 10, 9),  // 안방
+            createOndolPlane(-8, -7.5, 8, 9),  // 방 B
+            createOndolPlane(10, 5, 8, 14),   // 방 A
+            createOndolPlane(1, -7.5, 10, 9)   // 주방
+        ];
+
+        this.scene.add(group);
+        this.ondolMeshGroup = group;
+    }
+
+    buildACParticleStream() {
+        const particleCount = 120;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            positions[i] = 5.2 - Math.random() * 0.4;
+            positions[i + 1] = 1.9 - Math.random() * 0.3;
+            positions[i + 2] = 3.0 + (Math.random() - 0.5) * 1.5;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const material = new THREE.PointsMaterial({
+            color: 0x4a86e8,
+            size: 0.18,
+            transparent: true,
+            opacity: 0,
+            blending: THREE.AdditiveBlending
+        });
+
+        this.acParticles = new THREE.Points(geometry, material);
+        this.scene.add(this.acParticles);
+    }
+
+    buildStoveFlame() {
+        const flameGeo = new THREE.ConeGeometry(0.12, 0.25, 8);
+        const flameMat = new THREE.MeshBasicMaterial({
+            color: 0x3498db,
+            transparent: true,
+            opacity: 0
+        });
+        const flame = new THREE.Mesh(flameGeo, flameMat);
+        flame.position.set(0, 1.15, -10.5);
+        this.scene.add(flame);
+        this.stoveFlame = flame;
+    }
+
+    buildRoomLabels() {
+        const group = new THREE.Group();
+
+        const createLabel = (text, x, z) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 80;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'rgba(26, 30, 38, 0.85)';
+            ctx.roundRect(10, 10, 236, 60, 14);
+            ctx.fill();
+            ctx.strokeStyle = '#4a86e8';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            ctx.font = 'bold 28px sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 128, 40);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.position.set(x, 2.8, z);
+            sprite.scale.set(4, 1.25, 1);
+            group.add(sprite);
+        };
+
+        createLabel('거실 (Living)', 2, 5);
+        createLabel('안방 (Master)', -9, 1.5);
+        createLabel('방 B & 발코니', -8, -7.5);
+        createLabel('방 A (Room A)', 10, 5);
+        createLabel('주방 & 식당', 1, -7.5);
+        createLabel('공용 욕실', -9, 9);
+        createLabel('현관 (Door)', 10, -7.5);
+
+        this.scene.add(group);
+        this.roomLabelsGroup = group;
+    }
+
+    // --- State Synchronization Methods ---
+    syncLights() {
+        const factor = state.brightness / 100;
+        Object.keys(state.lights).forEach(room => {
+            if (this.lights[room]) {
+                const isOn = state.lights[room];
+                this.lights[room].intensity = isOn ? (1.5 * factor + 0.3) : 0;
+            }
+        });
+    }
+
+    syncDoor() {
+        // Will be smoothly tweened in animate()
+    }
+
+    syncGas() {
+        if (this.stoveFlame) {
+            this.stoveFlame.material.opacity = (state.gas.status === 'open') ? 0.9 : 0;
+        }
+    }
+
+    syncThermodynamics() {
+        // Syncs visuals based on aircon and boiler
+    }
+
+    updateTheme(theme) {
+        const isDark = (theme === 'dark');
+        if (this.scene) {
+            this.scene.background.setHex(isDark ? 0x141820 : 0xdde6f3);
+            this.scene.fog.color.setHex(isDark ? 0x141820 : 0xdde6f3);
+        }
+        if (this.ambientLight) {
+            this.ambientLight.intensity = isDark ? 0.35 : 0.65;
+        }
+    }
+
+    animateCameraTo(targetPos, targetLookAt, duration = 800) {
+        const startPos = this.camera.position.clone();
+        const startTarget = this.controls.target.clone();
+        const startTime = performance.now();
+
+        this.isAnimatingCamera = true;
+
+        const updateCam = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = 0.5 - Math.cos(progress * Math.PI) / 2; // smooth easeInOut
+
+            this.camera.position.lerpVectors(startPos, targetPos, ease);
+            this.controls.target.lerpVectors(startTarget, targetLookAt, ease);
+            this.controls.update();
+
+            if (progress < 1) {
+                requestAnimationFrame(updateCam);
+            } else {
+                this.isAnimatingCamera = false;
+            }
+        };
+
+        requestAnimationFrame(updateCam);
+    }
+
+    bindToolbar() {
+        // Camera presets
+        elements.btnCamIso.addEventListener('click', () => {
+            this.setActiveToolBtn(elements.btnCamIso);
+            this.animateCameraTo(new THREE.Vector3(22, 25, 22), new THREE.Vector3(0, 1, 0));
+        });
+
+        elements.btnCamTop.addEventListener('click', () => {
+            this.setActiveToolBtn(elements.btnCamTop);
+            this.animateCameraTo(new THREE.Vector3(0, 36, 0.1), new THREE.Vector3(0, 0, 0));
+        });
+
+        elements.btnCamLiving.addEventListener('click', () => {
+            this.setActiveToolBtn(elements.btnCamLiving);
+            this.animateCameraTo(new THREE.Vector3(2, 14, 18), new THREE.Vector3(2, 1, 5));
+        });
+
+        elements.btnCamMaster.addEventListener('click', () => {
+            this.setActiveToolBtn(elements.btnCamMaster);
+            this.animateCameraTo(new THREE.Vector3(-18, 14, 12), new THREE.Vector3(-9, 1, 1.5));
+        });
+
+        elements.btnCamKitchen.addEventListener('click', () => {
+            this.setActiveToolBtn(elements.btnCamKitchen);
+            this.animateCameraTo(new THREE.Vector3(1, 14, -18), new THREE.Vector3(1, 1, -7.5));
+        });
+
+        elements.btnCamReset.addEventListener('click', () => {
+            this.setActiveToolBtn(elements.btnCamIso);
+            this.animateCameraTo(new THREE.Vector3(22, 25, 22), new THREE.Vector3(0, 1, 0));
+        });
+
+        // 3D Visual Effects Toggles
+        elements.btnToggleOndolFx.addEventListener('click', () => {
+            state.effects3D.ondol = !state.effects3D.ondol;
+            elements.btnToggleOndolFx.classList.toggle('active', state.effects3D.ondol);
+            if (this.ondolMeshGroup) this.ondolMeshGroup.visible = state.effects3D.ondol;
+        });
+
+        elements.btnToggleAcFx.addEventListener('click', () => {
+            state.effects3D.acWind = !state.effects3D.acWind;
+            elements.btnToggleAcFx.classList.toggle('active', state.effects3D.acWind);
+            if (this.acParticles) this.acParticles.visible = state.effects3D.acWind;
+        });
+
+        elements.btnToggleLabelsFx.addEventListener('click', () => {
+            state.effects3D.labels = !state.effects3D.labels;
+            elements.btnToggleLabelsFx.classList.toggle('active', state.effects3D.labels);
+            if (this.roomLabelsGroup) this.roomLabelsGroup.visible = state.effects3D.labels;
+        });
+    }
+
+    setActiveToolBtn(activeBtn) {
+        document.querySelectorAll('.camera-presets-group .btn-tool-chip').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    onResize() {
+        if (!this.container) return;
+        const width = this.container.clientWidth;
+        const height = this.container.clientHeight;
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(width, height);
+    }
+
+    animate() {
+        requestAnimationFrame(this.animate);
+
+        const time = performance.now() * 0.001;
+
+        // 1. Controls update
+        if (!this.isAnimatingCamera && this.controls) {
+            this.controls.update();
+        }
+
+        // 2. Door Animation (Smooth swing)
+        if (this.doorMesh) {
+            const targetRotation = state.door.status === 'unlocked' ? (Math.PI / 2.2) : 0;
+            this.doorMesh.rotation.y += (targetRotation - this.doorMesh.rotation.y) * 0.1;
+        }
+
+        // 3. Boiler Ondol Glow Pulse Animation
+        if (this.ondolPlanes && this.ondolPlanes.length > 0) {
+            const isBoilerOn = state.boiler.active;
+            const targetOpacity = isBoilerOn ? (0.35 + 0.25 * Math.sin(time * 3.5)) : 0;
+            this.ondolPlanes.forEach(plane => {
+                plane.material.opacity += (targetOpacity - plane.material.opacity) * 0.1;
+            });
+        }
+
+        // 4. AC Breeze Particle Flow Animation
+        if (this.acParticles) {
+            const isAcOn = state.aircon.active;
+            const targetOpacity = isAcOn ? 0.75 : 0;
+            this.acParticles.material.opacity += (targetOpacity - this.acParticles.material.opacity) * 0.1;
+
+            if (isAcOn || this.acParticles.material.opacity > 0.02) {
+                const positions = this.acParticles.geometry.attributes.position.array;
+                const windSpeed = state.aircon.wind === 'high' ? 0.08 : (state.aircon.wind === 'medium' ? 0.05 : 0.03);
+
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i] -= windSpeed * 1.5;      // flow in -X direction
+                    positions[i + 1] -= windSpeed * 0.4;  // slightly descend
+                    positions[i + 2] += (Math.sin(time * 2 + i) * 0.02);
+
+                    // Reset particle when reached floor or drifted far
+                    if (positions[i] < -2.0 || positions[i + 1] < 0.2) {
+                        positions[i] = 5.2 - Math.random() * 0.4;
+                        positions[i + 1] = 1.9 - Math.random() * 0.3;
+                        positions[i + 2] = 3.0 + (Math.random() - 0.5) * 1.5;
+                    }
+                }
+                this.acParticles.geometry.attributes.position.needsUpdate = true;
+            }
+        }
+
+        // 5. Gas Stove Flame Animation
+        if (this.stoveFlame && state.gas.status === 'open') {
+            this.stoveFlame.scale.set(
+                1 + 0.15 * Math.sin(time * 15),
+                1 + 0.25 * Math.cos(time * 12),
+                1 + 0.15 * Math.sin(time * 15)
+            );
+        }
+
+        // 6. Render Scene
+        if (this.renderer && this.scene && this.camera) {
+            this.renderer.render(this.scene, this.camera);
+        }
+    }
+}
+
+// Global 3D simulator instance
+let threeApp = null;
+
+// =========================================================================
+// 11. Initial Application Bootstrap
+// =========================================================================
 function init() {
     initTheme();
     updateLightingUI();
     updateDoorUI();
     updateGasUI();
     updateTempUI();
-    initThermodynamics(); // Start temperature simulator engine
-    updateCardNetworkUI(); // Initialise card states
+    initThermodynamics();
+
+    // Initialize 3D Engine
+    setTimeout(() => {
+        threeApp = new ThreeJSSimulator('threejs-container');
+        if (threeApp) {
+            threeApp.syncLights();
+            threeApp.syncDoor();
+            threeApp.syncGas();
+        }
+    }, 150);
 }
 
 document.addEventListener('DOMContentLoaded', init);
