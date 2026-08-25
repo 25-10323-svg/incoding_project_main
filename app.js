@@ -1120,6 +1120,7 @@ function updateGasUI() {
 
         // Resize Handler
         window.addEventListener('resize', onWindowResize3D);
+        setTimeout(onWindowResize3D, 100);
 
         // Initial 3D sync
         update3DLights();
