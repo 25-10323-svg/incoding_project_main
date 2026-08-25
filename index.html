@@ -9,6 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Three.js & 3D Simulation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
 </head>
 <body>
     <!-- SVG Icon Symbols Definition for clean, inline reuse -->
@@ -527,71 +531,32 @@
                         <p>가상 홈 공간의 상태를 실시간으로 모니터링하고 제어 시나리오를 테스트합니다.</p>
                     </div>
 
-                    <!-- 2D Floor Plan Graphic -->
-                    <div class="floor-plan-container">
-                        <div class="floor-plan-grid">
-                            
-                            <!-- Master Bedroom (안방) -->
-                            <div class="room-block master-room" id="sim-masterRoom">
-                                <span class="room-label">안방</span>
-                                <div class="sim-light-indicator single" id="sim-masterRoom-light"></div>
+                    <!-- 3D Real-time House Simulator Canvas & Controls -->
+                    <div class="sim-3d-wrapper">
+                        <div id="webgl-container"></div>
+                        
+                        <!-- Floating 3D Toolbar Controls -->
+                        <div class="sim-3d-overlay">
+                            <div class="sim-3d-toolbar">
+                                <button class="btn-neumorphic sim-3d-btn active" id="btn-view-dollhouse" onclick="setViewMode('dollhouse')">3D 절단 뷰</button>
+                                <button class="btn-neumorphic sim-3d-btn" id="btn-view-full" onclick="setViewMode('full')">3D 외관 뷰</button>
+                                <button class="btn-neumorphic sim-3d-btn" id="btn-view-top" onclick="setViewMode('top')">2D 평면도</button>
+                                <button class="btn-neumorphic sim-3d-btn" id="btn-view-fpv" onclick="setViewMode('fpv')">1인칭 뷰</button>
+                                <button class="btn-neumorphic sim-3d-btn" id="btn-toggle-roof" onclick="toggleRoof()"><span id="roof-btn-text">지붕 닫기</span></button>
+                                <button class="btn-neumorphic sim-3d-btn" id="btn-toggle-daynight" onclick="toggleDayNight()"><span id="daynight-btn-text">야간 모드</span></button>
+                                <button class="btn-neumorphic sim-3d-btn" onclick="resetCameraView()">초기화</button>
                             </div>
 
-                            <!-- Master Bath (안방 화장실) -->
-                            <div class="room-block master-bath" id="sim-masterBathroom">
-                                <span class="room-label">안방 욕실</span>
-                                <div class="sim-light-indicator single" id="sim-masterBathroom-light"></div>
+                            <div class="room-quick-btns">
+                                <button class="btn-room-chip" onclick="focusRoom('master-bed')">안방</button>
+                                <button class="btn-room-chip" onclick="focusRoom('master-bath')">안방 욕실</button>
+                                <button class="btn-room-chip" onclick="focusRoom('room-a')">방A</button>
+                                <button class="btn-room-chip" onclick="focusRoom('living')">거실</button>
+                                <button class="btn-room-chip" onclick="focusRoom('shared-bath')">공용 욕실</button>
+                                <button class="btn-room-chip" onclick="focusRoom('room-b')">방B</button>
+                                <button class="btn-room-chip" onclick="focusRoom('kitchen')">주방&가스</button>
+                                <button class="btn-room-chip" onclick="focusRoom('entrance')">현관문</button>
                             </div>
-
-                            <!-- Room A (방a) -->
-                            <div class="room-block room-a" id="sim-roomA">
-                                <span class="room-label">방a</span>
-                                <div class="sim-light-indicator single" id="sim-roomA-light"></div>
-                            </div>
-
-                            <!-- Bathroom (화장실) -->
-                            <div class="room-block public-bath" id="sim-bathroom">
-                                <span class="room-label">공용 욕실</span>
-                                <div class="sim-light-indicator single" id="sim-bathroom-light"></div>
-                            </div>
-
-                            <!-- Living Room (거실) -->
-                            <div class="room-block living-room" id="sim-livingRoom">
-                                <span class="room-label">거실 (전체 조명 밝기 연동)</span>
-                                <div class="sim-light-indicator single" id="sim-livingRoom-light"></div>
-                                <div class="aircon-graphic-sim" id="sim-aircon-indicator">
-                                    <span class="fan-icon">❄️</span>
-                                    <span class="wind-lines">░░</span>
-                                </div>
-                            </div>
-
-                            <!-- Room B (방b) -->
-                            <div class="room-block room-b" id="sim-roomB">
-                                <span class="room-label">방b</span>
-                                <div class="sim-light-indicator single" id="sim-roomB-light"></div>
-                            </div>
-
-                            <!-- Kitchen / Gas Area (주방/가스) -->
-                            <div class="room-block kitchen" id="sim-kitchen">
-                                <span class="room-label">주방 & 가스</span>
-                                <div class="sim-light-indicator single" id="sim-kitchen-light"></div>
-                                <div class="kitchen-sim-status">
-                                    <div class="gas-valve-graphic" id="sim-gas-valve">
-                                        <svg class="valve-svg-sim"><use href="#icon-valve"></use></svg>
-                                    </div>
-                                    <div class="kitchen-temp-display" id="sim-kitchen-temp">24.7°C</div>
-                                </div>
-                            </div>
-
-                            <!-- Entrance / Door Lock (현관) -->
-                            <div class="room-block entrance" id="sim-entrance">
-                                <span class="room-label">현관문</span>
-                                <div class="entrance-door-graphic" id="sim-door-status">
-                                    <span class="door-status-text">LOCKED</span>
-                                    <div class="secure-lock-active-light" id="sim-door-secure-active-light"></div>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
 
