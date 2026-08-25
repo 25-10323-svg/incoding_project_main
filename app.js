@@ -1,4 +1,4 @@
-// AURA 3D Smart Home Digital Twin - 100x Scale, Smart Curtains, Door Open/Close, 3D Lamps, Roof & FPS Engine
+// AURA 3D Smart Home Digital Twin - Grand Scale Penthouse Engine & Continuous WASD Walkthrough
 
 // =========================================================================
 // 1. Central Application State
@@ -15,11 +15,11 @@ const state = {
         bathroom: false
     },
     door: {
-        locked: true,     // true: locked, false: unlocked
-        opened: false     // true: physical door opened (90 deg), false: closed
+        locked: true,
+        opened: false
     },
     curtains: {
-        livingRoom: true, // true: open (revealing window), false: closed
+        livingRoom: true,
         masterRoom: true,
         roomA: true,
         roomB: true
@@ -170,7 +170,7 @@ const elements = {
 // =========================================================================
 function navigateTo(screenIndex) {
     state.currentScreen = screenIndex;
-    const translatePercentage = -(screenIndex - 1) * 16.666; // 6 screens = 16.666%
+    const translatePercentage = -(screenIndex - 1) * 16.666;
     elements.screensWrapper.style.transform = `translateX(${translatePercentage}%)`;
 }
 
@@ -293,7 +293,6 @@ elements.lightSingleButtons.forEach(btn => {
 
 // --- 6.2 Door Open/Close & Lock UI ---
 function updateDoorUI() {
-    // 1. Physical Open / Close UI
     if (state.door.opened) {
         elements.btnDoorOpenPhys.classList.add('active');
         elements.btnDoorClosePhys.classList.remove('active');
@@ -302,7 +301,6 @@ function updateDoorUI() {
         elements.btnDoorClosePhys.classList.add('active');
     }
 
-    // 2. Lock UI
     if (state.door.locked) {
         elements.btnDoorUnlock.classList.remove('active');
         elements.btnDoorLock.classList.add('active');
@@ -311,7 +309,6 @@ function updateDoorUI() {
         elements.btnDoorLock.classList.remove('active');
     }
 
-    // 3. Header Status Pill
     if (elements.hdrDoor) {
         if (state.door.opened) {
             elements.hdrDoor.textContent = '현관문 열림';
@@ -325,9 +322,7 @@ function updateDoorUI() {
 
 elements.btnDoorOpenPhys.addEventListener('click', () => {
     if (state.door.opened) return;
-    if (state.door.locked) {
-        state.door.locked = false; // Auto unlock on open
-    }
+    if (state.door.locked) state.door.locked = false;
     state.door.opened = true;
     updateDoorUI();
     showToast('현관문이 열렸습니다. (3D 회전 모션)');
@@ -343,9 +338,7 @@ elements.btnDoorClosePhys.addEventListener('click', () => {
 elements.btnDoorLock.addEventListener('click', () => {
     if (state.door.locked) return;
     state.door.locked = true;
-    if (state.door.opened) {
-        state.door.opened = false; // Auto close on lock
-    }
+    if (state.door.opened) state.door.opened = false;
     updateDoorUI();
     showToast('현관문 도어락이 잠겼습니다.');
 });
@@ -732,7 +725,6 @@ function executeLeaveHome() {
     state.door.locked = true;
     updateDoorUI();
 
-    // Close all curtains
     Object.keys(state.curtains).forEach(room => state.curtains[room] = false);
     updateCurtainUI();
 
@@ -761,7 +753,7 @@ function showConnectedDevicesCount() {
 }
 
 // =========================================================================
-// 9. Three.js 3D Engine (100x Scale, 3D Curtains, 3D Lamps, Roof & FPS Walk)
+// 9. Three.js 3D Monumental Engine (100x Scale, Soaring Walls, WASD FPS & Curtains)
 // =========================================================================
 class ThreeJSSimulator {
     constructor(containerId) {
@@ -785,10 +777,10 @@ class ThreeJSSimulator {
         this.roofGroup = null;
         this.isAnimatingCamera = false;
 
-        // FPS Mode State
-        this.fpsPos = new THREE.Vector3(10, 5.5, 20);
-        this.fpsTarget = new THREE.Vector3(10, 5.5, 30);
+        // Continuous WASD Keys Tracker
         this.keys = {};
+        this.fpsPos = new THREE.Vector3(25, 7.0, 60); // Living room eye level
+        this.clock = new THREE.Clock();
 
         this.init();
     }
@@ -801,11 +793,11 @@ class ThreeJSSimulator {
         this.scene = new THREE.Scene();
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         this.scene.background = new THREE.Color(isDark ? 0x090e1a : 0xebf0f7);
-        this.scene.fog = new THREE.FogExp2(isDark ? 0x090e1a : 0xebf0f7, 0.0022);
+        this.scene.fog = new THREE.FogExp2(isDark ? 0x090e1a : 0xebf0f7, 0.0015);
 
-        // 2. Camera
-        this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 3000);
-        this.camera.position.set(130, 130, 130);
+        // 2. Camera (Wide Far Plane for High-rise Scale)
+        this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 20000);
+        this.camera.position.set(160, 160, 160);
 
         // 3. Renderer
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -814,7 +806,7 @@ class ThreeJSSimulator {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 1.25;
+        this.renderer.toneMappingExposure = 1.3;
         this.container.appendChild(this.renderer.domElement);
 
         // 4. Controls
@@ -823,31 +815,31 @@ class ThreeJSSimulator {
         this.controls.dampingFactor = 0.05;
         this.controls.maxPolarAngle = Math.PI / 2.04;
         this.controls.minDistance = 10;
-        this.controls.maxDistance = 500;
-        this.controls.target.set(0, 5, 0);
+        this.controls.maxDistance = 1200;
+        this.controls.target.set(0, 8, 0);
 
         // 5. Illumination
-        this.ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 0.45 : 0.75);
+        this.ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 0.45 : 0.78);
         this.scene.add(this.ambientLight);
 
         this.sunLight = new THREE.DirectionalLight(0xfff8ee, 0.95);
-        this.sunLight.position.set(120, 180, 90);
+        this.sunLight.position.set(180, 260, 140);
         this.sunLight.castShadow = true;
         this.sunLight.shadow.mapSize.width = 2048;
         this.sunLight.shadow.mapSize.height = 2048;
         this.sunLight.shadow.camera.near = 10;
-        this.sunLight.shadow.camera.far = 450;
-        this.sunLight.shadow.camera.left = -160;
-        this.sunLight.shadow.camera.right = 160;
-        this.sunLight.shadow.camera.top = 100;
-        this.sunLight.shadow.camera.bottom = -100;
+        this.sunLight.shadow.camera.far = 700;
+        this.sunLight.shadow.camera.left = -220;
+        this.sunLight.shadow.camera.right = 220;
+        this.sunLight.shadow.camera.top = 220;
+        this.sunLight.shadow.camera.bottom = -220;
         this.sunLight.shadow.bias = -0.0005;
         this.scene.add(this.sunLight);
 
-        // 6. Build the 100x Scale Grand House & Fixtures
+        // 6. Build the Soaring Grand House & Modern Reorganized Furniture
         this.buildMaterials();
-        this.buildGrandHouseModel();
-        this.build3DLampFixtures();
+        this.buildGrandHouseArchitecture();
+        this.build3DLamps();
         this.build3DCurtains();
         this.buildRoofSlab();
         this.buildOndolHeatingGrid();
@@ -856,11 +848,11 @@ class ThreeJSSimulator {
         this.buildStoveFlame();
         this.buildRoomLabels();
 
-        // 7. Bind Events & FPS
+        // 7. Bind WASD & Events
         window.addEventListener('resize', () => this.onResize());
         this.bindToolbar();
         this.bindRoomHUD();
-        this.bindFPSControls();
+        this.bindContinuousWASD();
 
         // 8. Start Loop
         this.animate = this.animate.bind(this);
@@ -869,26 +861,27 @@ class ThreeJSSimulator {
 
     buildMaterials() {
         this.materials = {
-            floorWoodLiving: new THREE.MeshStandardMaterial({ color: 0xd8c5ab, roughness: 0.35, metalness: 0.05 }),
-            floorWoodRooms: new THREE.MeshStandardMaterial({ color: 0xcdb99c, roughness: 0.4, metalness: 0.05 }),
-            floorTileKitchen: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.1 }),
-            floorTileBath: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.25, metalness: 0.1 }),
+            floorLiving: new THREE.MeshStandardMaterial({ color: 0xd8c5ab, roughness: 0.35, metalness: 0.05 }),
+            floorRooms: new THREE.MeshStandardMaterial({ color: 0xcdb99c, roughness: 0.4, metalness: 0.05 }),
+            floorKitchen: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.1 }),
+            floorBath: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.25, metalness: 0.1 }),
             floorBalcony: new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.6 }),
             wallCutaway: new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 }),
-            wallRoof: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5, metalness: 0.1 }),
+            wallRoof: new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.1 }),
             glassWindow: new THREE.MeshPhysicalMaterial({
                 color: 0x93c5fd,
                 transparent: true,
                 opacity: 0.45,
                 roughness: 0.1,
                 transmission: 0.85,
-                thickness: 1.0
+                thickness: 1.2
             }),
             windowRedMarker: new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 }),
-            curtainFabric: new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.85, side: THREE.DoubleSide }),
-            curtainMaster: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9, side: THREE.DoubleSide }),
-            blindRoomA: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5, side: THREE.DoubleSide }),
+            curtainFabric: new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85, side: THREE.DoubleSide }),
+            curtainMaster: new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9, side: THREE.DoubleSide }),
+            blindMesh: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5, side: THREE.DoubleSide }),
             leatherSofa: new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.6 }),
+            leatherSofaAccent: new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.6 }),
             woodDark: new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.4 }),
             woodLight: new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.5 }),
             furnitureWhite: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.25 }),
@@ -901,10 +894,13 @@ class ThreeJSSimulator {
         };
     }
 
-    buildGrandHouseModel() {
+    buildGrandHouseArchitecture() {
         const root = new THREE.Group();
 
-        const createWall = (x, z, w, d, h = 10.0, colorMat = this.materials.wallCutaway) => {
+        // Soaring Wall Height (Y: 18.0 units)
+        const wallHeight = 18.0;
+
+        const createWall = (x, z, w, d, h = wallHeight, colorMat = this.materials.wallCutaway) => {
             const wallGeo = new THREE.BoxGeometry(w, h, d);
             const wall = new THREE.Mesh(wallGeo, colorMat);
             wall.position.set(x, h / 2, z);
@@ -914,175 +910,276 @@ class ThreeJSSimulator {
             return wall;
         };
 
-        const createWindow = (x, z, w, d, h = 6.5) => {
-            const frameGeo = new THREE.BoxGeometry(w, 0.4, d);
+        const createWindow = (x, z, w, d, h = 12.0) => {
+            const frameGeo = new THREE.BoxGeometry(w, 0.5, d);
             const frame = new THREE.Mesh(frameGeo, this.materials.windowRedMarker);
-            frame.position.set(x, 5.0, z);
+            frame.position.set(x, 9.0, z);
             root.add(frame);
 
             const glassGeo = new THREE.BoxGeometry(w, h, d);
             const glass = new THREE.Mesh(glassGeo, this.materials.glassWindow);
-            glass.position.set(x, 5.0, z);
+            glass.position.set(x, 9.0, z);
             root.add(glass);
         };
 
-        // Floors (100x Horizontal Span: X from -150 to +150, Z from -60 to +60)
-        // Living Room
-        const livingFloor = new THREE.Mesh(new THREE.PlaneGeometry(100, 75), this.materials.floorWoodLiving);
+        // =====================================================================
+        // 1. FLOORS (Grand Spans: X: -150 to +150, Z: -150 to +150)
+        // =====================================================================
+        // Living Room (거실): X: -30 to +80 (w: 110), Z: -20 to +150 (d: 170)
+        const livingFloor = new THREE.Mesh(new THREE.PlaneGeometry(110, 170), this.materials.floorLiving);
         livingFloor.rotation.x = -Math.PI / 2;
-        livingFloor.position.set(10, 0.01, 22.5);
+        livingFloor.position.set(25, 0.01, 65);
         livingFloor.receiveShadow = true;
         root.add(livingFloor);
 
-        // Master Room
-        const masterFloor = new THREE.Mesh(new THREE.PlaneGeometry(110, 50), this.materials.floorWoodRooms);
+        // Master Room (안방): X: -150 to -30 (w: 120), Z: -30 to +70 (d: 100)
+        const masterFloor = new THREE.Mesh(new THREE.PlaneGeometry(120, 100), this.materials.floorRooms);
         masterFloor.rotation.x = -Math.PI / 2;
-        masterFloor.position.set(-95, 0.01, 5);
+        masterFloor.position.set(-90, 0.01, 20);
         masterFloor.receiveShadow = true;
         root.add(masterFloor);
 
-        // Room B & Balcony
-        const roomBFloor = new THREE.Mesh(new THREE.PlaneGeometry(80, 40), this.materials.floorWoodRooms);
+        // Room B (방 B): X: -110 to -30 (w: 80), Z: -150 to -30 (d: 120)
+        const roomBFloor = new THREE.Mesh(new THREE.PlaneGeometry(80, 120), this.materials.floorRooms);
         roomBFloor.rotation.x = -Math.PI / 2;
-        roomBFloor.position.set(-80, 0.01, -40);
+        roomBFloor.position.set(-70, 0.01, -90);
         roomBFloor.receiveShadow = true;
         root.add(roomBFloor);
 
-        const balconyFloor = new THREE.Mesh(new THREE.PlaneGeometry(30, 40), this.materials.floorBalcony);
+        // Balcony (발코니): X: -150 to -110 (w: 40), Z: -150 to -30 (d: 120)
+        const balconyFloor = new THREE.Mesh(new THREE.PlaneGeometry(40, 120), this.materials.floorBalcony);
         balconyFloor.rotation.x = -Math.PI / 2;
-        balconyFloor.position.set(-135, 0.01, -40);
+        balconyFloor.position.set(-130, 0.01, -90);
         balconyFloor.receiveShadow = true;
         root.add(balconyFloor);
 
-        // Bathroom
-        const bathFloor = new THREE.Mesh(new THREE.PlaneGeometry(110, 30), this.materials.floorTileBath);
+        // Bathroom (화장실): X: -150 to -30 (w: 120), Z: +70 to +150 (d: 80)
+        const bathFloor = new THREE.Mesh(new THREE.PlaneGeometry(120, 80), this.materials.floorBath);
         bathFloor.rotation.x = -Math.PI / 2;
-        bathFloor.position.set(-95, 0.01, 45);
+        bathFloor.position.set(-90, 0.01, 110);
         bathFloor.receiveShadow = true;
         root.add(bathFloor);
 
-        // Kitchen & Dining
-        const kitchenFloor = new THREE.Mesh(new THREE.PlaneGeometry(100, 45), this.materials.floorTileKitchen);
+        // Kitchen & Dining (주방): X: -30 to +80 (w: 110), Z: -150 to -20 (d: 130)
+        const kitchenFloor = new THREE.Mesh(new THREE.PlaneGeometry(110, 130), this.materials.floorKitchen);
         kitchenFloor.rotation.x = -Math.PI / 2;
-        kitchenFloor.position.set(10, 0.01, -37.5);
+        kitchenFloor.position.set(25, 0.01, -85);
         kitchenFloor.receiveShadow = true;
         root.add(kitchenFloor);
 
-        // Entrance
-        const entranceFloor = new THREE.Mesh(new THREE.PlaneGeometry(90, 45), this.materials.floorTileKitchen);
+        // Entrance (현관): X: +80 to +150 (w: 70), Z: -150 to -20 (d: 130)
+        const entranceFloor = new THREE.Mesh(new THREE.PlaneGeometry(70, 130), this.materials.floorKitchen);
         entranceFloor.rotation.x = -Math.PI / 2;
-        entranceFloor.position.set(105, 0.01, -37.5);
+        entranceFloor.position.set(115, 0.01, -85);
         entranceFloor.receiveShadow = true;
         root.add(entranceFloor);
 
-        // Room A
-        const roomAFloor = new THREE.Mesh(new THREE.PlaneGeometry(90, 75), this.materials.floorWoodRooms);
+        // Room A (방 A): X: +80 to +150 (w: 70), Z: -20 to +150 (d: 170)
+        const roomAFloor = new THREE.Mesh(new THREE.PlaneGeometry(70, 170), this.materials.floorRooms);
         roomAFloor.rotation.x = -Math.PI / 2;
-        roomAFloor.position.set(105, 0.01, 22.5);
+        roomAFloor.position.set(115, 0.01, 65);
         roomAFloor.receiveShadow = true;
         root.add(roomAFloor);
 
-        // Walls & Windows
-        createWall(-150, 0, 1.8, 120);
-        createWall(-95, 60, 110, 1.8);
-        createWall(10, 60, 100, 1.8);
-        createWindow(10, 60, 50, 1.0, 7.0); // 거실 대형 창문
+        // =====================================================================
+        // 2. WALLS & WINDOWS
+        // =====================================================================
+        createWall(-150, 0, 2.0, 300); // Far Left Wall
+        createWall(-90, 150, 120, 2.0); // Bath Bottom Wall
+        createWall(25, 150, 110, 2.0);  // Living Room Bottom Wall
+        createWindow(25, 150, 70, 1.2, 13.0); // 거실 대형 창문 (Red Marker)
 
-        createWall(105, 60, 90, 1.8);
-        createWall(150, 22.5, 1.8, 75);
-        createWindow(150, 22.5, 1.0, 40, 6.5); // 방 A 창문
+        createWall(115, 150, 70, 2.0);  // Room A Bottom Wall
+        createWall(150, 65, 2.0, 170);  // Room A Right Wall
+        createWindow(150, 65, 1.2, 70, 12.0); // 방 A 창문 (Red Marker)
 
-        createWall(150, -37.5, 1.8, 45);
-        createWall(105, -60, 90, 1.8);
-        createWall(10, -60, 100, 1.8);
-        createWindow(10, -60, 24, 1.0, 5.0); // 주방 창문
+        createWall(150, -85, 2.0, 130); // Entrance Right Wall
+        createWall(115, -150, 70, 2.0); // Entrance Top Wall
+        createWall(25, -150, 110, 2.0); // Kitchen Top Wall
+        createWindow(25, -150, 40, 1.2, 10.0); // 주방 창문
 
-        createWall(-80, -60, 80, 1.8);
-        createWall(-150, -40, 1.8, 40);
-        createWindow(-150, -40, 1.0, 26, 6.5); // 발코니 창문
+        createWall(-70, -150, 80, 2.0); // Room B Top Wall
+        createWall(-150, -90, 2.0, 120); // Balcony Outer Wall
+        createWindow(-150, -90, 1.2, 70, 12.0); // 발코니 창문
 
-        // Interior Walls
-        createWall(-40, 0, 1.6, 120);
-        createWall(-95, -20, 110, 1.6);
-        createWall(-95, 30, 110, 1.6);
-        createWindow(-150, 5, 1.0, 36, 6.5); // 안방 외벽 창문
+        // Dividing Walls
+        createWall(-30, 0, 1.8, 300);   // Master/RoomB/Bath vs Living/Kitchen Divider
+        createWall(-90, -30, 120, 1.8); // Room B vs Master Room Divider
+        createWall(-90, 70, 120, 1.8);  // Master Room vs Bath Divider
+        createWindow(-150, 20, 1.2, 50, 12.0); // 안방 창문 (Red Marker)
 
-        createWall(-120, -40, 0.4, 40, 10.0, this.materials.glassWindow);
-        createWall(60, 0, 1.6, 120);
-        createWall(10, -15, 100, 1.6);
-        createWall(105, -15, 90, 1.6);
+        createWall(-110, -90, 0.4, 120, wallHeight, this.materials.glassWindow); // Balcony Glass Divider
+        createWall(80, 0, 1.8, 300);    // Living/Kitchen vs Entrance/RoomA Divider
+        createWall(25, -20, 110, 1.8);  // Kitchen vs Living Divider
+        createWall(115, -20, 70, 1.8);  // Entrance vs Room A Divider
 
-        // Entrance Door Assembly
+        // Entrance Door
         const doorFrame = new THREE.Group();
-        doorFrame.position.set(105, 0, -60);
-        const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(18, 9.5, 0.8), this.materials.doorWood);
-        doorMesh.position.set(9, 4.75, 0);
+        doorFrame.position.set(115, 0, -150);
+        const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(22, 16.0, 1.0), this.materials.doorWood);
+        doorMesh.position.set(11, 8.0, 0);
         doorMesh.castShadow = true;
         doorFrame.add(doorMesh);
 
-        const lockPad = new THREE.Mesh(new THREE.BoxGeometry(1.6, 3.5, 0.4), this.materials.metalChrome);
-        lockPad.position.set(16, 4.75, 0.5);
+        const lockPad = new THREE.Mesh(new THREE.BoxGeometry(2.0, 5.0, 0.4), this.materials.metalChrome);
+        lockPad.position.set(20, 8.0, 0.6);
         doorFrame.add(lockPad);
         root.add(doorFrame);
         this.doorMesh = doorFrame;
 
-        // Furniture
-        const rug = new THREE.Mesh(new THREE.PlaneGeometry(60, 45), this.materials.carpetLiving);
+        // =====================================================================
+        // 3. BEAUTIFULLY REORGANIZED GRAND FURNITURE SET
+        // =====================================================================
+
+        // --- 🛋️ 거실 (Living Room) ---
+        const rug = new THREE.Mesh(new THREE.PlaneGeometry(80, 65), this.materials.carpetLiving);
         rug.rotation.x = -Math.PI / 2;
-        rug.position.set(10, 0.02, 22);
+        rug.position.set(25, 0.02, 65);
         root.add(rug);
 
-        const sofaMain = new THREE.Mesh(new THREE.BoxGeometry(45, 3.8, 12), this.materials.leatherSofa);
-        sofaMain.position.set(10, 1.9, 10);
-        sofaMain.castShadow = true;
-        root.add(sofaMain);
+        // U-Shaped Modern Sectional Sofa Suite
+        const sofaCenter = new THREE.Mesh(new THREE.BoxGeometry(55, 4.5, 14), this.materials.leatherSofa);
+        sofaCenter.position.set(25, 2.25, 45);
+        sofaCenter.castShadow = true;
+        root.add(sofaCenter);
 
-        const sofaL = new THREE.Mesh(new THREE.BoxGeometry(12, 3.8, 26), this.materials.leatherSofa);
-        sofaL.position.set(-8, 1.9, 23);
-        sofaL.castShadow = true;
-        root.add(sofaL);
+        const sofaWingL = new THREE.Mesh(new THREE.BoxGeometry(14, 4.5, 35), this.materials.leatherSofa);
+        sofaWingL.position.set(-6, 2.25, 62);
+        sofaWingL.castShadow = true;
+        root.add(sofaWingL);
 
-        const coffeeTable = new THREE.Mesh(new THREE.BoxGeometry(24, 1.8, 11), this.materials.woodDark);
-        coffeeTable.position.set(12, 0.9, 22);
+        const sofaWingR = new THREE.Mesh(new THREE.BoxGeometry(14, 4.5, 35), this.materials.leatherSofaAccent);
+        sofaWingR.position.set(56, 2.25, 62);
+        sofaWingR.castShadow = true;
+        root.add(sofaWingR);
+
+        // Grand Marble Coffee Table
+        const coffeeTable = new THREE.Mesh(new THREE.BoxGeometry(32, 2.2, 16), this.materials.woodDark);
+        coffeeTable.position.set(25, 1.1, 65);
         coffeeTable.castShadow = true;
         root.add(coffeeTable);
 
-        const tvConsole = new THREE.Mesh(new THREE.BoxGeometry(38, 2.4, 6), this.materials.furnitureWhite);
-        tvConsole.position.set(10, 1.2, 48);
+        // 98-inch 8K Smart TV & Entertainment Console
+        const tvConsole = new THREE.Mesh(new THREE.BoxGeometry(60, 3.0, 7), this.materials.furnitureWhite);
+        tvConsole.position.set(25, 1.5, 138);
         tvConsole.castShadow = true;
         root.add(tvConsole);
 
-        const tvScreen = new THREE.Mesh(new THREE.BoxGeometry(28, 12, 0.6), this.materials.tvScreen);
-        tvScreen.position.set(10, 8.5, 48.5);
+        const tvScreen = new THREE.Mesh(new THREE.BoxGeometry(45, 20.0, 0.8), this.materials.tvScreen);
+        tvScreen.position.set(25, 13.0, 138.5);
         root.add(tvScreen);
 
-        const acUnit = new THREE.Mesh(new THREE.BoxGeometry(16, 3.2, 2.5), this.materials.furnitureWhite);
-        acUnit.position.set(58, 8.2, 10);
+        // Smart Air Conditioner Tower on side wall
+        const acUnit = new THREE.Mesh(new THREE.BoxGeometry(22, 5.0, 3.5), this.materials.furnitureWhite);
+        acUnit.position.set(78, 14.0, 45);
         root.add(acUnit);
+        this.acUnitMesh = acUnit;
 
-        const humidifierBody = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 5.0, 24), this.materials.furnitureWhite);
-        humidifierBody.position.set(36, 2.5, 26);
+        // Smart Ultrasonic Humidifier Console
+        const humidifierBody = new THREE.Mesh(new THREE.CylinderGeometry(3.0, 3.0, 7.0, 24), this.materials.furnitureWhite);
+        humidifierBody.position.set(58, 3.5, 95);
         humidifierBody.castShadow = true;
         root.add(humidifierBody);
+        this.humidifierMesh = humidifierBody;
 
-        const masterBed = new THREE.Mesh(new THREE.BoxGeometry(32, 3.2, 36), this.materials.leatherSofa);
-        masterBed.position.set(-95, 1.6, 8);
-        masterBed.castShadow = true;
-        root.add(masterBed);
-
-        const kitchenCounter = new THREE.Mesh(new THREE.BoxGeometry(50, 4.0, 8.5), this.materials.furnitureWhite);
-        kitchenCounter.position.set(5, 2.0, -52);
-        kitchenCounter.castShadow = true;
-        root.add(kitchenCounter);
-
-        const kitchenIsland = new THREE.Mesh(new THREE.BoxGeometry(36, 4.0, 9.0), this.materials.woodDark);
-        kitchenIsland.position.set(8, 2.0, -32);
+        // --- 🍳 주방 & 식당 (Kitchen & Dining) ---
+        // Chef's Long Marble Island with Induction Cooktop
+        const kitchenIsland = new THREE.Mesh(new THREE.BoxGeometry(55, 5.0, 14), this.materials.woodDark);
+        kitchenIsland.position.set(25, 2.5, -80);
         kitchenIsland.castShadow = true;
         root.add(kitchenIsland);
 
-        const boilerBox = new THREE.Mesh(new THREE.BoxGeometry(8, 9, 3.0), this.materials.furnitureWhite);
-        boilerBox.position.set(-32, 6.0, -56);
+        // Counter Wall Unit
+        const kitchenCounter = new THREE.Mesh(new THREE.BoxGeometry(80, 5.0, 12), this.materials.furnitureWhite);
+        kitchenCounter.position.set(25, 2.5, -140);
+        kitchenCounter.castShadow = true;
+        root.add(kitchenCounter);
+
+        // Smart Boiler Station on Utility Wall
+        const boilerBox = new THREE.Mesh(new THREE.BoxGeometry(12, 14, 4.0), this.materials.furnitureWhite);
+        boilerBox.position.set(-22, 9.0, -145);
         root.add(boilerBox);
+
+        // 8-Seater Designer Dining Table
+        const diningTable = new THREE.Mesh(new THREE.BoxGeometry(45, 4.5, 18), this.materials.woodLight);
+        diningTable.position.set(25, 2.25, -45);
+        diningTable.castShadow = true;
+        root.add(diningTable);
+
+        // Refrigerator
+        const fridge = new THREE.Mesh(new THREE.BoxGeometry(12, 14.0, 8), this.materials.metalChrome);
+        fridge.position.set(65, 7.0, -140);
+        root.add(fridge);
+
+        // --- 🛏️ 안방 (Master Suite) ---
+        // Master King-size Bed & Headboard
+        const masterBed = new THREE.Mesh(new THREE.BoxGeometry(45, 4.5, 50), this.materials.leatherSofa);
+        masterBed.position.set(-90, 2.25, 25);
+        masterBed.castShadow = true;
+        root.add(masterBed);
+
+        const headboard = new THREE.Mesh(new THREE.BoxGeometry(55, 12.0, 3.0), this.materials.woodDark);
+        headboard.position.set(-90, 6.0, -3);
+        root.add(headboard);
+
+        // Nightstands
+        const nightstandL = new THREE.Mesh(new THREE.BoxGeometry(8, 3.5, 6), this.materials.woodDark);
+        nightstandL.position.set(-124, 1.75, 5);
+        root.add(nightstandL);
+
+        const nightstandR = new THREE.Mesh(new THREE.BoxGeometry(8, 3.5, 6), this.materials.woodDark);
+        nightstandR.position.set(-56, 1.75, 5);
+        root.add(nightstandR);
+
+        // Full-wall Wardrobe Closet
+        const wardrobe = new THREE.Mesh(new THREE.BoxGeometry(80, 14.0, 6), this.materials.furnitureWhite);
+        wardrobe.position.set(-90, 7.0, 65);
+        root.add(wardrobe);
+
+        // --- 🛏️ 방 B & 발코니 (Work & Gaming Studio) ---
+        const bedB = new THREE.Mesh(new THREE.BoxGeometry(25, 4.0, 45), this.materials.leatherSofa);
+        bedB.position.set(-55, 2.0, -80);
+        bedB.castShadow = true;
+        root.add(bedB);
+
+        const deskB = new THREE.Mesh(new THREE.BoxGeometry(30, 4.0, 10), this.materials.woodDark);
+        deskB.position.set(-85, 2.0, -135);
+        deskB.castShadow = true;
+        root.add(deskB);
+
+        const laundryRack = new THREE.Mesh(new THREE.BoxGeometry(16, 10.0, 6), this.materials.metalChrome);
+        laundryRack.position.set(-130, 5.0, -90);
+        root.add(laundryRack);
+
+        // --- 🛏️ 방 A (Study & Library Bedroom) ---
+        const bedA = new THREE.Mesh(new THREE.BoxGeometry(25, 4.0, 45), this.materials.leatherSofa);
+        bedA.position.set(125, 2.0, 80);
+        bedA.castShadow = true;
+        root.add(bedA);
+
+        const deskA = new THREE.Mesh(new THREE.BoxGeometry(35, 4.0, 10), this.materials.woodLight);
+        deskA.position.set(100, 2.0, 10);
+        deskA.castShadow = true;
+        root.add(deskA);
+
+        const bookshelfA = new THREE.Mesh(new THREE.BoxGeometry(45, 14.0, 6), this.materials.woodDark);
+        bookshelfA.position.set(115, 7.0, 140);
+        root.add(bookshelfA);
+
+        // --- 🛁 욕실 (Bathroom) ---
+        const bathtub = new THREE.Mesh(new THREE.BoxGeometry(35, 5.5, 18), this.materials.furnitureWhite);
+        bathtub.position.set(-115, 2.75, 115);
+        bathtub.castShadow = true;
+        root.add(bathtub);
+
+        const vanity = new THREE.Mesh(new THREE.BoxGeometry(30, 4.5, 10), this.materials.furnitureWhite);
+        vanity.position.set(-65, 2.25, 80);
+        root.add(vanity);
+
+        // --- 🚪 현관 (Entrance Hall) ---
+        const shoeCabinet = new THREE.Mesh(new THREE.BoxGeometry(35, 14.0, 8), this.materials.furnitureWhite);
+        shoeCabinet.position.set(125, 7.0, -45);
+        root.add(shoeCabinet);
 
         this.scene.add(root);
         this.houseRoot = root;
@@ -1091,88 +1188,86 @@ class ThreeJSSimulator {
     build3DCurtains() {
         const group = new THREE.Group();
 
-        // 1. Living Room Curtains (Dual panels across the large south window)
-        const livingCurtainL = new THREE.Mesh(new THREE.BoxGeometry(12, 7.5, 0.4), this.materials.curtainFabric);
-        livingCurtainL.position.set(-10, 5.0, 58.5);
+        // 1. Living Room Wide Curtains (South Wall Window)
+        const livingCurtainL = new THREE.Mesh(new THREE.BoxGeometry(24, 14.0, 0.6), this.materials.curtainFabric);
+        livingCurtainL.position.set(-6, 8.5, 148);
         group.add(livingCurtainL);
 
-        const livingCurtainR = new THREE.Mesh(new THREE.BoxGeometry(12, 7.5, 0.4), this.materials.curtainFabric);
-        livingCurtainR.position.set(30, 5.0, 58.5);
+        const livingCurtainR = new THREE.Mesh(new THREE.BoxGeometry(24, 14.0, 0.6), this.materials.curtainFabric);
+        livingCurtainR.position.set(56, 8.5, 148);
         group.add(livingCurtainR);
 
-        this.curtainMeshes.livingRoom = { l: livingCurtainL, r: livingCurtainR, openL: -18, closeL: -1, openR: 38, closeR: 21 };
+        this.curtainMeshes.livingRoom = { l: livingCurtainL, r: livingCurtainR, openL: -18, closeL: 8, openR: 68, closeR: 42 };
 
-        // 2. Master Room Curtains (Dual blackout panels on west window)
-        const masterCurtainL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 7.0, 10), this.materials.curtainMaster);
-        masterCurtainL.position.set(-148.5, 5.0, -6);
+        // 2. Master Room Blackout Curtains (West Wall Window)
+        const masterCurtainL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 13.0, 18), this.materials.curtainMaster);
+        masterCurtainL.position.set(-148, 8.5, 2);
         group.add(masterCurtainL);
 
-        const masterCurtainR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 7.0, 10), this.materials.curtainMaster);
-        masterCurtainR.position.set(-148.5, 5.0, 16);
+        const masterCurtainR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 13.0, 18), this.materials.curtainMaster);
+        masterCurtainR.position.set(-148, 8.5, 38);
         group.add(masterCurtainR);
 
-        this.curtainMeshes.masterRoom = { l: masterCurtainL, r: masterCurtainR, openL: -12, closeL: 0, openR: 22, closeR: 10 };
+        this.curtainMeshes.masterRoom = { l: masterCurtainL, r: masterCurtainR, openL: -8, closeL: 10, openR: 48, closeR: 30 };
 
-        // 3. Room A Blinds (East window)
-        const roomABlind = new THREE.Mesh(new THREE.BoxGeometry(0.4, 6.5, 36), this.materials.blindRoomA);
-        roomABlind.position.set(148.5, 5.0, 22.5);
+        // 3. Room A Blinds (East Window)
+        const roomABlind = new THREE.Mesh(new THREE.BoxGeometry(0.6, 13.0, 68), this.materials.blindMesh);
+        roomABlind.position.set(148, 8.5, 65);
         group.add(roomABlind);
-
         this.curtainMeshes.roomA = { mesh: roomABlind };
 
-        // 4. Room B Blinds (Balcony window)
-        const roomBBlind = new THREE.Mesh(new THREE.BoxGeometry(0.4, 6.5, 24), this.materials.blindRoomA);
-        roomBBlind.position.set(-148.5, 5.0, -40);
+        // 4. Room B Balcony Blinds (West Window)
+        const roomBBlind = new THREE.Mesh(new THREE.BoxGeometry(0.6, 13.0, 68), this.materials.blindMesh);
+        roomBBlind.position.set(-148, 8.5, -90);
         group.add(roomBBlind);
-
         this.curtainMeshes.roomB = { mesh: roomBBlind };
 
         this.scene.add(group);
         this.curtainsGroup = group;
     }
 
-    build3DLampFixtures() {
+    build3DLamps() {
         const group = new THREE.Group();
 
-        const createLamp = (roomKey, x, z, type = 'chandelier') => {
-            const lampStem = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.0, 16), this.materials.metalChrome);
-            lampStem.position.set(x, 9.0, z);
-            group.add(lampStem);
+        const createGrandLamp = (roomKey, x, y, z, type = 'chandelier') => {
+            const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 4.0, 16), this.materials.metalChrome);
+            stem.position.set(x, y + 2.0, z);
+            group.add(stem);
 
             let fixture, bulb;
             if (type === 'chandelier') {
-                fixture = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.4, 16, 32), this.materials.metalChrome);
+                fixture = new THREE.Mesh(new THREE.TorusGeometry(6.5, 0.8, 16, 32), this.materials.metalChrome);
                 fixture.rotation.x = Math.PI / 2;
-                fixture.position.set(x, 8.0, z);
+                fixture.position.set(x, y, z);
                 group.add(fixture);
 
-                bulb = new THREE.Mesh(new THREE.SphereGeometry(1.4, 16, 16), this.materials.lampGlowOff);
-                bulb.position.set(x, 7.8, z);
+                bulb = new THREE.Mesh(new THREE.SphereGeometry(2.8, 16, 16), this.materials.lampGlowOff);
+                bulb.position.set(x, y - 0.4, z);
                 group.add(bulb);
             } else {
-                fixture = new THREE.Mesh(new THREE.ConeGeometry(2.5, 1.8, 24), this.materials.furnitureWhite);
-                fixture.position.set(x, 8.2, z);
+                fixture = new THREE.Mesh(new THREE.ConeGeometry(4.5, 3.2, 24), this.materials.furnitureWhite);
+                fixture.position.set(x, y + 0.5, z);
                 group.add(fixture);
 
-                bulb = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), this.materials.lampGlowOff);
-                bulb.position.set(x, 7.5, z);
+                bulb = new THREE.Mesh(new THREE.SphereGeometry(2.2, 16, 16), this.materials.lampGlowOff);
+                bulb.position.set(x, y - 0.6, z);
                 group.add(bulb);
             }
 
-            const pLight = new THREE.PointLight(0xffeedd, 0, 75, 1.4);
-            pLight.position.set(x, 7.2, z);
+            const pLight = new THREE.PointLight(0xffeedd, 0, 120, 1.4);
+            pLight.position.set(x, y - 1.2, z);
             group.add(pLight);
 
             this.lights[roomKey] = pLight;
             this.lampBulbs[roomKey] = bulb;
         };
 
-        createLamp('livingRoom', 10, 22.5, 'chandelier');
-        createLamp('masterRoom', -95, 5, 'chandelier');
-        createLamp('kitchen', 8, -32, 'pendant');
-        createLamp('roomA', 105, 22.5, 'pendant');
-        createLamp('roomB', -80, -40, 'pendant');
-        createLamp('bathroom', -95, 45, 'pendant');
+        createGrandLamp('livingRoom', 25, 14.0, 65, 'chandelier');
+        createGrandLamp('masterRoom', -90, 14.0, 20, 'chandelier');
+        createGrandLamp('kitchen', 25, 14.0, -65, 'pendant');
+        createGrandLamp('roomA', 115, 14.0, 65, 'pendant');
+        createGrandLamp('roomB', -70, 14.0, -90, 'pendant');
+        createGrandLamp('bathroom', -90, 14.0, 110, 'pendant');
 
         this.scene.add(group);
         this.lampsGroup = group;
@@ -1181,14 +1276,14 @@ class ThreeJSSimulator {
     buildRoofSlab() {
         const roofGroup = new THREE.Group();
 
-        const roofMain = new THREE.Mesh(new THREE.BoxGeometry(302, 1.2, 122), this.materials.wallRoof);
-        roofMain.position.set(0, 10.6, 0);
+        const roofMain = new THREE.Mesh(new THREE.BoxGeometry(304, 2.0, 304), this.materials.wallRoof);
+        roofMain.position.set(0, 19.0, 0);
         roofGroup.add(roofMain);
 
-        const skylight1 = new THREE.Mesh(new THREE.PlaneGeometry(35, 25), this.materials.glassWindow);
-        skylight1.rotation.x = -Math.PI / 2;
-        skylight1.position.set(10, 11.3, 22);
-        roofGroup.add(skylight1);
+        const skylight = new THREE.Mesh(new THREE.PlaneGeometry(60, 45), this.materials.glassWindow);
+        skylight.rotation.x = -Math.PI / 2;
+        skylight.position.set(25, 20.2, 65);
+        roofGroup.add(skylight);
 
         roofGroup.visible = false;
         this.scene.add(roofGroup);
@@ -1199,7 +1294,7 @@ class ThreeJSSimulator {
         const group = new THREE.Group();
 
         const createOndolPlane = (x, z, w, d) => {
-            const geo = new THREE.PlaneGeometry(w - 2.0, d - 2.0, 24, 24);
+            const geo = new THREE.PlaneGeometry(w - 4.0, d - 4.0, 28, 28);
             const mat = new THREE.MeshBasicMaterial({
                 color: 0xef4444,
                 wireframe: true,
@@ -1208,17 +1303,17 @@ class ThreeJSSimulator {
             });
             const plane = new THREE.Mesh(geo, mat);
             plane.rotation.x = -Math.PI / 2;
-            plane.position.set(x, 0.08, z);
+            plane.position.set(x, 0.1, z);
             group.add(plane);
             return plane;
         };
 
         this.ondolPlanes = [
-            createOndolPlane(10, 22.5, 100, 75),
-            createOndolPlane(-95, 5, 110, 50),
-            createOndolPlane(-80, -40, 80, 40),
-            createOndolPlane(105, 22.5, 90, 75),
-            createOndolPlane(10, -37.5, 100, 45)
+            createOndolPlane(25, 65, 110, 170),
+            createOndolPlane(-90, 20, 120, 100),
+            createOndolPlane(-70, -90, 80, 120),
+            createOndolPlane(115, 65, 70, 170),
+            createOndolPlane(25, -85, 110, 130)
         ];
 
         this.scene.add(group);
@@ -1226,21 +1321,21 @@ class ThreeJSSimulator {
     }
 
     buildACParticleStream() {
-        const particleCount = 280;
+        const particleCount = 350;
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
 
         for (let i = 0; i < particleCount * 3; i += 3) {
-            positions[i] = 56.0 - Math.random() * 4.0;
-            positions[i + 1] = 8.0 - Math.random() * 2.0;
-            positions[i + 2] = 10.0 + (Math.random() - 0.5) * 12.0;
+            positions[i] = 76.0 - Math.random() * 6.0;
+            positions[i + 1] = 13.5 - Math.random() * 3.0;
+            positions[i + 2] = 45.0 + (Math.random() - 0.5) * 25.0;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
         const material = new THREE.PointsMaterial({
             color: 0x60a5fa,
-            size: 0.9,
+            size: 1.4,
             transparent: true,
             opacity: 0,
             blending: THREE.AdditiveBlending
@@ -1251,21 +1346,21 @@ class ThreeJSSimulator {
     }
 
     buildHumidifierMist() {
-        const mistCount = 160;
+        const mistCount = 200;
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(mistCount * 3);
 
         for (let i = 0; i < mistCount * 3; i += 3) {
-            positions[i] = 36.0 + (Math.random() - 0.5) * 1.5;
-            positions[i + 1] = 5.0 + Math.random() * 3.0;
-            positions[i + 2] = 26.0 + (Math.random() - 0.5) * 1.5;
+            positions[i] = 58.0 + (Math.random() - 0.5) * 3.0;
+            positions[i + 1] = 7.0 + Math.random() * 4.0;
+            positions[i + 2] = 95.0 + (Math.random() - 0.5) * 3.0;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
         const material = new THREE.PointsMaterial({
             color: 0xe0f2fe,
-            size: 0.7,
+            size: 1.0,
             transparent: true,
             opacity: 0,
             blending: THREE.AdditiveBlending
@@ -1276,14 +1371,14 @@ class ThreeJSSimulator {
     }
 
     buildStoveFlame() {
-        const flameGeo = new THREE.ConeGeometry(0.8, 1.8, 8);
+        const flameGeo = new THREE.ConeGeometry(1.4, 3.2, 8);
         const flameMat = new THREE.MeshBasicMaterial({
             color: 0x3b82f6,
             transparent: true,
             opacity: 0
         });
         const flame = new THREE.Mesh(flameGeo, flameMat);
-        flame.position.set(5, 4.5, -52);
+        flame.position.set(25, 5.8, -140);
         this.scene.add(flame);
         this.stoveFlame = flame;
     }
@@ -1296,7 +1391,7 @@ class ThreeJSSimulator {
             canvas.width = 256;
             canvas.height = 80;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
             ctx.roundRect(10, 10, 236, 60, 14);
             ctx.fill();
             ctx.strokeStyle = '#3b82f6';
@@ -1312,18 +1407,18 @@ class ThreeJSSimulator {
             const texture = new THREE.CanvasTexture(canvas);
             const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
             const sprite = new THREE.Sprite(spriteMat);
-            sprite.position.set(x, 12.0, z);
-            sprite.scale.set(22, 6.8, 1);
+            sprite.position.set(x, 20.0, z);
+            sprite.scale.set(32, 10.0, 1);
             group.add(sprite);
         };
 
-        createLabel('거실 (Living)', 10, 22.5);
-        createLabel('안방 (Master)', -95, 5);
-        createLabel('방 B & 발코니', -80, -40);
-        createLabel('방 A (Room A)', 105, 22.5);
-        createLabel('주방 & 식당', 10, -37.5);
-        createLabel('공용 욕실', -95, 45);
-        createLabel('현관 (Door)', 105, -37.5);
+        createLabel('거실 (Living)', 25, 65);
+        createLabel('안방 (Master)', -90, 20);
+        createLabel('방 B & 발코니', -70, -90);
+        createLabel('방 A (Room A)', 115, 65);
+        createLabel('주방 & 식당', 25, -85);
+        createLabel('공용 욕실', -90, 110);
+        createLabel('현관 (Door)', 115, -85);
 
         this.scene.add(group);
         this.roomLabelsGroup = group;
@@ -1334,7 +1429,7 @@ class ThreeJSSimulator {
         Object.keys(state.lights).forEach(room => {
             const isOn = state.lights[room];
             if (this.lights[room]) {
-                this.lights[room].intensity = isOn ? (2.8 * factor + 0.6) : 0;
+                this.lights[room].intensity = isOn ? (3.5 * factor + 0.8) : 0;
             }
             if (this.lampBulbs[room]) {
                 this.lampBulbs[room].material = isOn ? this.materials.lampGlowOn : this.materials.lampGlowOff;
@@ -1358,7 +1453,7 @@ class ThreeJSSimulator {
             this.scene.fog.color.setHex(isDark ? 0x090e1a : 0xebf0f7);
         }
         if (this.ambientLight) {
-            this.ambientLight.intensity = isDark ? 0.45 : 0.75;
+            this.ambientLight.intensity = isDark ? 0.45 : 0.78;
         }
     }
 
@@ -1366,22 +1461,22 @@ class ThreeJSSimulator {
         state.effects3D.roof = !state.effects3D.roof;
         if (this.roofGroup) this.roofGroup.visible = state.effects3D.roof;
         elements.btnToggleRoof.classList.toggle('active', state.effects3D.roof);
-        showToast(`지붕(천장) [${state.effects3D.roof ? 'ON (완전 밀폐)' : 'OFF (오픈 탑뷰)'}]`);
+        showToast(`지붕(천장) [${state.effects3D.roof ? 'ON (완전 밀폐)' : 'OFF (오픈 뷰)'}]`);
     }
 
-    // --- 1st-Person Walkthrough Engine ---
-    enterFPSMode(startPos = new THREE.Vector3(10, 5.5, 20)) {
+    // --- 1st-Person Continuous WASD Engine ---
+    enterFPSMode(startPos = new THREE.Vector3(25, 7.0, 60)) {
         state.fpsMode = true;
         this.fpsPos.copy(startPos);
         this.camera.position.copy(this.fpsPos);
-        this.controls.target.set(this.fpsPos.x, this.fpsPos.y, this.fpsPos.z + 10);
+        this.controls.target.set(this.fpsPos.x, this.fpsPos.y, this.fpsPos.z + 15);
         this.controls.minDistance = 0.1;
-        this.controls.maxDistance = 15;
-        this.controls.maxPolarAngle = Math.PI / 1.9;
+        this.controls.maxDistance = 25;
+        this.controls.maxPolarAngle = Math.PI / 1.85;
 
         elements.btnCamFps.classList.add('active');
         elements.fpsControlsOverlay.classList.add('active');
-        showToast('🚶 1인칭 걷기 모드 시작! (WASD / D-Pad 조작)');
+        showToast('🚶 1인칭 걷기 모드! WASD 키를 누르고 있으면 부드럽게 이동합니다.');
     }
 
     exitFPSMode() {
@@ -1389,12 +1484,17 @@ class ThreeJSSimulator {
         elements.btnCamFps.classList.remove('active');
         elements.fpsControlsOverlay.classList.remove('active');
         this.controls.minDistance = 10;
-        this.controls.maxDistance = 500;
+        this.controls.maxDistance = 1200;
         this.controls.maxPolarAngle = Math.PI / 2.04;
     }
 
-    walk(forward = 0, strafe = 0) {
+    updateFPSMovement(delta) {
         if (!state.fpsMode) return;
+
+        const forwardKey = (this.keys['w'] || this.keys['arrowup'] ? 1 : 0) - (this.keys['s'] || this.keys['arrowdown'] ? 1 : 0);
+        const strafeKey = (this.keys['d'] || this.keys['arrowright'] ? 1 : 0) - (this.keys['a'] || this.keys['arrowleft'] ? 1 : 0);
+
+        if (forwardKey === 0 && strafeKey === 0) return;
 
         const dir = new THREE.Vector3();
         this.camera.getWorldDirection(dir);
@@ -1403,17 +1503,17 @@ class ThreeJSSimulator {
 
         const side = new THREE.Vector3(-dir.z, 0, dir.x);
 
-        const moveStep = 1.6;
-        this.fpsPos.addScaledVector(dir, forward * moveStep);
-        this.fpsPos.addScaledVector(side, strafe * moveStep);
+        const moveSpeed = 45.0 * delta; // Smooth units/sec
+        this.fpsPos.addScaledVector(dir, forwardKey * moveSpeed);
+        this.fpsPos.addScaledVector(side, strafeKey * moveSpeed);
 
-        // Boundary Clamp
-        this.fpsPos.x = Math.max(-140, Math.min(140, this.fpsPos.x));
-        this.fpsPos.z = Math.max(-55, Math.min(55, this.fpsPos.z));
-        this.fpsPos.y = 5.5;
+        // Clamping to interior boundaries
+        this.fpsPos.x = Math.max(-142, Math.min(142, this.fpsPos.x));
+        this.fpsPos.z = Math.max(-142, Math.min(142, this.fpsPos.z));
+        this.fpsPos.y = 7.0;
 
         this.camera.position.copy(this.fpsPos);
-        this.controls.target.copy(this.fpsPos).add(dir.multiplyScalar(10));
+        this.controls.target.copy(this.fpsPos).add(dir.multiplyScalar(15));
     }
 
     animateCameraTo(targetPos, targetLookAt, duration = 800) {
@@ -1447,19 +1547,19 @@ class ThreeJSSimulator {
     bindToolbar() {
         elements.btnCamIso.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamIso);
-            this.animateCameraTo(new THREE.Vector3(130, 130, 130), new THREE.Vector3(0, 5, 0));
+            this.animateCameraTo(new THREE.Vector3(160, 160, 160), new THREE.Vector3(0, 8, 0));
         });
 
         elements.btnCamTop.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamTop);
-            this.animateCameraTo(new THREE.Vector3(0, 190, 0.1), new THREE.Vector3(0, 0, 0));
+            this.animateCameraTo(new THREE.Vector3(0, 240, 0.1), new THREE.Vector3(0, 0, 0));
         });
 
         elements.btnCamFps.addEventListener('click', () => {
             if (state.fpsMode) {
                 this.exitFPSMode();
                 this.setActiveToolBtn(elements.btnCamIso);
-                this.animateCameraTo(new THREE.Vector3(130, 130, 130), new THREE.Vector3(0, 5, 0));
+                this.animateCameraTo(new THREE.Vector3(160, 160, 160), new THREE.Vector3(0, 8, 0));
             } else {
                 this.setActiveToolBtn(elements.btnCamFps);
                 this.enterFPSMode();
@@ -1468,22 +1568,22 @@ class ThreeJSSimulator {
 
         elements.btnCamLiving.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamLiving);
-            this.animateCameraTo(new THREE.Vector3(10, 60, 95), new THREE.Vector3(10, 4, 22.5));
+            this.animateCameraTo(new THREE.Vector3(25, 75, 140), new THREE.Vector3(25, 6, 65));
         });
 
         elements.btnCamMaster.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamMaster);
-            this.animateCameraTo(new THREE.Vector3(-95, 60, 75), new THREE.Vector3(-95, 4, 5));
+            this.animateCameraTo(new THREE.Vector3(-90, 75, 95), new THREE.Vector3(-90, 6, 20));
         });
 
         elements.btnCamKitchen.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamKitchen);
-            this.animateCameraTo(new THREE.Vector3(10, 60, -95), new THREE.Vector3(10, 4, -37.5));
+            this.animateCameraTo(new THREE.Vector3(25, 75, -140), new THREE.Vector3(25, 6, -85));
         });
 
         elements.btnCamReset.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamIso);
-            this.animateCameraTo(new THREE.Vector3(130, 130, 130), new THREE.Vector3(0, 5, 0));
+            this.animateCameraTo(new THREE.Vector3(160, 160, 160), new THREE.Vector3(0, 8, 0));
         });
 
         elements.btnToggleRoof.addEventListener('click', () => this.toggleRoof());
@@ -1509,13 +1609,13 @@ class ThreeJSSimulator {
 
     bindRoomHUD() {
         const roomCoords = {
-            living: { cam: new THREE.Vector3(10, 60, 95), look: new THREE.Vector3(10, 4, 22.5), fps: new THREE.Vector3(10, 5.5, 20) },
-            master: { cam: new THREE.Vector3(-95, 60, 75), look: new THREE.Vector3(-95, 4, 5), fps: new THREE.Vector3(-95, 5.5, 5) },
-            roomb: { cam: new THREE.Vector3(-80, 60, -90), look: new THREE.Vector3(-80, 4, -40), fps: new THREE.Vector3(-80, 5.5, -40) },
-            rooma: { cam: new THREE.Vector3(105, 60, 90), look: new THREE.Vector3(105, 4, 22.5), fps: new THREE.Vector3(105, 5.5, 20) },
-            kitchen: { cam: new THREE.Vector3(10, 60, -95), look: new THREE.Vector3(10, 4, -37.5), fps: new THREE.Vector3(10, 5.5, -30) },
-            bath: { cam: new THREE.Vector3(-95, 60, 95), look: new THREE.Vector3(-95, 4, 45), fps: new THREE.Vector3(-95, 5.5, 45) },
-            entrance: { cam: new THREE.Vector3(105, 60, -95), look: new THREE.Vector3(105, 4, -37.5), fps: new THREE.Vector3(105, 5.5, -45) }
+            living: { cam: new THREE.Vector3(25, 75, 140), look: new THREE.Vector3(25, 6, 65), fps: new THREE.Vector3(25, 7.0, 60) },
+            master: { cam: new THREE.Vector3(-90, 75, 95), look: new THREE.Vector3(-90, 6, 20), fps: new THREE.Vector3(-90, 7.0, 20) },
+            roomb: { cam: new THREE.Vector3(-70, 75, -140), look: new THREE.Vector3(-70, 6, -90), fps: new THREE.Vector3(-70, 7.0, -90) },
+            rooma: { cam: new THREE.Vector3(115, 75, 140), look: new THREE.Vector3(115, 6, 65), fps: new THREE.Vector3(115, 7.0, 65) },
+            kitchen: { cam: new THREE.Vector3(25, 75, -140), look: new THREE.Vector3(25, 6, -85), fps: new THREE.Vector3(25, 7.0, -70) },
+            bath: { cam: new THREE.Vector3(-90, 75, 150), look: new THREE.Vector3(-90, 6, 110), fps: new THREE.Vector3(-90, 7.0, 110) },
+            entrance: { cam: new THREE.Vector3(115, 75, -140), look: new THREE.Vector3(115, 6, -85), fps: new THREE.Vector3(115, 7.0, -85) }
         };
 
         elements.roomFocusButtons.forEach(btn => {
@@ -1534,20 +1634,31 @@ class ThreeJSSimulator {
         });
     }
 
-    bindFPSControls() {
+    bindContinuousWASD() {
         window.addEventListener('keydown', (e) => {
-            if (!state.fpsMode) return;
-            const key = e.key.toLowerCase();
-            if (key === 'w' || key === 'arrowup') this.walk(1, 0);
-            if (key === 's' || key === 'arrowdown') this.walk(-1, 0);
-            if (key === 'a' || key === 'arrowleft') this.walk(0, -1);
-            if (key === 'd' || key === 'arrowright') this.walk(0, 1);
+            this.keys[e.key.toLowerCase()] = true;
         });
 
-        elements.btnDpadUp.addEventListener('click', () => this.walk(1, 0));
-        elements.btnDpadDown.addEventListener('click', () => this.walk(-1, 0));
-        elements.btnDpadLeft.addEventListener('click', () => this.walk(0, -1));
-        elements.btnDpadRight.addEventListener('click', () => this.walk(0, 1));
+        window.addEventListener('keyup', (e) => {
+            this.keys[e.key.toLowerCase()] = false;
+        });
+
+        // Virtual D-Pad Touch/Mouse Listeners
+        const bindButtonHold = (btn, keyName) => {
+            if (!btn) return;
+            const start = () => { this.keys[keyName] = true; };
+            const stop = () => { this.keys[keyName] = false; };
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', stop);
+            btn.addEventListener('mouseleave', stop);
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); start(); });
+            btn.addEventListener('touchend', stop);
+        };
+
+        bindButtonHold(elements.btnDpadUp, 'w');
+        bindButtonHold(elements.btnDpadDown, 's');
+        bindButtonHold(elements.btnDpadLeft, 'a');
+        bindButtonHold(elements.btnDpadRight, 'd');
     }
 
     setActiveToolBtn(activeBtn) {
@@ -1569,13 +1680,17 @@ class ThreeJSSimulator {
     animate() {
         requestAnimationFrame(this.animate);
 
+        const delta = this.clock.getDelta();
         const time = performance.now() * 0.001;
+
+        // Continuous WASD Loop in FPS mode
+        this.updateFPSMovement(delta);
 
         if (!this.isAnimatingCamera && this.controls) {
             this.controls.update();
         }
 
-        // 1. Door Physical Swing Animation (0 deg closed, 90 deg open)
+        // 1. Door Physical Swing Animation
         if (this.doorMesh) {
             const targetRotation = state.door.opened ? (Math.PI / 2.05) : 0;
             this.doorMesh.rotation.y += (targetRotation - this.doorMesh.rotation.y) * 0.12;
@@ -1600,16 +1715,16 @@ class ThreeJSSimulator {
 
         if (this.curtainMeshes.roomA) {
             const cur = this.curtainMeshes.roomA;
-            const targetScaleY = state.curtains.roomA ? 0.15 : 1.0;
+            const targetScaleY = state.curtains.roomA ? 0.12 : 1.0;
             cur.mesh.scale.y += (targetScaleY - cur.mesh.scale.y) * 0.1;
-            cur.mesh.position.y = 8.2 - (cur.mesh.scale.y * 3.2);
+            cur.mesh.position.y = 15.0 - (cur.mesh.scale.y * 6.5);
         }
 
         if (this.curtainMeshes.roomB) {
             const cur = this.curtainMeshes.roomB;
-            const targetScaleY = state.curtains.roomB ? 0.15 : 1.0;
+            const targetScaleY = state.curtains.roomB ? 0.12 : 1.0;
             cur.mesh.scale.y += (targetScaleY - cur.mesh.scale.y) * 0.1;
-            cur.mesh.position.y = 8.2 - (cur.mesh.scale.y * 3.2);
+            cur.mesh.position.y = 15.0 - (cur.mesh.scale.y * 6.5);
         }
 
         // 3. Ondol Heat Glow Pulse
@@ -1629,17 +1744,17 @@ class ThreeJSSimulator {
 
             if (isAcOn || this.acParticles.material.opacity > 0.02) {
                 const positions = this.acParticles.geometry.attributes.position.array;
-                const windSpeed = state.aircon.wind === 'high' ? 0.8 : (state.aircon.wind === 'medium' ? 0.5 : 0.3);
+                const windSpeed = state.aircon.wind === 'high' ? 1.0 : (state.aircon.wind === 'medium' ? 0.65 : 0.4);
 
                 for (let i = 0; i < positions.length; i += 3) {
                     positions[i] -= windSpeed * 1.5;
                     positions[i + 1] -= windSpeed * 0.25;
-                    positions[i + 2] += (Math.sin(time * 2 + i) * 0.1);
+                    positions[i + 2] += (Math.sin(time * 2 + i) * 0.15);
 
-                    if (positions[i] < -20.0 || positions[i + 1] < 1.0) {
-                        positions[i] = 56.0 - Math.random() * 4.0;
-                        positions[i + 1] = 8.0 - Math.random() * 2.0;
-                        positions[i + 2] = 10.0 + (Math.random() - 0.5) * 12.0;
+                    if (positions[i] < -25.0 || positions[i + 1] < 1.0) {
+                        positions[i] = 76.0 - Math.random() * 6.0;
+                        positions[i + 1] = 13.5 - Math.random() * 3.0;
+                        positions[i + 2] = 45.0 + (Math.random() - 0.5) * 25.0;
                     }
                 }
                 this.acParticles.geometry.attributes.position.needsUpdate = true;
@@ -1655,21 +1770,21 @@ class ThreeJSSimulator {
             if (isHumOn || this.mistParticles.material.opacity > 0.02) {
                 const positions = this.mistParticles.geometry.attributes.position.array;
                 for (let i = 0; i < positions.length; i += 3) {
-                    positions[i + 1] += 0.08;
-                    positions[i] += (Math.sin(time * 3 + i) * 0.03);
-                    positions[i + 2] += (Math.cos(time * 3 + i) * 0.03);
+                    positions[i + 1] += 0.12;
+                    positions[i] += (Math.sin(time * 3 + i) * 0.04);
+                    positions[i + 2] += (Math.cos(time * 3 + i) * 0.04);
 
-                    if (positions[i + 1] > 9.5) {
-                        positions[i] = 36.0 + (Math.random() - 0.5) * 1.5;
-                        positions[i + 1] = 5.0;
-                        positions[i + 2] = 26.0 + (Math.random() - 0.5) * 1.5;
+                    if (positions[i + 1] > 16.0) {
+                        positions[i] = 58.0 + (Math.random() - 0.5) * 3.0;
+                        positions[i + 1] = 7.0;
+                        positions[i + 2] = 95.0 + (Math.random() - 0.5) * 3.0;
                     }
                 }
                 this.mistParticles.geometry.attributes.position.needsUpdate = true;
             }
         }
 
-        // 6. Stove Flame
+        // 6. Stove Flame Flicker
         if (this.stoveFlame && state.gas.status === 'open') {
             this.stoveFlame.scale.set(
                 1 + 0.15 * Math.sin(time * 15),
