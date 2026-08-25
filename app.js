@@ -1,4 +1,4 @@
-// AURA 3D Smart Home Digital Twin - Grand Scale Penthouse Engine & Continuous WASD Walkthrough
+// AURA Hyper-Luxury Smart Villa Estate - Monumental Architecture & High-Performance 3D Digital Twin
 
 // =========================================================================
 // 1. Central Application State
@@ -89,26 +89,22 @@ const elements = {
     hdrDoor: document.getElementById('hdr-door'),
     hdrCurtain: document.getElementById('hdr-curtain'),
 
-    // Lights
     brightnessSlider: document.getElementById('global-brightness-slider'),
     brightnessValText: document.getElementById('global-brightness-val'),
     sliderFill: document.getElementById('slider-fill'),
     btnAllLightsOff: document.getElementById('btn-all-lights-off'),
     lightSingleButtons: document.querySelectorAll('.light-toggle-single-btn'),
 
-    // Door Controls
     btnDoorOpenPhys: document.getElementById('btn-door-open-phys'),
     btnDoorClosePhys: document.getElementById('btn-door-close-phys'),
     btnDoorUnlock: document.getElementById('btn-door-unlock'),
     btnDoorLock: document.getElementById('btn-door-lock'),
 
-    // Curtain Controls
     btnAllCurtainsOpen: document.getElementById('btn-all-curtains-open'),
     btnAllCurtainsClose: document.getElementById('btn-all-curtains-close'),
     curtainSingleButtons: document.querySelectorAll('.curtain-toggle-single-btn'),
     btnToggleCurtainsFx: document.getElementById('btn-toggle-curtains-fx'),
 
-    // Gas
     btnGasOpen: document.getElementById('btn-gas-open'),
     btnGasClose: document.getElementById('btn-gas-close'),
     switchAutoGas: document.getElementById('switch-auto-gas'),
@@ -116,7 +112,6 @@ const elements = {
     badgeAutoGas: document.getElementById('badge-auto-gas'),
     badgeAutoSafe: document.getElementById('badge-auto-safe'),
 
-    // Climate
     targetTempDisplay: document.getElementById('target-temp-display'),
     currentTempDisplay: document.getElementById('current-temp-display'),
     btnTempMinus: document.getElementById('btn-temp-minus'),
@@ -143,7 +138,6 @@ const elements = {
     windMediumBtn: document.getElementById('wind-medium'),
     windHighBtn: document.getElementById('wind-high'),
 
-    // 3D Toolbar & FPS
     btnCamIso: document.getElementById('btn-cam-iso'),
     btnCamTop: document.getElementById('btn-cam-top'),
     btnCamFps: document.getElementById('btn-cam-fps'),
@@ -325,14 +319,14 @@ elements.btnDoorOpenPhys.addEventListener('click', () => {
     if (state.door.locked) state.door.locked = false;
     state.door.opened = true;
     updateDoorUI();
-    showToast('현관문이 열렸습니다. (3D 회전 모션)');
+    showToast('대저택 현관문이 열렸습니다. (3D 모터 스윙)');
 });
 
 elements.btnDoorClosePhys.addEventListener('click', () => {
     if (!state.door.opened) return;
     state.door.opened = false;
     updateDoorUI();
-    showToast('현관문을 닫았습니다.');
+    showToast('대저택 현관문을 닫았습니다.');
 });
 
 elements.btnDoorLock.addEventListener('click', () => {
@@ -340,14 +334,14 @@ elements.btnDoorLock.addEventListener('click', () => {
     state.door.locked = true;
     if (state.door.opened) state.door.opened = false;
     updateDoorUI();
-    showToast('현관문 도어락이 잠겼습니다.');
+    showToast('생체인식 도어락이 잠겼습니다.');
 });
 
 elements.btnDoorUnlock.addEventListener('click', () => {
     if (!state.door.locked) return;
     state.door.locked = false;
     updateDoorUI();
-    showToast('현관문 도어락이 해제되었습니다.');
+    showToast('생체인식 도어락이 해제되었습니다.');
 });
 
 // --- 6.3 Smart Motorized Curtain UI ---
@@ -366,7 +360,7 @@ function updateCurtainUI() {
 
     const anyOpen = Object.values(state.curtains).some(v => v);
     if (elements.hdrCurtain) {
-        elements.hdrCurtain.textContent = anyOpen ? '커튼 열림' : '커튼 모두 닫힘';
+        elements.hdrCurtain.textContent = anyOpen ? '전동 커튼 열림' : '전동 커튼 모두 닫힘';
     }
 
     if (threeApp && threeApp.syncCurtains) threeApp.syncCurtains();
@@ -375,13 +369,13 @@ function updateCurtainUI() {
 elements.btnAllCurtainsOpen.addEventListener('click', () => {
     Object.keys(state.curtains).forEach(room => state.curtains[room] = true);
     updateCurtainUI();
-    showToast('전 객실 커튼이 모두 열렸습니다.');
+    showToast('대저택 전 객실 전동 커튼이 모두 열렸습니다.');
 });
 
 elements.btnAllCurtainsClose.addEventListener('click', () => {
     Object.keys(state.curtains).forEach(room => state.curtains[room] = false);
     updateCurtainUI();
-    showToast('전 객실 커튼이 모두 닫혔습니다.');
+    showToast('대저택 전 객실 전동 커튼이 모두 닫혔습니다.');
 });
 
 elements.curtainSingleButtons.forEach(btn => {
@@ -398,7 +392,7 @@ if (elements.btnToggleCurtainsFx) {
         const allOpen = Object.values(state.curtains).every(v => v);
         Object.keys(state.curtains).forEach(room => state.curtains[room] = !allOpen);
         updateCurtainUI();
-        showToast(`3D 커튼 일괄 [${!allOpen ? '열기' : '닫기'}]`);
+        showToast(`전동 커튼 일괄 [${!allOpen ? '열기' : '닫기'}]`);
     });
 }
 
@@ -429,14 +423,14 @@ elements.btnGasOpen.addEventListener('click', () => {
     if (state.gas.status === 'open') return;
     state.gas.status = 'open';
     updateGasUI();
-    showToast('가스 밸브를 열었습니다.');
+    showToast('셰프 쿡탑 가스를 열었습니다.');
 });
 
 elements.btnGasClose.addEventListener('click', () => {
     if (state.gas.status === 'closed') return;
     state.gas.status = 'closed';
     updateGasUI();
-    showToast('가스 밸브를 안전하게 잠갔습니다.');
+    showToast('셰프 쿡탑 가스를 안전하게 잠갔습니다.');
 });
 
 elements.switchAutoGas.addEventListener('change', (e) => {
@@ -495,17 +489,17 @@ function updateTempUI() {
 function updateBoilerUI() {
     if (state.boiler.active) {
         const modeLabels = {
-            indoor: '실내난방 ON',
+            indoor: '전체난방 ON',
             ondol: '온돌바닥 ON',
             eco: '외출절전 ON',
-            water: '온수전용 ON'
+            water: '스파온수 ON'
         };
         elements.badgeBoiler.textContent = modeLabels[state.boiler.mode] || 'ON';
         elements.badgeBoiler.classList.add('active');
         elements.btnToggleBoiler.textContent = '보일러 끄기';
         elements.btnToggleBoiler.classList.add('active');
         elements.boilerModesContainer.style.display = 'flex';
-        elements.boilerSubStatus.textContent = `설정: ${state.boiler.targetTemp.toFixed(1)}°C / 바닥 난방 연동`;
+        elements.boilerSubStatus.textContent = `설정: ${state.boiler.targetTemp.toFixed(1)}°C / 바닥 온돌 연동`;
 
         if (elements.hdrBoiler) elements.hdrBoiler.textContent = `보일러 (${modeLabels[state.boiler.mode] || 'ON'})`;
     } else {
@@ -542,7 +536,7 @@ function updateHumidityUI() {
         elements.humiditySubStatus.textContent = '쾌적 상태 (40~60% RH 유지 중)';
         elements.currentHumidityBadge.style.color = 'var(--accent-blue)';
     } else if (hum < 40) {
-        elements.humiditySubStatus.textContent = '건조 주의 (습도 보충 권장)';
+        elements.humiditySubStatus.textContent = '건조 주의 (가습 권장)';
         elements.currentHumidityBadge.style.color = 'var(--accent-red)';
     } else {
         elements.humiditySubStatus.textContent = '다습 주의 (제습 권장)';
@@ -577,7 +571,7 @@ elements.btnTempPlus.addEventListener('click', () => {
 elements.btnToggleAircon.addEventListener('click', () => {
     state.aircon.active = !state.aircon.active;
     updateTempUI();
-    showToast(`거실 에어컨 ${state.aircon.active ? 'ON' : 'OFF'}`);
+    showToast(`듀얼 타워 에어컨 ${state.aircon.active ? 'ON' : 'OFF'}`);
 });
 
 [elements.windLowBtn, elements.windMediumBtn, elements.windHighBtn].forEach(btn => {
@@ -590,7 +584,7 @@ elements.btnToggleAircon.addEventListener('click', () => {
 elements.btnToggleBoiler.addEventListener('click', () => {
     state.boiler.active = !state.boiler.active;
     updateTempUI();
-    showToast(`스마트 보일러 ${state.boiler.active ? 'ON' : 'OFF'}`);
+    showToast(`스마트 보일러 스테이션 ${state.boiler.active ? 'ON' : 'OFF'}`);
 });
 
 elements.boilerModeButtons.forEach(btn => {
@@ -651,23 +645,23 @@ function initThermodynamics() {
 
         // 1. Aircon cooling
         if (state.aircon.active) {
-            let speed = 0.06;
-            if (state.aircon.wind === 'medium') speed = 0.12;
-            if (state.aircon.wind === 'high') speed = 0.22;
+            let speed = 0.08;
+            if (state.aircon.wind === 'medium') speed = 0.16;
+            if (state.aircon.wind === 'high') speed = 0.28;
 
             if (rooms.livingRoom > state.temp.target) {
                 rooms.livingRoom = Math.max(state.temp.target, rooms.livingRoom - speed);
             }
-            state.humidity.current = Math.max(40, state.humidity.current - 0.2);
+            state.humidity.current = Math.max(40, state.humidity.current - 0.25);
         }
 
         // 2. Boiler heating
         if (state.boiler.active) {
             const bTarget = state.boiler.targetTemp;
             const bMode = state.boiler.mode;
-            let heatSpeed = 0.08;
-            if (bMode === 'ondol') heatSpeed = 0.14;
-            if (bMode === 'eco') heatSpeed = 0.02;
+            let heatSpeed = 0.10;
+            if (bMode === 'ondol') heatSpeed = 0.18;
+            if (bMode === 'eco') heatSpeed = 0.03;
 
             Object.keys(rooms).forEach(room => {
                 if (bMode !== 'water') {
@@ -676,7 +670,7 @@ function initThermodynamics() {
                     }
                 }
             });
-            state.humidity.current = Math.max(35, state.humidity.current - 0.1);
+            state.humidity.current = Math.max(35, state.humidity.current - 0.15);
         }
 
         // 3. Ambient drift
@@ -701,9 +695,9 @@ function initThermodynamics() {
             const humDiff = state.humidity.target - state.humidity.current;
             state.humidity.current += humDiff * 0.05;
         } else if (state.humidity.mode === 'humidify') {
-            if (state.humidity.current < 70) state.humidity.current += 0.4;
+            if (state.humidity.current < 70) state.humidity.current += 0.5;
         } else if (state.humidity.mode === 'dehumidify') {
-            if (state.humidity.current > 40) state.humidity.current -= 0.4;
+            if (state.humidity.current > 40) state.humidity.current -= 0.5;
         } else {
             state.humidity.current += (50.0 - state.humidity.current) * 0.01;
         }
@@ -716,7 +710,7 @@ function initThermodynamics() {
 // 8. Automation Scenarios: Away Mode
 // =========================================================================
 function executeLeaveHome() {
-    showToast('외출 모드 실행! (소등, 문닫힘/잠금, 커튼닫힘, 가스차단, 에어컨OFF, 보일러외출)');
+    showToast('대저택 외출 보안 모드 실행! (전체 소등, 문잠금, 커튼닫힘, 가스차단, 보일러외출)');
 
     Object.keys(state.lights).forEach(room => state.lights[room] = false);
     updateLightingUI();
@@ -749,11 +743,11 @@ if (elements.btnAwayModeHeader) elements.btnAwayModeHeader.addEventListener('cli
 if (elements.btnAwayModeHome) elements.btnAwayModeHome.addEventListener('click', executeLeaveHome);
 
 function showConnectedDevicesCount() {
-    showToast('스마트 기기 16개(조명, 도어락, 커튼4개, 가스, 보일러, 에어컨 등) 정상 연결 중');
+    showToast('AURA 스마트 빌라 16개 구역 기기 모두 최상 상태로 연동 중');
 }
 
 // =========================================================================
-// 9. Three.js 3D Monumental Engine (100x Scale, Soaring Walls, WASD FPS & Curtains)
+// 9. Three.js 3D Monumental Mansion Engine (500x400 Grand Scale)
 // =========================================================================
 class ThreeJSSimulator {
     constructor(containerId) {
@@ -777,9 +771,8 @@ class ThreeJSSimulator {
         this.roofGroup = null;
         this.isAnimatingCamera = false;
 
-        // Continuous WASD Keys Tracker
         this.keys = {};
-        this.fpsPos = new THREE.Vector3(25, 7.0, 60); // Living room eye level
+        this.fpsPos = new THREE.Vector3(20, 8.0, 80); // Grand living room center
         this.clock = new THREE.Clock();
 
         this.init();
@@ -793,11 +786,11 @@ class ThreeJSSimulator {
         this.scene = new THREE.Scene();
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         this.scene.background = new THREE.Color(isDark ? 0x090e1a : 0xebf0f7);
-        this.scene.fog = new THREE.FogExp2(isDark ? 0x090e1a : 0xebf0f7, 0.0015);
+        this.scene.fog = new THREE.FogExp2(isDark ? 0x090e1a : 0xebf0f7, 0.0010);
 
-        // 2. Camera (Wide Far Plane for High-rise Scale)
-        this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 20000);
-        this.camera.position.set(160, 160, 160);
+        // 2. Camera Setup (Monumental Mansion Viewport)
+        this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 30000);
+        this.camera.position.set(220, 220, 220);
 
         // 3. Renderer
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -806,39 +799,39 @@ class ThreeJSSimulator {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 1.3;
+        this.renderer.toneMappingExposure = 1.35;
         this.container.appendChild(this.renderer.domElement);
 
-        // 4. Controls
+        // 4. Orbit Controls
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.maxPolarAngle = Math.PI / 2.04;
         this.controls.minDistance = 10;
-        this.controls.maxDistance = 1200;
-        this.controls.target.set(0, 8, 0);
+        this.controls.maxDistance = 1600;
+        this.controls.target.set(0, 10, 0);
 
         // 5. Illumination
-        this.ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 0.45 : 0.78);
+        this.ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 0.45 : 0.8);
         this.scene.add(this.ambientLight);
 
-        this.sunLight = new THREE.DirectionalLight(0xfff8ee, 0.95);
-        this.sunLight.position.set(180, 260, 140);
+        this.sunLight = new THREE.DirectionalLight(0xfff8ee, 1.0);
+        this.sunLight.position.set(250, 350, 180);
         this.sunLight.castShadow = true;
         this.sunLight.shadow.mapSize.width = 2048;
         this.sunLight.shadow.mapSize.height = 2048;
         this.sunLight.shadow.camera.near = 10;
-        this.sunLight.shadow.camera.far = 700;
-        this.sunLight.shadow.camera.left = -220;
-        this.sunLight.shadow.camera.right = 220;
-        this.sunLight.shadow.camera.top = 220;
-        this.sunLight.shadow.camera.bottom = -220;
+        this.sunLight.shadow.camera.far = 1000;
+        this.sunLight.shadow.camera.left = -300;
+        this.sunLight.shadow.camera.right = 300;
+        this.sunLight.shadow.camera.top = 300;
+        this.sunLight.shadow.camera.bottom = -300;
         this.sunLight.shadow.bias = -0.0005;
         this.scene.add(this.sunLight);
 
-        // 6. Build the Soaring Grand House & Modern Reorganized Furniture
+        // 6. Build the Hyper-Luxury Mansion Estate
         this.buildMaterials();
-        this.buildGrandHouseArchitecture();
+        this.buildMansionArchitecture();
         this.build3DLamps();
         this.build3DCurtains();
         this.buildRoofSlab();
@@ -861,46 +854,46 @@ class ThreeJSSimulator {
 
     buildMaterials() {
         this.materials = {
-            floorLiving: new THREE.MeshStandardMaterial({ color: 0xd8c5ab, roughness: 0.35, metalness: 0.05 }),
-            floorRooms: new THREE.MeshStandardMaterial({ color: 0xcdb99c, roughness: 0.4, metalness: 0.05 }),
-            floorKitchen: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.1 }),
-            floorBath: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.25, metalness: 0.1 }),
-            floorBalcony: new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.6 }),
-            wallCutaway: new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 }),
+            floorLounge: new THREE.MeshStandardMaterial({ color: 0xd8c5ab, roughness: 0.3, metalness: 0.05 }),
+            floorSuites: new THREE.MeshStandardMaterial({ color: 0xcdb99c, roughness: 0.35, metalness: 0.05 }),
+            floorKitchenMarble: new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.1, metalness: 0.15 }),
+            floorSpaTiles: new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.2, metalness: 0.1 }),
+            floorGardenTerrace: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5 }),
+            wallMansion: new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 }),
             wallRoof: new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.1 }),
-            glassWindow: new THREE.MeshPhysicalMaterial({
+            glassCurtainWall: new THREE.MeshPhysicalMaterial({
                 color: 0x93c5fd,
                 transparent: true,
                 opacity: 0.45,
-                roughness: 0.1,
-                transmission: 0.85,
-                thickness: 1.2
+                roughness: 0.08,
+                transmission: 0.9,
+                thickness: 1.5
             }),
-            windowRedMarker: new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 }),
-            curtainFabric: new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85, side: THREE.DoubleSide }),
-            curtainMaster: new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9, side: THREE.DoubleSide }),
-            blindMesh: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5, side: THREE.DoubleSide }),
-            leatherSofa: new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.6 }),
-            leatherSofaAccent: new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.6 }),
-            woodDark: new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.4 }),
-            woodLight: new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.5 }),
-            furnitureWhite: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.25 }),
-            metalChrome: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.15 }),
-            doorWood: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 }),
-            tvScreen: new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.1 }),
-            carpetLiving: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.9 }),
+            windowRedAccent: new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 }),
+            curtainSilk: new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8, side: THREE.DoubleSide }),
+            curtainMasterVelvet: new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9, side: THREE.DoubleSide }),
+            blindAcoustic: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4, side: THREE.DoubleSide }),
+            leatherRoyalBlue: new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 }),
+            leatherCyanAccent: new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 }),
+            marbleDark: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.15 }),
+            woodWalnut: new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.35 }),
+            furnitureWhiteLacquer: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15 }),
+            metalTitanium: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.92, roughness: 0.12 }),
+            doorSecurityWood: new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.35 }),
+            tvScreen8K: new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.05 }),
+            carpetPlush: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.9 }),
             lampGlowOn: new THREE.MeshBasicMaterial({ color: 0xfff0bb }),
             lampGlowOff: new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5 })
         };
     }
 
-    buildGrandHouseArchitecture() {
+    buildMansionArchitecture() {
         const root = new THREE.Group();
 
-        // Soaring Wall Height (Y: 18.0 units)
-        const wallHeight = 18.0;
+        // Monumental Soaring Mansion Wall Height (Y: 24.0 units)
+        const wallHeight = 24.0;
 
-        const createWall = (x, z, w, d, h = wallHeight, colorMat = this.materials.wallCutaway) => {
+        const createWall = (x, z, w, d, h = wallHeight, colorMat = this.materials.wallMansion) => {
             const wallGeo = new THREE.BoxGeometry(w, h, d);
             const wall = new THREE.Mesh(wallGeo, colorMat);
             wall.position.set(x, h / 2, z);
@@ -910,276 +903,273 @@ class ThreeJSSimulator {
             return wall;
         };
 
-        const createWindow = (x, z, w, d, h = 12.0) => {
-            const frameGeo = new THREE.BoxGeometry(w, 0.5, d);
-            const frame = new THREE.Mesh(frameGeo, this.materials.windowRedMarker);
-            frame.position.set(x, 9.0, z);
+        const createWindow = (x, z, w, d, h = 16.0) => {
+            const frameGeo = new THREE.BoxGeometry(w, 0.6, d);
+            const frame = new THREE.Mesh(frameGeo, this.materials.windowRedAccent);
+            frame.position.set(x, 12.0, z);
             root.add(frame);
 
             const glassGeo = new THREE.BoxGeometry(w, h, d);
-            const glass = new THREE.Mesh(glassGeo, this.materials.glassWindow);
-            glass.position.set(x, 9.0, z);
+            const glass = new THREE.Mesh(glassGeo, this.materials.glassCurtainWall);
+            glass.position.set(x, 12.0, z);
             root.add(glass);
         };
 
         // =====================================================================
-        // 1. FLOORS (Grand Spans: X: -150 to +150, Z: -150 to +150)
+        // 1. EXPANSIVE MANSION FLOORS (X: -250 to +250 = 500, Z: -200 to +200 = 400)
         // =====================================================================
-        // Living Room (거실): X: -30 to +80 (w: 110), Z: -20 to +150 (d: 170)
-        const livingFloor = new THREE.Mesh(new THREE.PlaneGeometry(110, 170), this.materials.floorLiving);
+        // 1) Grand Central Lounge & Cinema: X: -60 to +100 (w: 160), Z: -20 to +200 (d: 220)
+        const livingFloor = new THREE.Mesh(new THREE.PlaneGeometry(160, 220), this.materials.floorLounge);
         livingFloor.rotation.x = -Math.PI / 2;
-        livingFloor.position.set(25, 0.01, 65);
+        livingFloor.position.set(20, 0.01, 90);
         livingFloor.receiveShadow = true;
         root.add(livingFloor);
 
-        // Master Room (안방): X: -150 to -30 (w: 120), Z: -30 to +70 (d: 100)
-        const masterFloor = new THREE.Mesh(new THREE.PlaneGeometry(120, 100), this.materials.floorRooms);
+        // 2) Presidential Master Suite: X: -250 to -60 (w: 190), Z: -40 to +90 (d: 130)
+        const masterFloor = new THREE.Mesh(new THREE.PlaneGeometry(190, 130), this.materials.floorSuites);
         masterFloor.rotation.x = -Math.PI / 2;
-        masterFloor.position.set(-90, 0.01, 20);
+        masterFloor.position.set(-155, 0.01, 25);
         masterFloor.receiveShadow = true;
         root.add(masterFloor);
 
-        // Room B (방 B): X: -110 to -30 (w: 80), Z: -150 to -30 (d: 120)
-        const roomBFloor = new THREE.Mesh(new THREE.PlaneGeometry(80, 120), this.materials.floorRooms);
-        roomBFloor.rotation.x = -Math.PI / 2;
-        roomBFloor.position.set(-70, 0.01, -90);
-        roomBFloor.receiveShadow = true;
-        root.add(roomBFloor);
-
-        // Balcony (발코니): X: -150 to -110 (w: 40), Z: -150 to -30 (d: 120)
-        const balconyFloor = new THREE.Mesh(new THREE.PlaneGeometry(40, 120), this.materials.floorBalcony);
-        balconyFloor.rotation.x = -Math.PI / 2;
-        balconyFloor.position.set(-130, 0.01, -90);
-        balconyFloor.receiveShadow = true;
-        root.add(balconyFloor);
-
-        // Bathroom (화장실): X: -150 to -30 (w: 120), Z: +70 to +150 (d: 80)
-        const bathFloor = new THREE.Mesh(new THREE.PlaneGeometry(120, 80), this.materials.floorBath);
-        bathFloor.rotation.x = -Math.PI / 2;
-        bathFloor.position.set(-90, 0.01, 110);
-        bathFloor.receiveShadow = true;
-        root.add(bathFloor);
-
-        // Kitchen & Dining (주방): X: -30 to +80 (w: 110), Z: -150 to -20 (d: 130)
-        const kitchenFloor = new THREE.Mesh(new THREE.PlaneGeometry(110, 130), this.materials.floorKitchen);
+        // 3) Master Chef Gourmet Kitchen & Bar: X: -60 to +100 (w: 160), Z: -200 to -20 (d: 180)
+        const kitchenFloor = new THREE.Mesh(new THREE.PlaneGeometry(160, 180), this.materials.floorKitchenMarble);
         kitchenFloor.rotation.x = -Math.PI / 2;
-        kitchenFloor.position.set(25, 0.01, -85);
+        kitchenFloor.position.set(20, 0.01, -110);
         kitchenFloor.receiveShadow = true;
         root.add(kitchenFloor);
 
-        // Entrance (현관): X: +80 to +150 (w: 70), Z: -150 to -20 (d: 130)
-        const entranceFloor = new THREE.Mesh(new THREE.PlaneGeometry(70, 130), this.materials.floorKitchen);
+        // 4) High-Tech Cyber Gaming Studio: X: -170 to -60 (w: 110), Z: -200 to -40 (d: 160)
+        const studioFloor = new THREE.Mesh(new THREE.PlaneGeometry(110, 160), this.materials.floorSuites);
+        studioFloor.rotation.x = -Math.PI / 2;
+        studioFloor.position.set(-115, 0.01, -120);
+        studioFloor.receiveShadow = true;
+        root.add(studioFloor);
+
+        // 5) Eco Garden Terrace & Sunroom: X: -250 to -170 (w: 80), Z: -200 to -40 (d: 160)
+        const balconyFloor = new THREE.Mesh(new THREE.PlaneGeometry(80, 160), this.materials.floorGardenTerrace);
+        balconyFloor.rotation.x = -Math.PI / 2;
+        balconyFloor.position.set(-210, 0.01, -120);
+        balconyFloor.receiveShadow = true;
+        root.add(balconyFloor);
+
+        // 6) Luxury Spa & Hydrotherapy Wellness Suite: X: -250 to -60 (w: 190), Z: +90 to +200 (d: 110)
+        const spaFloor = new THREE.Mesh(new THREE.PlaneGeometry(190, 110), this.materials.floorSpaTiles);
+        spaFloor.rotation.x = -Math.PI / 2;
+        spaFloor.position.set(-155, 0.01, 145);
+        spaFloor.receiveShadow = true;
+        root.add(spaFloor);
+
+        // 7) Futuristic Smart Entryway & Security Hub: X: +100 to +250 (w: 150), Z: -200 to -20 (d: 180)
+        const entranceFloor = new THREE.Mesh(new THREE.PlaneGeometry(150, 180), this.materials.floorKitchenMarble);
         entranceFloor.rotation.x = -Math.PI / 2;
-        entranceFloor.position.set(115, 0.01, -85);
+        entranceFloor.position.set(175, 0.01, -110);
         entranceFloor.receiveShadow = true;
         root.add(entranceFloor);
 
-        // Room A (방 A): X: +80 to +150 (w: 70), Z: -20 to +150 (d: 170)
-        const roomAFloor = new THREE.Mesh(new THREE.PlaneGeometry(70, 170), this.materials.floorRooms);
-        roomAFloor.rotation.x = -Math.PI / 2;
-        roomAFloor.position.set(115, 0.01, 65);
-        roomAFloor.receiveShadow = true;
-        root.add(roomAFloor);
+        // 8) VIP Guest Bedroom & Library: X: +100 to +250 (w: 150), Z: -20 to +200 (d: 220)
+        const libraryFloor = new THREE.Mesh(new THREE.PlaneGeometry(150, 220), this.materials.floorSuites);
+        libraryFloor.rotation.x = -Math.PI / 2;
+        libraryFloor.position.set(175, 0.01, 90);
+        libraryFloor.receiveShadow = true;
+        root.add(libraryFloor);
 
         // =====================================================================
-        // 2. WALLS & WINDOWS
+        // 2. MONUMENTAL WALLS & PANORAMIC GLASS CURTAIN WALLS
         // =====================================================================
-        createWall(-150, 0, 2.0, 300); // Far Left Wall
-        createWall(-90, 150, 120, 2.0); // Bath Bottom Wall
-        createWall(25, 150, 110, 2.0);  // Living Room Bottom Wall
-        createWindow(25, 150, 70, 1.2, 13.0); // 거실 대형 창문 (Red Marker)
+        createWall(-250, 0, 2.4, 400);  // Far West Wall
+        createWall(-155, 200, 190, 2.4); // Spa South Wall
+        createWall(20, 200, 160, 2.4);   // Grand Lounge South Wall
+        createWindow(20, 200, 100, 1.4, 16.0); // 거실 대형 파노라마 커튼월 (Red Marker)
 
-        createWall(115, 150, 70, 2.0);  // Room A Bottom Wall
-        createWall(150, 65, 2.0, 170);  // Room A Right Wall
-        createWindow(150, 65, 1.2, 70, 12.0); // 방 A 창문 (Red Marker)
+        createWall(175, 200, 150, 2.4);  // VIP Library South Wall
+        createWall(250, 90, 2.4, 220);   // East Wall (Library)
+        createWindow(250, 90, 1.4, 100, 16.0); // 라이브러리 대형 창문 (Red Marker)
 
-        createWall(150, -85, 2.0, 130); // Entrance Right Wall
-        createWall(115, -150, 70, 2.0); // Entrance Top Wall
-        createWall(25, -150, 110, 2.0); // Kitchen Top Wall
-        createWindow(25, -150, 40, 1.2, 10.0); // 주방 창문
+        createWall(250, -110, 2.4, 180); // East Wall (Foyer)
+        createWall(175, -200, 150, 2.4); // North Entrance Wall
+        createWall(20, -200, 160, 2.4);  // North Kitchen Wall
+        createWindow(20, -200, 60, 1.4, 14.0); // 주방 파노라마 창문
 
-        createWall(-70, -150, 80, 2.0); // Room B Top Wall
-        createWall(-150, -90, 2.0, 120); // Balcony Outer Wall
-        createWindow(-150, -90, 1.2, 70, 12.0); // 발코니 창문
+        createWall(-115, -200, 110, 2.4); // Cyber Studio North Wall
+        createWall(-250, -120, 2.4, 160); // Garden Balcony West Wall
+        createWindow(-250, -120, 1.4, 100, 16.0); // 발코니 창문
 
-        // Dividing Walls
-        createWall(-30, 0, 1.8, 300);   // Master/RoomB/Bath vs Living/Kitchen Divider
-        createWall(-90, -30, 120, 1.8); // Room B vs Master Room Divider
-        createWall(-90, 70, 120, 1.8);  // Master Room vs Bath Divider
-        createWindow(-150, 20, 1.2, 50, 12.0); // 안방 창문 (Red Marker)
+        // Interior Architectural Dividers
+        createWall(-60, 0, 2.0, 400);    // West Wing Divider
+        createWall(-155, -40, 190, 2.0); // Studio vs Master Divider
+        createWall(-155, 90, 190, 2.0);  // Master vs Spa Divider
+        createWindow(-250, 25, 1.4, 80, 16.0); // 마스터 스위트 통창 (Red Marker)
 
-        createWall(-110, -90, 0.4, 120, wallHeight, this.materials.glassWindow); // Balcony Glass Divider
-        createWall(80, 0, 1.8, 300);    // Living/Kitchen vs Entrance/RoomA Divider
-        createWall(25, -20, 110, 1.8);  // Kitchen vs Living Divider
-        createWall(115, -20, 70, 1.8);  // Entrance vs Room A Divider
+        createWall(-170, -120, 0.4, 160, wallHeight, this.materials.glassCurtainWall); // Studio-Terrace Glass Wall
+        createWall(100, 0, 2.0, 400);    // East Wing Divider
+        createWall(20, -20, 160, 2.0);   // Kitchen vs Lounge Divider
+        createWall(175, -20, 150, 2.0);  // Entrance vs Library Divider
 
-        // Entrance Door
+        // Grand Motorized Biometric Front Door
         const doorFrame = new THREE.Group();
-        doorFrame.position.set(115, 0, -150);
-        const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(22, 16.0, 1.0), this.materials.doorWood);
-        doorMesh.position.set(11, 8.0, 0);
+        doorFrame.position.set(175, 0, -200);
+        const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(32, 20.0, 1.2), this.materials.doorSecurityWood);
+        doorMesh.position.set(16, 10.0, 0);
         doorMesh.castShadow = true;
         doorFrame.add(doorMesh);
 
-        const lockPad = new THREE.Mesh(new THREE.BoxGeometry(2.0, 5.0, 0.4), this.materials.metalChrome);
-        lockPad.position.set(20, 8.0, 0.6);
+        const lockPad = new THREE.Mesh(new THREE.BoxGeometry(2.4, 6.0, 0.5), this.materials.metalTitanium);
+        lockPad.position.set(28, 10.0, 0.8);
         doorFrame.add(lockPad);
         root.add(doorFrame);
         this.doorMesh = doorFrame;
 
         // =====================================================================
-        // 3. BEAUTIFULLY REORGANIZED GRAND FURNITURE SET
+        // 3. ULTRA-LUXURY ARCHITECTURAL FURNITURE SETTING
         // =====================================================================
 
-        // --- 🛋️ 거실 (Living Room) ---
-        const rug = new THREE.Mesh(new THREE.PlaneGeometry(80, 65), this.materials.carpetLiving);
+        // --- 🏛️ 그랜드 라운지 & 8K 시네마 (Grand Central Living) ---
+        const rug = new THREE.Mesh(new THREE.PlaneGeometry(120, 95), this.materials.carpetPlush);
         rug.rotation.x = -Math.PI / 2;
-        rug.position.set(25, 0.02, 65);
+        rug.position.set(20, 0.02, 90);
         root.add(rug);
 
-        // U-Shaped Modern Sectional Sofa Suite
-        const sofaCenter = new THREE.Mesh(new THREE.BoxGeometry(55, 4.5, 14), this.materials.leatherSofa);
-        sofaCenter.position.set(25, 2.25, 45);
+        // Circular Grand Sectional Pit Sofa Suite
+        const sofaCenter = new THREE.Mesh(new THREE.BoxGeometry(80, 5.5, 18), this.materials.leatherRoyalBlue);
+        sofaCenter.position.set(20, 2.75, 60);
         sofaCenter.castShadow = true;
         root.add(sofaCenter);
 
-        const sofaWingL = new THREE.Mesh(new THREE.BoxGeometry(14, 4.5, 35), this.materials.leatherSofa);
-        sofaWingL.position.set(-6, 2.25, 62);
+        const sofaWingL = new THREE.Mesh(new THREE.BoxGeometry(18, 5.5, 50), this.materials.leatherRoyalBlue);
+        sofaWingL.position.set(-25, 2.75, 85);
         sofaWingL.castShadow = true;
         root.add(sofaWingL);
 
-        const sofaWingR = new THREE.Mesh(new THREE.BoxGeometry(14, 4.5, 35), this.materials.leatherSofaAccent);
-        sofaWingR.position.set(56, 2.25, 62);
+        const sofaWingR = new THREE.Mesh(new THREE.BoxGeometry(18, 5.5, 50), this.materials.leatherCyanAccent);
+        sofaWingR.position.set(65, 2.75, 85);
         sofaWingR.castShadow = true;
         root.add(sofaWingR);
 
-        // Grand Marble Coffee Table
-        const coffeeTable = new THREE.Mesh(new THREE.BoxGeometry(32, 2.2, 16), this.materials.woodDark);
-        coffeeTable.position.set(25, 1.1, 65);
-        coffeeTable.castShadow = true;
-        root.add(coffeeTable);
+        // Italian Marble Dual Center Tables
+        const coffeeTable1 = new THREE.Mesh(new THREE.BoxGeometry(45, 2.5, 22), this.materials.marbleDark);
+        coffeeTable1.position.set(20, 1.25, 90);
+        coffeeTable1.castShadow = true;
+        root.add(coffeeTable1);
 
-        // 98-inch 8K Smart TV & Entertainment Console
-        const tvConsole = new THREE.Mesh(new THREE.BoxGeometry(60, 3.0, 7), this.materials.furnitureWhite);
-        tvConsole.position.set(25, 1.5, 138);
+        // 120-inch MicroLED Wall Cinema Display & Console
+        const tvConsole = new THREE.Mesh(new THREE.BoxGeometry(90, 3.5, 8), this.materials.furnitureWhiteLacquer);
+        tvConsole.position.set(20, 1.75, 185);
         tvConsole.castShadow = true;
         root.add(tvConsole);
 
-        const tvScreen = new THREE.Mesh(new THREE.BoxGeometry(45, 20.0, 0.8), this.materials.tvScreen);
-        tvScreen.position.set(25, 13.0, 138.5);
+        const tvScreen = new THREE.Mesh(new THREE.BoxGeometry(70, 28.0, 1.0), this.materials.tvScreen8K);
+        tvScreen.position.set(20, 18.0, 186);
         root.add(tvScreen);
 
-        // Smart Air Conditioner Tower on side wall
-        const acUnit = new THREE.Mesh(new THREE.BoxGeometry(22, 5.0, 3.5), this.materials.furnitureWhite);
-        acUnit.position.set(78, 14.0, 45);
+        // Dual Tower Air Conditioners
+        const acUnit = new THREE.Mesh(new THREE.BoxGeometry(28, 6.0, 4.0), this.materials.furnitureWhiteLacquer);
+        acUnit.position.set(98, 18.0, 60);
         root.add(acUnit);
         this.acUnitMesh = acUnit;
 
-        // Smart Ultrasonic Humidifier Console
-        const humidifierBody = new THREE.Mesh(new THREE.CylinderGeometry(3.0, 3.0, 7.0, 24), this.materials.furnitureWhite);
-        humidifierBody.position.set(58, 3.5, 95);
+        // Central Humidifier Column
+        const humidifierBody = new THREE.Mesh(new THREE.CylinderGeometry(4.0, 4.0, 9.0, 32), this.materials.furnitureWhiteLacquer);
+        humidifierBody.position.set(65, 4.5, 135);
         humidifierBody.castShadow = true;
         root.add(humidifierBody);
         this.humidifierMesh = humidifierBody;
 
-        // --- 🍳 주방 & 식당 (Kitchen & Dining) ---
-        // Chef's Long Marble Island with Induction Cooktop
-        const kitchenIsland = new THREE.Mesh(new THREE.BoxGeometry(55, 5.0, 14), this.materials.woodDark);
-        kitchenIsland.position.set(25, 2.5, -80);
+        // --- 🍳 마스터 셰프 고메 키친 & 와인바 (Kitchen & Bar) ---
+        // 12-meter Waterfall Marble Island
+        const kitchenIsland = new THREE.Mesh(new THREE.BoxGeometry(85, 6.0, 18), this.materials.marbleDark);
+        kitchenIsland.position.set(20, 3.0, -100);
         kitchenIsland.castShadow = true;
         root.add(kitchenIsland);
 
-        // Counter Wall Unit
-        const kitchenCounter = new THREE.Mesh(new THREE.BoxGeometry(80, 5.0, 12), this.materials.furnitureWhite);
-        kitchenCounter.position.set(25, 2.5, -140);
+        // Commercial Kitchen Wall Cabinetry
+        const kitchenCounter = new THREE.Mesh(new THREE.BoxGeometry(120, 6.0, 14), this.materials.furnitureWhiteLacquer);
+        kitchenCounter.position.set(20, 3.0, -188);
         kitchenCounter.castShadow = true;
         root.add(kitchenCounter);
 
-        // Smart Boiler Station on Utility Wall
-        const boilerBox = new THREE.Mesh(new THREE.BoxGeometry(12, 14, 4.0), this.materials.furnitureWhite);
-        boilerBox.position.set(-22, 9.0, -145);
+        // Smart Boiler Energy Station on Utility Wall
+        const boilerBox = new THREE.Mesh(new THREE.BoxGeometry(16, 18, 5.0), this.materials.furnitureWhiteLacquer);
+        boilerBox.position.set(-48, 12.0, -192);
         root.add(boilerBox);
 
-        // 8-Seater Designer Dining Table
-        const diningTable = new THREE.Mesh(new THREE.BoxGeometry(45, 4.5, 18), this.materials.woodLight);
-        diningTable.position.set(25, 2.25, -45);
+        // 10-Seater Banquet Dining Table
+        const diningTable = new THREE.Mesh(new THREE.BoxGeometry(65, 5.0, 22), this.materials.woodWalnut);
+        diningTable.position.set(20, 2.5, -50);
         diningTable.castShadow = true;
         root.add(diningTable);
 
-        // Refrigerator
-        const fridge = new THREE.Mesh(new THREE.BoxGeometry(12, 14.0, 8), this.materials.metalChrome);
-        fridge.position.set(65, 7.0, -140);
+        // Double Commercial Smart Fridges
+        const fridge = new THREE.Mesh(new THREE.BoxGeometry(16, 18.0, 10), this.materials.metalTitanium);
+        fridge.position.set(85, 9.0, -188);
         root.add(fridge);
 
-        // --- 🛏️ 안방 (Master Suite) ---
-        // Master King-size Bed & Headboard
-        const masterBed = new THREE.Mesh(new THREE.BoxGeometry(45, 4.5, 50), this.materials.leatherSofa);
-        masterBed.position.set(-90, 2.25, 25);
+        // --- 👑 프레지덴셜 마스터 스위트 (Presidential Master Bedroom) ---
+        const masterBed = new THREE.Mesh(new THREE.BoxGeometry(65, 5.5, 70), this.materials.leatherRoyalBlue);
+        masterBed.position.set(-155, 2.75, 30);
         masterBed.castShadow = true;
         root.add(masterBed);
 
-        const headboard = new THREE.Mesh(new THREE.BoxGeometry(55, 12.0, 3.0), this.materials.woodDark);
-        headboard.position.set(-90, 6.0, -3);
+        const headboard = new THREE.Mesh(new THREE.BoxGeometry(80, 16.0, 4.0), this.materials.woodWalnut);
+        headboard.position.set(-155, 8.0, -10);
         root.add(headboard);
 
-        // Nightstands
-        const nightstandL = new THREE.Mesh(new THREE.BoxGeometry(8, 3.5, 6), this.materials.woodDark);
-        nightstandL.position.set(-124, 1.75, 5);
+        const nightstandL = new THREE.Mesh(new THREE.BoxGeometry(12, 4.5, 8), this.materials.woodWalnut);
+        nightstandL.position.set(-205, 2.25, 0);
         root.add(nightstandL);
 
-        const nightstandR = new THREE.Mesh(new THREE.BoxGeometry(8, 3.5, 6), this.materials.woodDark);
-        nightstandR.position.set(-56, 1.75, 5);
+        const nightstandR = new THREE.Mesh(new THREE.BoxGeometry(12, 4.5, 8), this.materials.woodWalnut);
+        nightstandR.position.set(-105, 2.25, 0);
         root.add(nightstandR);
 
-        // Full-wall Wardrobe Closet
-        const wardrobe = new THREE.Mesh(new THREE.BoxGeometry(80, 14.0, 6), this.materials.furnitureWhite);
-        wardrobe.position.set(-90, 7.0, 65);
+        const wardrobe = new THREE.Mesh(new THREE.BoxGeometry(120, 18.0, 8), this.materials.furnitureWhiteLacquer);
+        wardrobe.position.set(-155, 9.0, 82);
         root.add(wardrobe);
 
-        // --- 🛏️ 방 B & 발코니 (Work & Gaming Studio) ---
-        const bedB = new THREE.Mesh(new THREE.BoxGeometry(25, 4.0, 45), this.materials.leatherSofa);
-        bedB.position.set(-55, 2.0, -80);
-        bedB.castShadow = true;
-        root.add(bedB);
-
-        const deskB = new THREE.Mesh(new THREE.BoxGeometry(30, 4.0, 10), this.materials.woodDark);
-        deskB.position.set(-85, 2.0, -135);
+        // --- 💻 하이테크 사이버 스튜디오 & 테라스 (Studio & Balcony) ---
+        const deskB = new THREE.Mesh(new THREE.BoxGeometry(45, 5.0, 14), this.materials.marbleDark);
+        deskB.position.set(-115, 2.5, -165);
         deskB.castShadow = true;
         root.add(deskB);
 
-        const laundryRack = new THREE.Mesh(new THREE.BoxGeometry(16, 10.0, 6), this.materials.metalChrome);
-        laundryRack.position.set(-130, 5.0, -90);
+        const bedB = new THREE.Mesh(new THREE.BoxGeometry(35, 5.0, 60), this.materials.leatherRoyalBlue);
+        bedB.position.set(-85, 2.5, -95);
+        bedB.castShadow = true;
+        root.add(bedB);
+
+        const laundryRack = new THREE.Mesh(new THREE.BoxGeometry(22, 14.0, 8), this.materials.metalTitanium);
+        laundryRack.position.set(-210, 7.0, -120);
         root.add(laundryRack);
 
-        // --- 🛏️ 방 A (Study & Library Bedroom) ---
-        const bedA = new THREE.Mesh(new THREE.BoxGeometry(25, 4.0, 45), this.materials.leatherSofa);
-        bedA.position.set(125, 2.0, 80);
+        // --- 📚 VIP 라이브러리 & 게스트 스위트 (Library & VIP) ---
+        const bedA = new THREE.Mesh(new THREE.BoxGeometry(35, 5.0, 60), this.materials.leatherRoyalBlue);
+        bedA.position.set(190, 2.5, 110);
         bedA.castShadow = true;
         root.add(bedA);
 
-        const deskA = new THREE.Mesh(new THREE.BoxGeometry(35, 4.0, 10), this.materials.woodLight);
-        deskA.position.set(100, 2.0, 10);
+        const deskA = new THREE.Mesh(new THREE.BoxGeometry(45, 5.0, 14), this.materials.woodWalnut);
+        deskA.position.set(150, 2.5, 20);
         deskA.castShadow = true;
         root.add(deskA);
 
-        const bookshelfA = new THREE.Mesh(new THREE.BoxGeometry(45, 14.0, 6), this.materials.woodDark);
-        bookshelfA.position.set(115, 7.0, 140);
+        const bookshelfA = new THREE.Mesh(new THREE.BoxGeometry(70, 18.0, 8), this.materials.woodWalnut);
+        bookshelfA.position.set(175, 9.0, 192);
         root.add(bookshelfA);
 
-        // --- 🛁 욕실 (Bathroom) ---
-        const bathtub = new THREE.Mesh(new THREE.BoxGeometry(35, 5.5, 18), this.materials.furnitureWhite);
-        bathtub.position.set(-115, 2.75, 115);
-        bathtub.castShadow = true;
-        root.add(bathtub);
+        // --- 🛁 럭셔리 스파 & 자쿠지 (Luxury Spa & Bath) ---
+        const jacuzzi = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 6.0, 32), this.materials.furnitureWhiteLacquer);
+        jacuzzi.position.set(-175, 3.0, 150);
+        jacuzzi.castShadow = true;
+        root.add(jacuzzi);
 
-        const vanity = new THREE.Mesh(new THREE.BoxGeometry(30, 4.5, 10), this.materials.furnitureWhite);
-        vanity.position.set(-65, 2.25, 80);
+        const vanity = new THREE.Mesh(new THREE.BoxGeometry(45, 5.5, 12), this.materials.marbleDark);
+        vanity.position.set(-95, 2.75, 110);
         root.add(vanity);
 
-        // --- 🚪 현관 (Entrance Hall) ---
-        const shoeCabinet = new THREE.Mesh(new THREE.BoxGeometry(35, 14.0, 8), this.materials.furnitureWhite);
-        shoeCabinet.position.set(125, 7.0, -45);
-        root.add(shoeCabinet);
+        // --- 🚪 스마트 보안 엔트런스 포이어 (Foyer) ---
+        const shoeStorage = new THREE.Mesh(new THREE.BoxGeometry(50, 18.0, 10), this.materials.furnitureWhiteLacquer);
+        shoeStorage.position.set(195, 9.0, -60);
+        root.add(shoeStorage);
 
         this.scene.add(root);
         this.houseRoot = root;
@@ -1188,37 +1178,37 @@ class ThreeJSSimulator {
     build3DCurtains() {
         const group = new THREE.Group();
 
-        // 1. Living Room Wide Curtains (South Wall Window)
-        const livingCurtainL = new THREE.Mesh(new THREE.BoxGeometry(24, 14.0, 0.6), this.materials.curtainFabric);
-        livingCurtainL.position.set(-6, 8.5, 148);
+        // 1. Living Room Curtains (South Panoramic Window)
+        const livingCurtainL = new THREE.Mesh(new THREE.BoxGeometry(35, 18.0, 0.8), this.materials.curtainSilk);
+        livingCurtainL.position.set(-25, 11.0, 198);
         group.add(livingCurtainL);
 
-        const livingCurtainR = new THREE.Mesh(new THREE.BoxGeometry(24, 14.0, 0.6), this.materials.curtainFabric);
-        livingCurtainR.position.set(56, 8.5, 148);
+        const livingCurtainR = new THREE.Mesh(new THREE.BoxGeometry(35, 18.0, 0.8), this.materials.curtainSilk);
+        livingCurtainR.position.set(65, 11.0, 198);
         group.add(livingCurtainR);
 
-        this.curtainMeshes.livingRoom = { l: livingCurtainL, r: livingCurtainR, openL: -18, closeL: 8, openR: 68, closeR: 42 };
+        this.curtainMeshes.livingRoom = { l: livingCurtainL, r: livingCurtainR, openL: -45, closeL: -5, openR: 85, closeR: 45 };
 
-        // 2. Master Room Blackout Curtains (West Wall Window)
-        const masterCurtainL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 13.0, 18), this.materials.curtainMaster);
-        masterCurtainL.position.set(-148, 8.5, 2);
+        // 2. Master Suite Velvet Blackout Drapery
+        const masterCurtainL = new THREE.Mesh(new THREE.BoxGeometry(0.8, 18.0, 28), this.materials.curtainMasterVelvet);
+        masterCurtainL.position.set(-248, 11.0, -10);
         group.add(masterCurtainL);
 
-        const masterCurtainR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 13.0, 18), this.materials.curtainMaster);
-        masterCurtainR.position.set(-148, 8.5, 38);
+        const masterCurtainR = new THREE.Mesh(new THREE.BoxGeometry(0.8, 18.0, 28), this.materials.curtainMasterVelvet);
+        masterCurtainR.position.set(-248, 11.0, 60);
         group.add(masterCurtainR);
 
-        this.curtainMeshes.masterRoom = { l: masterCurtainL, r: masterCurtainR, openL: -8, closeL: 10, openR: 48, closeR: 30 };
+        this.curtainMeshes.masterRoom = { l: masterCurtainL, r: masterCurtainR, openL: -25, closeL: 5, openR: 75, closeR: 45 };
 
-        // 3. Room A Blinds (East Window)
-        const roomABlind = new THREE.Mesh(new THREE.BoxGeometry(0.6, 13.0, 68), this.materials.blindMesh);
-        roomABlind.position.set(148, 8.5, 65);
+        // 3. VIP Library Blinds
+        const roomABlind = new THREE.Mesh(new THREE.BoxGeometry(0.8, 18.0, 95), this.materials.blindAcoustic);
+        roomABlind.position.set(248, 11.0, 90);
         group.add(roomABlind);
         this.curtainMeshes.roomA = { mesh: roomABlind };
 
-        // 4. Room B Balcony Blinds (West Window)
-        const roomBBlind = new THREE.Mesh(new THREE.BoxGeometry(0.6, 13.0, 68), this.materials.blindMesh);
-        roomBBlind.position.set(-148, 8.5, -90);
+        // 4. Cyber Studio Blinds
+        const roomBBlind = new THREE.Mesh(new THREE.BoxGeometry(0.8, 18.0, 95), this.materials.blindAcoustic);
+        roomBBlind.position.set(-248, 11.0, -120);
         group.add(roomBBlind);
         this.curtainMeshes.roomB = { mesh: roomBBlind };
 
@@ -1230,44 +1220,44 @@ class ThreeJSSimulator {
         const group = new THREE.Group();
 
         const createGrandLamp = (roomKey, x, y, z, type = 'chandelier') => {
-            const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 4.0, 16), this.materials.metalChrome);
-            stem.position.set(x, y + 2.0, z);
+            const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 5.0, 16), this.materials.metalTitanium);
+            stem.position.set(x, y + 2.5, z);
             group.add(stem);
 
             let fixture, bulb;
             if (type === 'chandelier') {
-                fixture = new THREE.Mesh(new THREE.TorusGeometry(6.5, 0.8, 16, 32), this.materials.metalChrome);
+                fixture = new THREE.Mesh(new THREE.TorusGeometry(9.0, 1.0, 16, 32), this.materials.metalTitanium);
                 fixture.rotation.x = Math.PI / 2;
                 fixture.position.set(x, y, z);
                 group.add(fixture);
 
-                bulb = new THREE.Mesh(new THREE.SphereGeometry(2.8, 16, 16), this.materials.lampGlowOff);
-                bulb.position.set(x, y - 0.4, z);
+                bulb = new THREE.Mesh(new THREE.SphereGeometry(4.0, 16, 16), this.materials.lampGlowOff);
+                bulb.position.set(x, y - 0.5, z);
                 group.add(bulb);
             } else {
-                fixture = new THREE.Mesh(new THREE.ConeGeometry(4.5, 3.2, 24), this.materials.furnitureWhite);
+                fixture = new THREE.Mesh(new THREE.ConeGeometry(6.0, 4.5, 24), this.materials.furnitureWhiteLacquer);
                 fixture.position.set(x, y + 0.5, z);
                 group.add(fixture);
 
-                bulb = new THREE.Mesh(new THREE.SphereGeometry(2.2, 16, 16), this.materials.lampGlowOff);
-                bulb.position.set(x, y - 0.6, z);
+                bulb = new THREE.Mesh(new THREE.SphereGeometry(3.0, 16, 16), this.materials.lampGlowOff);
+                bulb.position.set(x, y - 0.8, z);
                 group.add(bulb);
             }
 
-            const pLight = new THREE.PointLight(0xffeedd, 0, 120, 1.4);
-            pLight.position.set(x, y - 1.2, z);
+            const pLight = new THREE.PointLight(0xffeedd, 0, 180, 1.4);
+            pLight.position.set(x, y - 1.5, z);
             group.add(pLight);
 
             this.lights[roomKey] = pLight;
             this.lampBulbs[roomKey] = bulb;
         };
 
-        createGrandLamp('livingRoom', 25, 14.0, 65, 'chandelier');
-        createGrandLamp('masterRoom', -90, 14.0, 20, 'chandelier');
-        createGrandLamp('kitchen', 25, 14.0, -65, 'pendant');
-        createGrandLamp('roomA', 115, 14.0, 65, 'pendant');
-        createGrandLamp('roomB', -70, 14.0, -90, 'pendant');
-        createGrandLamp('bathroom', -90, 14.0, 110, 'pendant');
+        createGrandLamp('livingRoom', 20, 19.0, 90, 'chandelier');
+        createGrandLamp('masterRoom', -155, 19.0, 25, 'chandelier');
+        createGrandLamp('kitchen', 20, 19.0, -100, 'pendant');
+        createGrandLamp('roomA', 175, 19.0, 90, 'pendant');
+        createGrandLamp('roomB', -115, 19.0, -120, 'pendant');
+        createGrandLamp('bathroom', -155, 19.0, 145, 'pendant');
 
         this.scene.add(group);
         this.lampsGroup = group;
@@ -1276,13 +1266,13 @@ class ThreeJSSimulator {
     buildRoofSlab() {
         const roofGroup = new THREE.Group();
 
-        const roofMain = new THREE.Mesh(new THREE.BoxGeometry(304, 2.0, 304), this.materials.wallRoof);
-        roofMain.position.set(0, 19.0, 0);
+        const roofMain = new THREE.Mesh(new THREE.BoxGeometry(504, 2.5, 404), this.materials.wallRoof);
+        roofMain.position.set(0, 25.2, 0);
         roofGroup.add(roofMain);
 
-        const skylight = new THREE.Mesh(new THREE.PlaneGeometry(60, 45), this.materials.glassWindow);
+        const skylight = new THREE.Mesh(new THREE.PlaneGeometry(90, 65), this.materials.glassCurtainWall);
         skylight.rotation.x = -Math.PI / 2;
-        skylight.position.set(25, 20.2, 65);
+        skylight.position.set(20, 26.6, 90);
         roofGroup.add(skylight);
 
         roofGroup.visible = false;
@@ -1294,7 +1284,7 @@ class ThreeJSSimulator {
         const group = new THREE.Group();
 
         const createOndolPlane = (x, z, w, d) => {
-            const geo = new THREE.PlaneGeometry(w - 4.0, d - 4.0, 28, 28);
+            const geo = new THREE.PlaneGeometry(w - 6.0, d - 6.0, 32, 32);
             const mat = new THREE.MeshBasicMaterial({
                 color: 0xef4444,
                 wireframe: true,
@@ -1309,11 +1299,12 @@ class ThreeJSSimulator {
         };
 
         this.ondolPlanes = [
-            createOndolPlane(25, 65, 110, 170),
-            createOndolPlane(-90, 20, 120, 100),
-            createOndolPlane(-70, -90, 80, 120),
-            createOndolPlane(115, 65, 70, 170),
-            createOndolPlane(25, -85, 110, 130)
+            createOndolPlane(20, 90, 160, 220),   // 그랜드 라운지
+            createOndolPlane(-155, 25, 190, 130), // 마스터 스위트
+            createOndolPlane(-115, -120, 110, 160),// 사이버 스튜디오
+            createOndolPlane(175, 90, 150, 220),  // VIP 라이브러리
+            createOndolPlane(20, -110, 160, 180), // 셰프 키친
+            createOndolPlane(-155, 145, 190, 110) // 럭셔리 스파
         ];
 
         this.scene.add(group);
@@ -1321,21 +1312,21 @@ class ThreeJSSimulator {
     }
 
     buildACParticleStream() {
-        const particleCount = 350;
+        const particleCount = 450;
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
 
         for (let i = 0; i < particleCount * 3; i += 3) {
-            positions[i] = 76.0 - Math.random() * 6.0;
-            positions[i + 1] = 13.5 - Math.random() * 3.0;
-            positions[i + 2] = 45.0 + (Math.random() - 0.5) * 25.0;
+            positions[i] = 95.0 - Math.random() * 8.0;
+            positions[i + 1] = 17.5 - Math.random() * 4.0;
+            positions[i + 2] = 60.0 + (Math.random() - 0.5) * 35.0;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
         const material = new THREE.PointsMaterial({
             color: 0x60a5fa,
-            size: 1.4,
+            size: 1.8,
             transparent: true,
             opacity: 0,
             blending: THREE.AdditiveBlending
@@ -1346,21 +1337,21 @@ class ThreeJSSimulator {
     }
 
     buildHumidifierMist() {
-        const mistCount = 200;
+        const mistCount = 260;
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(mistCount * 3);
 
         for (let i = 0; i < mistCount * 3; i += 3) {
-            positions[i] = 58.0 + (Math.random() - 0.5) * 3.0;
-            positions[i + 1] = 7.0 + Math.random() * 4.0;
-            positions[i + 2] = 95.0 + (Math.random() - 0.5) * 3.0;
+            positions[i] = 65.0 + (Math.random() - 0.5) * 4.0;
+            positions[i + 1] = 9.0 + Math.random() * 5.0;
+            positions[i + 2] = 135.0 + (Math.random() - 0.5) * 4.0;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
         const material = new THREE.PointsMaterial({
             color: 0xe0f2fe,
-            size: 1.0,
+            size: 1.2,
             transparent: true,
             opacity: 0,
             blending: THREE.AdditiveBlending
@@ -1371,14 +1362,14 @@ class ThreeJSSimulator {
     }
 
     buildStoveFlame() {
-        const flameGeo = new THREE.ConeGeometry(1.4, 3.2, 8);
+        const flameGeo = new THREE.ConeGeometry(2.0, 4.5, 8);
         const flameMat = new THREE.MeshBasicMaterial({
             color: 0x3b82f6,
             transparent: true,
             opacity: 0
         });
         const flame = new THREE.Mesh(flameGeo, flameMat);
-        flame.position.set(25, 5.8, -140);
+        flame.position.set(20, 7.2, -188);
         this.scene.add(flame);
         this.stoveFlame = flame;
     }
@@ -1407,18 +1398,19 @@ class ThreeJSSimulator {
             const texture = new THREE.CanvasTexture(canvas);
             const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
             const sprite = new THREE.Sprite(spriteMat);
-            sprite.position.set(x, 20.0, z);
-            sprite.scale.set(32, 10.0, 1);
+            sprite.position.set(x, 26.0, z);
+            sprite.scale.set(40, 12.5, 1);
             group.add(sprite);
         };
 
-        createLabel('거실 (Living)', 25, 65);
-        createLabel('안방 (Master)', -90, 20);
-        createLabel('방 B & 발코니', -70, -90);
-        createLabel('방 A (Room A)', 115, 65);
-        createLabel('주방 & 식당', 25, -85);
-        createLabel('공용 욕실', -90, 110);
-        createLabel('현관 (Door)', 115, -85);
+        createLabel('그랜드 라운지 & 시네마', 20, 90);
+        createLabel('프레지덴셜 마스터 스위트', -155, 25);
+        createLabel('셰프 고메 키친 & 바', 20, -110);
+        createLabel('사이버 스튜디오', -115, -120);
+        createLabel('에코 가든 테라스', -210, -120);
+        createLabel('럭셔리 스파 자쿠지', -155, 145);
+        createLabel('VIP 라이브러리', 175, 90);
+        createLabel('스마트 보안 포이어', 175, -110);
 
         this.scene.add(group);
         this.roomLabelsGroup = group;
@@ -1429,7 +1421,7 @@ class ThreeJSSimulator {
         Object.keys(state.lights).forEach(room => {
             const isOn = state.lights[room];
             if (this.lights[room]) {
-                this.lights[room].intensity = isOn ? (3.5 * factor + 0.8) : 0;
+                this.lights[room].intensity = isOn ? (4.2 * factor + 1.0) : 0;
             }
             if (this.lampBulbs[room]) {
                 this.lampBulbs[room].material = isOn ? this.materials.lampGlowOn : this.materials.lampGlowOff;
@@ -1453,7 +1445,7 @@ class ThreeJSSimulator {
             this.scene.fog.color.setHex(isDark ? 0x090e1a : 0xebf0f7);
         }
         if (this.ambientLight) {
-            this.ambientLight.intensity = isDark ? 0.45 : 0.78;
+            this.ambientLight.intensity = isDark ? 0.45 : 0.8;
         }
     }
 
@@ -1461,22 +1453,22 @@ class ThreeJSSimulator {
         state.effects3D.roof = !state.effects3D.roof;
         if (this.roofGroup) this.roofGroup.visible = state.effects3D.roof;
         elements.btnToggleRoof.classList.toggle('active', state.effects3D.roof);
-        showToast(`지붕(천장) [${state.effects3D.roof ? 'ON (완전 밀폐)' : 'OFF (오픈 뷰)'}]`);
+        showToast(`대저택 지붕 [${state.effects3D.roof ? 'ON (완전 밀폐)' : 'OFF (오픈 조감도)'}]`);
     }
 
     // --- 1st-Person Continuous WASD Engine ---
-    enterFPSMode(startPos = new THREE.Vector3(25, 7.0, 60)) {
+    enterFPSMode(startPos = new THREE.Vector3(20, 8.0, 80)) {
         state.fpsMode = true;
         this.fpsPos.copy(startPos);
         this.camera.position.copy(this.fpsPos);
-        this.controls.target.set(this.fpsPos.x, this.fpsPos.y, this.fpsPos.z + 15);
+        this.controls.target.set(this.fpsPos.x, this.fpsPos.y, this.fpsPos.z + 20);
         this.controls.minDistance = 0.1;
-        this.controls.maxDistance = 25;
+        this.controls.maxDistance = 30;
         this.controls.maxPolarAngle = Math.PI / 1.85;
 
         elements.btnCamFps.classList.add('active');
         elements.fpsControlsOverlay.classList.add('active');
-        showToast('🚶 1인칭 걷기 모드! WASD 키를 누르고 있으면 부드럽게 이동합니다.');
+        showToast('🚶 대저택 1인칭 걷기 모드! WASD 키를 누르고 있으면 부드럽게 이동합니다.');
     }
 
     exitFPSMode() {
@@ -1484,7 +1476,7 @@ class ThreeJSSimulator {
         elements.btnCamFps.classList.remove('active');
         elements.fpsControlsOverlay.classList.remove('active');
         this.controls.minDistance = 10;
-        this.controls.maxDistance = 1200;
+        this.controls.maxDistance = 1600;
         this.controls.maxPolarAngle = Math.PI / 2.04;
     }
 
@@ -1503,17 +1495,17 @@ class ThreeJSSimulator {
 
         const side = new THREE.Vector3(-dir.z, 0, dir.x);
 
-        const moveSpeed = 45.0 * delta; // Smooth units/sec
+        const moveSpeed = 60.0 * delta; // Smooth units/sec for grand scale
         this.fpsPos.addScaledVector(dir, forwardKey * moveSpeed);
         this.fpsPos.addScaledVector(side, strafeKey * moveSpeed);
 
-        // Clamping to interior boundaries
-        this.fpsPos.x = Math.max(-142, Math.min(142, this.fpsPos.x));
-        this.fpsPos.z = Math.max(-142, Math.min(142, this.fpsPos.z));
-        this.fpsPos.y = 7.0;
+        // Clamping to mansion boundaries
+        this.fpsPos.x = Math.max(-240, Math.min(240, this.fpsPos.x));
+        this.fpsPos.z = Math.max(-190, Math.min(190, this.fpsPos.z));
+        this.fpsPos.y = 8.0;
 
         this.camera.position.copy(this.fpsPos);
-        this.controls.target.copy(this.fpsPos).add(dir.multiplyScalar(15));
+        this.controls.target.copy(this.fpsPos).add(dir.multiplyScalar(20));
     }
 
     animateCameraTo(targetPos, targetLookAt, duration = 800) {
@@ -1547,19 +1539,19 @@ class ThreeJSSimulator {
     bindToolbar() {
         elements.btnCamIso.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamIso);
-            this.animateCameraTo(new THREE.Vector3(160, 160, 160), new THREE.Vector3(0, 8, 0));
+            this.animateCameraTo(new THREE.Vector3(220, 220, 220), new THREE.Vector3(0, 10, 0));
         });
 
         elements.btnCamTop.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamTop);
-            this.animateCameraTo(new THREE.Vector3(0, 240, 0.1), new THREE.Vector3(0, 0, 0));
+            this.animateCameraTo(new THREE.Vector3(0, 340, 0.1), new THREE.Vector3(0, 0, 0));
         });
 
         elements.btnCamFps.addEventListener('click', () => {
             if (state.fpsMode) {
                 this.exitFPSMode();
                 this.setActiveToolBtn(elements.btnCamIso);
-                this.animateCameraTo(new THREE.Vector3(160, 160, 160), new THREE.Vector3(0, 8, 0));
+                this.animateCameraTo(new THREE.Vector3(220, 220, 220), new THREE.Vector3(0, 10, 0));
             } else {
                 this.setActiveToolBtn(elements.btnCamFps);
                 this.enterFPSMode();
@@ -1568,22 +1560,22 @@ class ThreeJSSimulator {
 
         elements.btnCamLiving.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamLiving);
-            this.animateCameraTo(new THREE.Vector3(25, 75, 140), new THREE.Vector3(25, 6, 65));
+            this.animateCameraTo(new THREE.Vector3(20, 100, 190), new THREE.Vector3(20, 8, 90));
         });
 
         elements.btnCamMaster.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamMaster);
-            this.animateCameraTo(new THREE.Vector3(-90, 75, 95), new THREE.Vector3(-90, 6, 20));
+            this.animateCameraTo(new THREE.Vector3(-155, 100, 130), new THREE.Vector3(-155, 8, 25));
         });
 
         elements.btnCamKitchen.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamKitchen);
-            this.animateCameraTo(new THREE.Vector3(25, 75, -140), new THREE.Vector3(25, 6, -85));
+            this.animateCameraTo(new THREE.Vector3(20, 100, -190), new THREE.Vector3(20, 8, -110));
         });
 
         elements.btnCamReset.addEventListener('click', () => {
             this.setActiveToolBtn(elements.btnCamIso);
-            this.animateCameraTo(new THREE.Vector3(160, 160, 160), new THREE.Vector3(0, 8, 0));
+            this.animateCameraTo(new THREE.Vector3(220, 220, 220), new THREE.Vector3(0, 10, 0));
         });
 
         elements.btnToggleRoof.addEventListener('click', () => this.toggleRoof());
@@ -1609,13 +1601,14 @@ class ThreeJSSimulator {
 
     bindRoomHUD() {
         const roomCoords = {
-            living: { cam: new THREE.Vector3(25, 75, 140), look: new THREE.Vector3(25, 6, 65), fps: new THREE.Vector3(25, 7.0, 60) },
-            master: { cam: new THREE.Vector3(-90, 75, 95), look: new THREE.Vector3(-90, 6, 20), fps: new THREE.Vector3(-90, 7.0, 20) },
-            roomb: { cam: new THREE.Vector3(-70, 75, -140), look: new THREE.Vector3(-70, 6, -90), fps: new THREE.Vector3(-70, 7.0, -90) },
-            rooma: { cam: new THREE.Vector3(115, 75, 140), look: new THREE.Vector3(115, 6, 65), fps: new THREE.Vector3(115, 7.0, 65) },
-            kitchen: { cam: new THREE.Vector3(25, 75, -140), look: new THREE.Vector3(25, 6, -85), fps: new THREE.Vector3(25, 7.0, -70) },
-            bath: { cam: new THREE.Vector3(-90, 75, 150), look: new THREE.Vector3(-90, 6, 110), fps: new THREE.Vector3(-90, 7.0, 110) },
-            entrance: { cam: new THREE.Vector3(115, 75, -140), look: new THREE.Vector3(115, 6, -85), fps: new THREE.Vector3(115, 7.0, -85) }
+            living: { cam: new THREE.Vector3(20, 100, 190), look: new THREE.Vector3(20, 8, 90), fps: new THREE.Vector3(20, 8.0, 80) },
+            master: { cam: new THREE.Vector3(-155, 100, 130), look: new THREE.Vector3(-155, 8, 25), fps: new THREE.Vector3(-155, 8.0, 25) },
+            kitchen: { cam: new THREE.Vector3(20, 100, -190), look: new THREE.Vector3(20, 8, -110), fps: new THREE.Vector3(20, 8.0, -90) },
+            studio: { cam: new THREE.Vector3(-115, 100, -190), look: new THREE.Vector3(-115, 8, -120), fps: new THREE.Vector3(-115, 8.0, -120) },
+            library: { cam: new THREE.Vector3(175, 100, 190), look: new THREE.Vector3(175, 8, 90), fps: new THREE.Vector3(175, 8.0, 90) },
+            spa: { cam: new THREE.Vector3(-155, 100, 200), look: new THREE.Vector3(-155, 8, 145), fps: new THREE.Vector3(-155, 8.0, 145) },
+            balcony: { cam: new THREE.Vector3(-210, 100, -190), look: new THREE.Vector3(-210, 8, -120), fps: new THREE.Vector3(-210, 8.0, -120) },
+            entrance: { cam: new THREE.Vector3(175, 100, -190), look: new THREE.Vector3(175, 8, -110), fps: new THREE.Vector3(175, 8.0, -110) }
         };
 
         elements.roomFocusButtons.forEach(btn => {
@@ -1643,7 +1636,6 @@ class ThreeJSSimulator {
             this.keys[e.key.toLowerCase()] = false;
         });
 
-        // Virtual D-Pad Touch/Mouse Listeners
         const bindButtonHold = (btn, keyName) => {
             if (!btn) return;
             const start = () => { this.keys[keyName] = true; };
@@ -1683,7 +1675,6 @@ class ThreeJSSimulator {
         const delta = this.clock.getDelta();
         const time = performance.now() * 0.001;
 
-        // Continuous WASD Loop in FPS mode
         this.updateFPSMovement(delta);
 
         if (!this.isAnimatingCamera && this.controls) {
@@ -1717,20 +1708,20 @@ class ThreeJSSimulator {
             const cur = this.curtainMeshes.roomA;
             const targetScaleY = state.curtains.roomA ? 0.12 : 1.0;
             cur.mesh.scale.y += (targetScaleY - cur.mesh.scale.y) * 0.1;
-            cur.mesh.position.y = 15.0 - (cur.mesh.scale.y * 6.5);
+            cur.mesh.position.y = 20.0 - (cur.mesh.scale.y * 9.0);
         }
 
         if (this.curtainMeshes.roomB) {
             const cur = this.curtainMeshes.roomB;
             const targetScaleY = state.curtains.roomB ? 0.12 : 1.0;
             cur.mesh.scale.y += (targetScaleY - cur.mesh.scale.y) * 0.1;
-            cur.mesh.position.y = 15.0 - (cur.mesh.scale.y * 6.5);
+            cur.mesh.position.y = 20.0 - (cur.mesh.scale.y * 9.0);
         }
 
         // 3. Ondol Heat Glow Pulse
         if (this.ondolPlanes && this.ondolPlanes.length > 0) {
             const isBoilerOn = state.boiler.active;
-            const targetOpacity = isBoilerOn ? (0.45 + 0.3 * Math.sin(time * 3.5)) : 0;
+            const targetOpacity = isBoilerOn ? (0.48 + 0.3 * Math.sin(time * 3.5)) : 0;
             this.ondolPlanes.forEach(plane => {
                 plane.material.opacity += (targetOpacity - plane.material.opacity) * 0.1;
             });
@@ -1739,22 +1730,22 @@ class ThreeJSSimulator {
         // 4. AC Particle Flow
         if (this.acParticles) {
             const isAcOn = state.aircon.active;
-            const targetOpacity = isAcOn ? 0.85 : 0;
+            const targetOpacity = isAcOn ? 0.88 : 0;
             this.acParticles.material.opacity += (targetOpacity - this.acParticles.material.opacity) * 0.1;
 
             if (isAcOn || this.acParticles.material.opacity > 0.02) {
                 const positions = this.acParticles.geometry.attributes.position.array;
-                const windSpeed = state.aircon.wind === 'high' ? 1.0 : (state.aircon.wind === 'medium' ? 0.65 : 0.4);
+                const windSpeed = state.aircon.wind === 'high' ? 1.2 : (state.aircon.wind === 'medium' ? 0.75 : 0.45);
 
                 for (let i = 0; i < positions.length; i += 3) {
                     positions[i] -= windSpeed * 1.5;
                     positions[i + 1] -= windSpeed * 0.25;
-                    positions[i + 2] += (Math.sin(time * 2 + i) * 0.15);
+                    positions[i + 2] += (Math.sin(time * 2 + i) * 0.2);
 
-                    if (positions[i] < -25.0 || positions[i + 1] < 1.0) {
-                        positions[i] = 76.0 - Math.random() * 6.0;
-                        positions[i + 1] = 13.5 - Math.random() * 3.0;
-                        positions[i + 2] = 45.0 + (Math.random() - 0.5) * 25.0;
+                    if (positions[i] < -35.0 || positions[i + 1] < 1.0) {
+                        positions[i] = 95.0 - Math.random() * 8.0;
+                        positions[i + 1] = 17.5 - Math.random() * 4.0;
+                        positions[i + 2] = 60.0 + (Math.random() - 0.5) * 35.0;
                     }
                 }
                 this.acParticles.geometry.attributes.position.needsUpdate = true;
@@ -1770,14 +1761,14 @@ class ThreeJSSimulator {
             if (isHumOn || this.mistParticles.material.opacity > 0.02) {
                 const positions = this.mistParticles.geometry.attributes.position.array;
                 for (let i = 0; i < positions.length; i += 3) {
-                    positions[i + 1] += 0.12;
-                    positions[i] += (Math.sin(time * 3 + i) * 0.04);
-                    positions[i + 2] += (Math.cos(time * 3 + i) * 0.04);
+                    positions[i + 1] += 0.14;
+                    positions[i] += (Math.sin(time * 3 + i) * 0.05);
+                    positions[i + 2] += (Math.cos(time * 3 + i) * 0.05);
 
-                    if (positions[i + 1] > 16.0) {
-                        positions[i] = 58.0 + (Math.random() - 0.5) * 3.0;
-                        positions[i + 1] = 7.0;
-                        positions[i + 2] = 95.0 + (Math.random() - 0.5) * 3.0;
+                    if (positions[i + 1] > 22.0) {
+                        positions[i] = 65.0 + (Math.random() - 0.5) * 4.0;
+                        positions[i + 1] = 9.0;
+                        positions[i + 2] = 135.0 + (Math.random() - 0.5) * 4.0;
                     }
                 }
                 this.mistParticles.geometry.attributes.position.needsUpdate = true;
