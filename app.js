@@ -1,6 +1,6 @@
 /* =====================================================================
    스마트홈 3D 시뮬레이터 — app.js
-   Realistic 3-Bay Apartment Topology + Interior Doors + Real Wall Gaps
+   No Interior Doors, No Doorlock, Roll-up Blinds, Soft Particles
    ===================================================================== */
 
 'use strict';
@@ -11,7 +11,7 @@
 const S = {
   lights: { living: false, kitchen: false, master: false, rooma: false, roomb: false, bathroom: false },
   brightness: 70,
-  door: { open: false, locked: true },
+  door: { open: false },
   curtains: { living: false, master: false, rooma: false, roomb: false },
   climate: {
     boiler: false, boilerMode: 'indoor', boilerTarget: 22.0,
@@ -140,7 +140,6 @@ class SmartHomeSimulator {
     this._buildFloors();
     this._buildWalls();
     this._buildExteriorDoor();
-    this._buildInteriorDoors();
     this._buildWindows();
     this._buildFurniture();
     this._buildRoof();
@@ -192,21 +191,21 @@ class SmartHomeSimulator {
     wall(   80,   0, 140, false);// East
 
     // ── Vertical Left (X=-30) ──
-    wall(-30, -45, 50, false, im); // 방B vs 주방 (Z=-70 to -20)
-    // Gap Z=-20 to -10 (방B 문)
+    wall(-30, -45, 50, false, im); // 방B vs 주방
+    // Gap Z=-20 to -10 (방B 입구)
     wall(-30,  -5, 10, false, im); // Z=-10 to 0
     wall(-30,   5, 10, false, im); // Z=0 to 10
-    // Gap Z=10 to 20 (방A 문)
-    wall(-30,  45, 50, false, im); // Z=20 to 70 (방A vs 거실)
+    // Gap Z=10 to 20 (방A 입구)
+    wall(-30,  45, 50, false, im); // Z=20 to 70
 
     // ── Vertical Right (X=30) ──
-    wall(30, -50, 40, false, im); // 현관 vs 주방 (Z=-70 to -30)
+    wall(30, -50, 40, false, im); // 현관 vs 주방
     // Gap Z=-30 to -20 (현관 진입로)
     wall(30, -10, 20, false, im); // Z=-20 to 0
-    // Gap Z=0 to 10 (욕실 문)
+    // Gap Z=0 to 10 (욕실 입구)
     wall(30,  15, 10, false, im); // Z=10 to 20
-    // Gap Z=20 to 30 (안방 문)
-    wall(30,  50, 40, false, im); // Z=30 to 70 (안방 vs 거실)
+    // Gap Z=20 to 30 (안방 입구)
+    wall(30,  50, 40, false, im); // Z=30 to 70
 
     // ── Horizontal Left (Z=0) ──
     wall(-55, 0, 50, true, im); // 방A vs 방B
@@ -238,35 +237,6 @@ class SmartHomeSimulator {
       fm.position.set(55 + fx, fy, -70 + fz);
       this.scene.add(fm);
     });
-
-    const lp = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.8, 0.4), this._mat(0x94a3b8, 0.2, 0.9));
-    lp.position.set(46, 12, -69.4);
-    this.scene.add(lp);
-  }
-
-  // ── Interior Doors (Static Open) ──────────────────────────────────
-  _buildInteriorDoors() {
-    const mat = this._mat(0x334155, 0.5, 0.1);
-    
-    // x, z = hinge position, rotY = open angle
-    const addDoor = (x, z, rotY) => {
-      const g = new THREE.Group();
-      g.position.set(x, 0, z);
-      const d = new THREE.Mesh(new THREE.BoxGeometry(10, 24, 0.8), mat);
-      d.position.set(-5, 12, 0); 
-      g.add(d);
-      g.rotation.y = rotY;
-      this.scene.add(g);
-    };
-
-    // 방 B (Gap: X=-30, Z=-20..-10) -> Hinge at Z=-10
-    addDoor(-30, -10, -Math.PI/2.5); 
-    // 방 A (Gap: X=-30, Z=10..20) -> Hinge at Z=20
-    addDoor(-30, 20, Math.PI/2.5);
-    // 욕실 (Gap: X=30, Z=0..10) -> Hinge at Z=10
-    addDoor(30, 10, Math.PI/2.5);
-    // 안방 (Gap: X=30, Z=20..30) -> Hinge at Z=30
-    addDoor(30, 30, Math.PI/2.5);
   }
 
   // ── Windows ───────────────────────────────────────────────────────
@@ -387,50 +357,65 @@ class SmartHomeSimulator {
     });
   }
 
-  // ── Curtains ──────────────────────────────────────────────────────
+  // ── Curtains (All Blinds, Roll Up/Down) ───────────────────────────
   _buildCurtains() {
-    const slidePair = (x, z, axis, mat, span) => {
-      const halfGeo = new THREE.PlaneGeometry(span / 2 - 0.5, 14);
-      const L = new THREE.Mesh(halfGeo, mat), R = new THREE.Mesh(halfGeo, mat);
-      L.position.set(x, 18, z); R.position.set(x, 18, z);
-      this.scene.add(L); this.scene.add(R);
-      return { L, R, axis, span, bx: x, bz: z };
-    };
-
-    const curFab = new THREE.MeshStandardMaterial({ color: 0x4a6b99, roughness: 0.9, side: THREE.DoubleSide });
-    this.curtains3d.living = slidePair(0, 68.5, 'x', curFab, 30);
-    this.curtains3d.master = slidePair(55, 68.5, 'x', curFab, 20);
-
     const bld = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, side: THREE.DoubleSide });
+    
+    // Living (Z=70, cx=0)
+    const blindL = new THREE.Mesh(new THREE.PlaneGeometry(30, 14), bld);
+    blindL.position.set(0, 18, 68.5); this.scene.add(blindL);
+    this.curtains3d.living = { type: 'blind', mesh: blindL, baseY: 18 };
+
+    // Master (Z=70, cx=55)
+    const blindM = new THREE.Mesh(new THREE.PlaneGeometry(20, 14), bld);
+    blindM.position.set(55, 18, 68.5); this.scene.add(blindM);
+    this.curtains3d.master = { type: 'blind', mesh: blindM, baseY: 18 };
+    
+    // Room A (West, X=-80, cz=35)
     const blindA = new THREE.Mesh(new THREE.PlaneGeometry(16, 14), bld);
     blindA.position.set(-78.5, 18, 35); blindA.rotation.y = Math.PI/2; this.scene.add(blindA);
     this.curtains3d.rooma = { type: 'blind', mesh: blindA, baseY: 18 };
-
+    
+    // Room B (West, X=-80, cz=-35)
     const blindB = new THREE.Mesh(new THREE.PlaneGeometry(16, 14), bld);
     blindB.position.set(-78.5, 18, -35); blindB.rotation.y = Math.PI/2; this.scene.add(blindB);
     this.curtains3d.roomb = { type: 'blind', mesh: blindB, baseY: 18 };
   }
 
   // ── Effects ───────────────────────────────────────────────────────
+  _createParticleTexture() {
+    const canvas = document.createElement('canvas'); canvas.width = 32; canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.3, 'rgba(255,255,255,0.8)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,32,32);
+    return new THREE.CanvasTexture(canvas);
+  }
+
   _buildEffects() {
-    // AC (x=-25, z=35)
+    const pTex = this._createParticleTexture();
+
+    // AC stream
     let geo = new THREE.BufferGeometry(), pos = new Float32Array(500 * 3);
     for (let i=0; i<500; i++) { pos[i*3] = -25+(Math.random()-0.5)*4; pos[i*3+1] = 24.5-Math.random()*5; pos[i*3+2] = 35+(Math.random()-0.5)*5; }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    this.acParticles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x7dd3fc, size: 0.4, transparent: true, opacity: 0, blending: THREE.AdditiveBlending }));
+    this.acParticles = new THREE.Points(geo, new THREE.PointsMaterial({ map: pTex, color: 0x7dd3fc, size: 1.5, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
     this.scene.add(this.acParticles);
 
-    // Mist (x=0, z=35)
+    // Mist stream
     geo = new THREE.BufferGeometry(); pos = new Float32Array(300 * 3);
     for (let i=0; i<300; i++) { pos[i*3] = (Math.random()-0.5)*3; pos[i*3+1] = 4+Math.random()*8; pos[i*3+2] = 35+(Math.random()-0.5)*3; }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    this.mistParticles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xe0f2fe, size: 0.5, transparent: true, opacity: 0, blending: THREE.AdditiveBlending }));
+    this.mistParticles = new THREE.Points(geo, new THREE.PointsMaterial({ map: pTex, color: 0xe0f2fe, size: 2.2, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
     this.scene.add(this.mistParticles);
 
-    // Stove flame (x=-24, z=-35)
+    // Stove flame
     this.flameMesh = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.8, 8), new THREE.MeshBasicMaterial({ color: 0x1d88fe, transparent: true, opacity: 0 }));
     this.flameMesh.position.set(-24, 10.6, -35); this.scene.add(this.flameMesh);
 
+    // Ondol
     const om = new THREE.MeshBasicMaterial({ color: 0xff4000, wireframe: true, transparent: true, opacity: 0 });
     [[-55,35], [-55,-35], [0,35], [0,-35], [55,45]].forEach(([x, z]) => {
       const p = new THREE.Mesh(new THREE.PlaneGeometry(35, 35, 8, 8), om.clone());
@@ -571,11 +556,8 @@ class SmartHomeSimulator {
       if (!c) return;
       if (c.type === 'blind') {
         const tSY = open ? 0.04 : 1.0;
-        c.mesh.scale.y += (tSY - c.mesh.scale.y) * 0.1; c.mesh.position.y = c.baseY - (14 * 0.5 * (1 - c.mesh.scale.y));
-      } else {
-        const half = c.span / 4, base = c.axis === 'x' ? c.bx : c.bz;
-        c.L.position[c.axis] += ((open ? base - half * 1.5 : base) - c.L.position[c.axis]) * 0.1;
-        c.R.position[c.axis] += ((open ? base + half * 1.5 : base) - c.R.position[c.axis]) * 0.1;
+        c.mesh.scale.y += (tSY - c.mesh.scale.y) * 0.1; 
+        c.mesh.position.y = c.baseY + 7 * (1 - c.mesh.scale.y); // Rolls up to the top fixed point
       }
     });
 
@@ -656,12 +638,10 @@ function initUI() {
   function refreshDoorUI() {
     const box = qs('#door-status-box'), icon = qs('#door-icon'), text = qs('#door-text'), hud = qs('#hud-door-status');
     if (S.door.open) { icon.textContent = '🚪'; text.textContent = '문 열림'; box.classList.add('open'); if (hud) hud.textContent = '🚪 현관 열림'; }
-    else { icon.textContent = S.door.locked ? '🔒' : '🔓'; text.textContent = S.door.locked ? '잠겨 있음' : '닫힘 (잠금 해제)'; box.classList.remove('open'); if (hud) hud.textContent = S.door.locked ? '🔒 현관 잠김' : '🔓 현관 닫힘'; }
+    else { icon.textContent = '🚪'; text.textContent = '닫힘'; box.classList.remove('open'); if (hud) hud.textContent = '🚪 현관 닫힘'; }
   }
-  qs('#btn-door-open').addEventListener('click', () => { S.door.locked = false; S.door.open = true; refreshDoorUI(); toast('🚪 현관문 열림'); });
-  qs('#btn-door-close').addEventListener('click', () => { S.door.open = false; S.door.locked = true; refreshDoorUI(); toast('🔒 현관문 닫힘 & 잠금'); });
-  qs('#btn-lock').addEventListener('click', () => { S.door.locked = true; S.door.open = false; refreshDoorUI(); toast('🔐 도어락 잠금'); });
-  qs('#btn-unlock').addEventListener('click', () => { S.door.locked = false; refreshDoorUI(); toast('🔑 도어락 해제'); });
+  qs('#btn-door-open')?.addEventListener('click', () => { S.door.open = true; refreshDoorUI(); toast('🚪 현관문 열림'); });
+  qs('#btn-door-close')?.addEventListener('click', () => { S.door.open = false; refreshDoorUI(); toast('🚪 현관문 닫힘'); });
 
   function refreshCurtainUI() { qsa('[data-curtain]').forEach(btn => { const open = S.curtains[btn.dataset.curtain]; btn.classList.toggle('on-blue', open); btn.textContent = open ? '열림 ↕' : '닫힘'; }); }
   qs('#btn-curtain-all-open').addEventListener('click', () => { Object.keys(S.curtains).forEach(k => S.curtains[k] = true); refreshCurtainUI(); toast('🪟 전체 커튼 열기'); });
@@ -681,7 +661,7 @@ function initUI() {
   qs('#btn-gas-open').addEventListener('click', () => { S.gas.open = true; qs('#gas-status-text').textContent = '가스 열림 ⚠️ 사용중'; qs('#gas-status-box').classList.add('danger'); sim.syncGas(); toast('🔥 가스 열림', 'err'); });
   qs('#btn-gas-close').addEventListener('click', () => { S.gas.open = false; qs('#gas-status-text').textContent = '가스 잠김 (안전)'; qs('#gas-status-box').classList.remove('danger'); sim.syncGas(); toast('🔒 가스 안전 잠금'); });
 
-  qs('#btn-away').addEventListener('click', () => { Object.keys(S.lights).forEach(k => S.lights[k] = false); refreshLightUI(); sim.syncLights(); S.door.open = false; S.door.locked = true; refreshDoorUI(); Object.keys(S.curtains).forEach(k => S.curtains[k] = false); refreshCurtainUI(); if (S.gas.open) { S.gas.open = false; qs('#gas-status-box').classList.remove('danger'); qs('#gas-status-text').textContent = '가스 잠김'; sim.syncGas(); } toast('🚶 외출 모드 완료'); });
+  qs('#btn-away').addEventListener('click', () => { Object.keys(S.lights).forEach(k => S.lights[k] = false); refreshLightUI(); sim.syncLights(); S.door.open = false; refreshDoorUI(); Object.keys(S.curtains).forEach(k => S.curtains[k] = false); refreshCurtainUI(); if (S.gas.open) { S.gas.open = false; qs('#gas-status-box').classList.remove('danger'); qs('#gas-status-text').textContent = '가스 잠김'; sim.syncGas(); } toast('🚶 외출 모드 완료'); });
 }
 
 function roomKr(k) { return { living:'거실', kitchen:'주방', master:'안방', rooma:'방 A', roomb:'방 B', bathroom:'욕실' }[k] || k; }

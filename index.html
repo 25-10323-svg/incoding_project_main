@@ -27,7 +27,7 @@
       <div class="hud-stats">
         <span id="hud-temp">🌡 24.5°C</span>
         <span id="hud-humidity">💧 52%</span>
-        <span id="hud-door-status">🔒 현관 잠김</span>
+        <span id="hud-door-status">🚪 현관 닫힘</span>
         <span id="hud-time" id="live-time"></span>
       </div>
       <div class="hud-actions">
@@ -142,21 +142,16 @@
       </div>
     </div>
 
-    <!-- ── TAB: 현관 ── -->
+    <!-- 🚪 TAB: 현관 제어 -->
     <div class="tab-content" id="tab-door">
       <div class="section-title">현관문</div>
       <div class="door-status-box" id="door-status-box">
-        <div class="door-icon" id="door-icon">🔒</div>
-        <div class="door-text" id="door-text">잠겨 있음</div>
+        <div class="door-icon" id="door-icon">🚪</div>
+        <div class="door-text" id="door-text">닫힘</div>
       </div>
       <div class="btn-row">
-        <button id="btn-door-open" class="action-btn">🔓 열기</button>
-        <button id="btn-door-close" class="action-btn danger">🔒 닫기 & 잠금</button>
-      </div>
-      <div class="section-title" style="margin-top:16px">도어락</div>
-      <div class="btn-row">
-        <button id="btn-lock" class="action-btn danger">🔐 잠금</button>
-        <button id="btn-unlock" class="action-btn">🔑 해제</button>
+        <button id="btn-door-open" class="action-btn">문 열기</button>
+        <button id="btn-door-close" class="action-btn danger">문 닫기</button>
       </div>
     </div>
 
