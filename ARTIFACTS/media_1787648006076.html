@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURA 3D Smart Home Simulator | 3D 실제 집 구조 시뮬레이터</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Three.js & Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      --glass-bg: rgba(15, 23, 42, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      --accent-blue: #38bdf8;
+      --accent-indigo: #6366f1;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #090d16;
+      color: var(--text-main);
+    }
+
+    #webgl-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Floating UI Overlay */
+    .ui-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+    }
+
+    .interactive {
+      pointer-events: auto;
+    }
+
+    /* Header Bar */
+    .header-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 18px 28px;
+      box-shadow: var(--glass-shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+    }
+
+    .brand-text h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .quick-stats {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .stat-badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .stat-badge i {
+      width: 18px;
+      height: 18px;
+      color: var(--accent-blue);
+    }
+
+    /* Navigation Instruction Helper */
+    .controls-hint {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 30px;
+      padding: 10px 22px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      animation: pulseGlow 3s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
+      100% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.4); }
+    }
+
+    /* Main Grid Layout for Left/Right Toolbars */
+    .main-body-ui {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    /* Left Panel: View Presets & Controls */
+    .view-toolbar {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--glass-shadow);
+      width: 220px;
+    }
+
+    .panel-header {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      padding-left: 4px;
+    }
+
+    .btn-tool {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-tool:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+      transform: translateY(-2px);
+      color: white;
+    }
+
+    .btn-tool.active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(99, 102, 241, 0.25));
+      border-color: var(--accent-blue);
+      color: white;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Right Panel: Smart Home Room Controls */
+    .room-grid-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--glass-shadow);
+      width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .room-cards-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .room-cards-container::-webkit-scrollbar {
+      width: 4px;
+    }
+    .room-cards-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    .room-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .room-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.02);
+    }
+
+    .room-card.selected {
+      border-color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    .room-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .room-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .light-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #475569;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .light-dot.on {
+      background: #fbbf24;
+      box-shadow: 0 0 10px #fbbf24;
+    }
+
+    .room-card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .btn-mini-toggle {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-mini-toggle:hover {
+      background: var(--accent-blue);
+    }
+
+    /* Special Door Lock Button */
+    .door-lock-btn {
+      grid-column: span 2;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      color: white;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .door-lock-btn.unlocked {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Master Light Toggle */
+    .master-light-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+
+    /* Bottom Center Controls */
+    .bottom-center-toolbar {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 8px 16px;
+      box-shadow: var(--glass-shadow);
+    }
+
+    .btn-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-circle:hover {
+      background: var(--accent-blue);
+      transform: scale(1.1);
+    }
+
+    /* Room Info Modal/Tooltip */
+    .room-info-banner {
+      position: absolute;
+      top: 100px;
+      right: 24px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      width: 280px;
+      box-shadow: var(--glass-shadow);
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .room-info-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .room-info-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 3D Canvas Container -->
+  <div id="webgl-container"></div>
+
+  <!-- UI Overlay -->
+  <div class="ui-layer">
+    
+    <!-- Top Header -->
+    <header class="header-card interactive">
+      <div class="brand-title">
+        <div class="brand-icon">
+          <i data-lucide="home"></i>
+        </div>
+        <div class="brand-text">
+          <h1>AURA Smart Home Simulator</h1>
+          <p>가상 홈 공간의 상태를 실시간으로 모니터링하고 3D 구조를 조작합니다.</p>
+        </div>
+      </div>
+
+      <div class="quick-stats">
+        <div class="stat-badge" id="temp-badge">
+          <i data-lucide="thermometer"></i>
+          <span>주방 & 가스: <strong style="color:#f59e0b;" id="kitchen-temp">26.5°C</strong></span>
+        </div>
+        <div class="stat-badge" id="time-mode-badge">
+          <i data-lucide="sun"></i>
+          <span id="time-mode-text">주간 모드</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Helper Hint -->
+    <div class="controls-hint">
+      <i data-lucide="mouse-pointer"></i>
+      <span><strong>마우스 드래그</strong>: 상하좌우 360° 자유 회전 | <strong>휠</strong>: 확대/축소</span>
+    </div>
+
+    <!-- Room Info Popup Banner -->
+    <div class="room-info-banner interactive" id="room-info-banner">
+      <div class="room-info-title">
+        <span id="banner-room-name">방 이름</span>
+        <i data-lucide="x" style="cursor:pointer; width:16px; height:16px;" onclick="closeRoomBanner()"></i>
+      </div>
+      <div class="room-info-desc" id="banner-room-desc">방 설명이 이곳에 표시됩니다.</div>
+    </div>
+
+    <!-- Main Toolbars Row -->
+    <div class="main-body-ui">
+      
+      <!-- Left Toolbar: View Modes & Controls -->
+      <div class="view-toolbar interactive">
+        <div class="panel-header">3D 시점 모드 (View Modes)</div>
+        <button class="btn-tool active" id="btn-view-dollhouse" onclick="setViewMode('dollhouse')">
+          <i data-lucide="box"></i> 3D 절단 뷰 (내부)
+        </button>
+        <button class="btn-tool" id="btn-view-full" onclick="setViewMode('full')">
+          <i data-lucide="building"></i> 3D 집 외관 뷰
+        </button>
+        <button class="btn-tool" id="btn-view-top" onclick="setViewMode('top')">
+          <i data-lucide="layout-grid"></i> 2D 평면도 뷰
+        </button>
+        <button class="btn-tool" id="btn-view-fpv" onclick="setViewMode('fpv')">
+          <i data-lucide="eye"></i> 거실 1인칭 뷰
+        </button>
+
+        <div class="panel-header" style="margin-top: 10px;">환경 설정</div>
+        <button class="btn-tool" id="btn-toggle-roof" onclick="toggleRoof()">
+          <i data-lucide="umbrella"></i> <span id="roof-btn-text">지붕 닫기</span>
+        </button>
+        <button class="btn-tool" id="btn-toggle-daynight" onclick="toggleDayNight()">
+          <i data-lucide="moon"></i> <span id="daynight-btn-text">야간 모드 전환</span>
+        </button>
+        <button class="btn-tool" onclick="resetCameraView()">
+          <i data-lucide="rotate-ccw"></i> 시점 초기화
+        </button>
+      </div>
+
+      <!-- Right Toolbar: Smart Home Room Controllers -->
+      <div class="room-grid-panel interactive">
+        <div class="master-light-bar">
+          <div style="font-size: 13px; font-weight: 700; color: #f1f5f9; display:flex; align-items:center; gap:8px;">
+            <i data-lucide="lightbulb" style="color:#fbbf24; width:18px; height:18px;"></i>
+            <span>전체 조명 밝기 연동</span>
+          </div>
+          <button class="btn-mini-toggle" onclick="toggleAllLights()">전체 ON/OFF</button>
+        </div>
+
+        <div class="panel-header">방 선택 & 조명 스마트 제어</div>
+        
+        <div class="room-cards-container">
+          <!-- Master Bed -->
+          <div class="room-card" id="card-master-bed" onclick="focusRoom('master-bed')">
+            <div class="room-card-header">
+              <span class="room-name">안방</span>
+              <div class="light-dot on" id="dot-master-bed"></div>
+            </div>
+            <div class="room-card-actions">
+              <span>Master Bedroom</span>
+              <button class="btn-mini-toggle" onclick="event.stopPropagation(); toggleRoomLight('master-bed')">조명</button>
+            </div>
+          </div>
+
+          <!-- Master Bath -->
+          <div class="room-card" id="card-master-bath" onclick="focusRoom('master-bath')">
+            <div class="room-card-header">
+              <span class="room-name">안방 욕실</span>
+              <div class="light-dot on" id="dot-master-bath"></div>
+            </div>
+            <div class="room-card-actions">
+              <span>En-suite Bath</span>
+              <button class="btn-mini-toggle" onclick="event.stopPropagation(); toggleRoomLight('master-bath')">조명</button>
+            </div>
+          </div>
+
+          <!-- Room A -->
+          <div class="room-card" id="card-room-a" onclick="focusRoom('room-a')">
+            <div class="room-card-header">
+              <span class="room-name">방A</span>
+              <div class="light-dot on" id="dot-room-a"></div>
+            </div>
+            <div class="room-card-actions">
+              <span>Room A (서재)</span>
+              <button class="btn-mini-toggle" onclick="event.stopPropagation(); toggleRoomLight('room-a')">조명</button>
+            </div>
+          </div>
+
+          <!-- Shared Bath -->
+          <div class="room-card" id="card-shared-bath" onclick="focusRoom('shared-bath')">
+            <div class="room-card-header">
+              <span class="room-name">공용 욕실</span>
+              <div class="light-dot on" id="dot-shared-bath"></div>
+            </div>
+            <div class="room-card-actions">
+              <span>Main Bathroom</span>
+              <button class="btn-mini-toggle" onclick="event.stopPropagation(); toggleRoomLight('shared-bath')">조명</button>
+            </div>
+          </div>
+
+          <!-- Living Room -->
+          <div class="room-card" id="card-living" onclick="focusRoom('living')">
+            <div class="room-card-header">
+              <span class="room-name">거실</span>
+              <div class="light-dot on" id="dot-living"></div>
+            </div>
+            <div class="room-card-actions">
+              <span>Living Room</span>
+              <button class="btn-mini-toggle" onclick="event.stopPropagation(); toggleRoomLight('living')">조명</button>
+            </div>
+          </div>
+
+          <!-- Room B -->
+          <div class="room-card" id="card-room-b" onclick="focusRoom('room-b')">
+            <div class="room-card-header">
+              <span class="room-name">방B</span>
+              <div class="light-dot on" id="dot-room-b"></div>
+            </div>
+            <div class="room-card-actions">
+              <span>Room B</span>
+              <button class="btn-mini-toggle" onclick="event.stopPropagation(); toggleRoomLight('room-b')">조명</button>
+            </div>
+          </div>
+
+          <!-- Kitchen & Gas -->
+          <div class="room-card" id="card-kitchen" onclick="focusRoom('kitchen')">
+            <div class="room-card-header">
+              <span class="room-name">주방 & 가스</span>
+              <div class="light-dot on" id="dot-kitchen"></div>
+            </div>
+            <div class="room-card-actions">
+              <span>26.5°C | 가스감지</span>
+              <button class="btn-mini-toggle" onclick="event.stopPropagation(); toggleRoomLight('kitchen')">조명</button>
+            </div>
+          </div>
+
+          <!-- Entrance Lock Button -->
+          <button class="door-lock-btn interactive" id="btn-door-lock" onclick="toggleDoorLock()">
+            <i data-lucide="lock" id="icon-door-lock"></i>
+            <span id="text-door-lock">현관문: LOCKED</span>
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Center Orbit Quick Actions -->
+    <div class="bottom-center-toolbar interactive">
+      <button class="btn-circle" title="좌로 회전" onclick="rotateCamera(-45)"><i data-lucide="rotate-ccw"></i></button>
+      <button class="btn-circle" title="위로 시점 이동" onclick="pitchCamera(15)"><i data-lucide="chevron-up"></i></button>
+      <button class="btn-circle" title="아래로 시점 이동" onclick="pitchCamera(-15)"><i data-lucide="chevron-down"></i></button>
+      <button class="btn-circle" title="우로 회전" onclick="rotateCamera(45)"><i data-lucide="rotate-cw"></i></button>
+      <button class="btn-circle" title="전체보기" onclick="resetCameraView()"><i data-lucide="maximize-2"></i></button>
+    </div>
+
+  </div>
+
+  <!-- 3D Engine Script -->
+  <script>
+    // --- 3D Scene Global Variables ---
+    let scene, camera, renderer, controls;
+    let houseGroup, roofGroup;
+    let roomLights = {};
+    let roomObjects = {};
+    let isRoofVisible = false;
+    let isNightMode = false;
+    let isDoorLocked = true;
+    let doorMesh = null;
+    let currentViewMode = 'dollhouse';
+
+    // Room Definitions & Coordinates matching blueprint
+    // Total House Dimensions: Width 12m, Depth 10m, Wall Height 2.6m
+    const ROOMS = {
+      'master-bed': { name: '안방', desc: '넓은 마스터 베드룸 공간. 킹사이즈 침대, 협탁, 대형 옷장이 배치되어 있습니다.', center: [-3.25, 0, -3.4], size: [5.5, 3.2] },
+      'master-bath': { name: '안방 욕실', desc: '안방 전용 욕실. 욕조, 고급 세면대, 변기가 구비되어 있습니다.', center: [1.0, 0, -3.4], size: [3.0, 3.2] },
+      'room-a': { name: '방A', desc: '서재 겸 침실 공간. 싱글 침대, 책상, 책장이 세팅되어 있습니다.', center: [4.25, 0, -3.4], size: [3.5, 3.2] },
+      'living': { name: '거실', desc: '중앙 거실 공간. 대형 소파, TV 거실장, 러그가 설치된 탁 트인 생활 공간입니다.', center: [-1.75, 0, 0.0], size: [8.5, 3.6] },
+      'shared-bath': { name: '공용 욕실', desc: '가족 및 손님용 공용 욕실. 샤워부스, 수건장, 현대적 세면대 구비.', center: [4.25, 0, 0.0], size: [3.5, 3.6] },
+      'room-b': { name: '방B', desc: '하단 측면 침실. 편안한 침대와 옷장이 배치되어 있습니다.', center: [-4.4, 0, 3.4], size: [3.2, 3.2] },
+      'kitchen': { name: '주방 & 가스', desc: '아일랜드 식탁, 씽크대, 가스렌지, 26.5°C 온도 센서가 연동된 주방 공간입니다.', center: [-0.15, 0, 3.4], size: [5.3, 3.2] },
+      'entrance': { name: '현관문', desc: '주택 출입 현관. 신발장 및 스마트 도어락(LOCKED/UNLOCKED) 제어 연동.', center: [4.25, 0, 3.4], size: [3.5, 3.2] }
+    };
+
+    // Initialize 3D Engine
+    function init3D() {
+      const container = document.getElementById('webgl-container');
+
+      // Scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0b1120);
+      scene.fog = new THREE.FogExp2(0x0b1120, 0.018);
+
+      // Camera
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(16, 18, 22);
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.1;
+      container.appendChild(renderer.domElement);
+
+      // Orbit Controls
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2 - 0.02; // Don't go under floor
+      controls.minDistance = 4;
+      controls.maxDistance = 50;
+      controls.target.set(0, 0, 0);
+
+      // Lights Setup
+      setupLighting();
+
+      // Build 3D House Model
+      houseGroup = new THREE.Group();
+      scene.add(houseGroup);
+
+      buildGround();
+      buildFloorsAndWalls();
+      buildFurniture();
+      buildRoof();
+
+      // Window Resize Listener
+      window.addEventListener('resize', onWindowResize);
+
+      // Lucide Icons Render
+      lucide.createIcons();
+
+      // Animation Loop
+      animate();
+    }
+
+    // --- Lighting Setup ---
+    let sunLight, hemiLight, ambientLight;
+    function setupLighting() {
+      ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x1e293b, 0.5);
+      hemiLight.position.set(0, 50, 0);
+      scene.add(hemiLight);
+
+      sunLight = new THREE.DirectionalLight(0xfffaed, 1.2);
+      sunLight.position.set(25, 35, 20);
+      sunLight.castShadow = true;
+      sunLight.shadow.mapSize.width = 2048;
+      sunLight.shadow.mapSize.height = 2048;
+      sunLight.shadow.camera.near = 0.5;
+      sunLight.shadow.camera.far = 100;
+      const d = 16;
+      sunLight.shadow.camera.left = -d;
+      sunLight.shadow.camera.right = d;
+      sunLight.shadow.camera.top = d;
+      sunLight.shadow.camera.bottom = -d;
+      sunLight.shadow.bias = -0.0005;
+      scene.add(sunLight);
+    }
+
+    // --- Ground & Garden Base ---
+    function buildGround() {
+      // Grass Garden Base
+      const grassGeo = new THREE.PlaneGeometry(36, 32);
+      const grassMat = new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.9,
+        metalness: 0.1
+      });
+      const grass = new THREE.Mesh(grassGeo, grassMat);
+      grass.rotation.x = -Math.PI / 2;
+      grass.position.y = -0.15;
+      grass.receiveShadow = true;
+      houseGroup.add(grass);
+
+      // Patio Foundation Slab
+      const foundationGeo = new THREE.BoxGeometry(13.2, 0.3, 11.2);
+      const foundationMat = new THREE.MeshStandardMaterial({
+        color: 0x0f172a,
+        roughness: 0.6
+      });
+      const foundation = new THREE.Mesh(foundationGeo, foundationMat);
+      foundation.position.set(0, -0.15, 0);
+      foundation.receiveShadow = true;
+      houseGroup.add(foundation);
+    }
+
+    // --- Create Room Floors, Wall Meshes & Point Lights ---
+    function buildFloorsAndWalls() {
+      // Floor Material Textures (Wood, Tile, Marble)
+      const woodMat = new THREE.MeshStandardMaterial({ color: 0xba8c63, roughness: 0.4 });
+      const tileMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.2 });
+      const darkTileMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.3 });
+      const entranceTileMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5 });
+
+      // Wall Materials
+      const outerWallMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+      const innerWallMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.6 });
+
+      // Loop through room definitions
+      for (const [key, room] of Object.entries(ROOMS)) {
+        const [cx, cy, cz] = room.center;
+        const [rw, rd] = room.size;
+
+        // Choose Floor Material
+        let fMat = woodMat;
+        if (key.includes('bath')) fMat = tileMat;
+        if (key === 'kitchen') fMat = darkTileMat;
+        if (key === 'entrance') fMat = entranceTileMat;
+
+        // Create Floor Plane
+        const floorGeo = new THREE.BoxGeometry(rw - 0.05, 0.08, rd - 0.05);
+        const floorMesh = new THREE.Mesh(floorGeo, fMat);
+        floorMesh.position.set(cx, 0.04, cz);
+        floorMesh.receiveShadow = true;
+        houseGroup.add(floorMesh);
+
+        // Add Ceiling/Interior Point Light for each room
+        const roomLight = new THREE.PointLight(0xfffae6, 0.9, 8);
+        roomLight.position.set(cx, 2.3, cz);
+        roomLight.castShadow = true;
+        houseGroup.add(roomLight);
+        roomLights[key] = roomLight;
+
+        // Add Ceiling Light Fixture Visual
+        const fixtureGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.06, 16);
+        const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xfffbe6 });
+        const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
+        fixture.position.set(cx, 2.55, cz);
+        houseGroup.add(fixture);
+      }
+
+      // --- WALLS CONSTRUCTION ---
+      // Outer Boundary Walls (Height 2.6m)
+      const wallHeight = 2.6;
+      const wallThick = 0.18;
+
+      // Outer Box Walls
+      // North Wall (Z = -5.0)
+      createWall(0, wallHeight/2, -5.0, 12.2, wallHeight, wallThick, outerWallMat);
+      // South Wall (Z = +5.0) - with entrance door cutout
+      createWall(-2.8, wallHeight/2, 5.0, 6.6, wallHeight, wallThick, outerWallMat);
+      createWall(4.25, wallHeight/2 + 0.8, 5.0, 3.5, 1.0, wallThick, outerWallMat); // door top header
+      // West Wall (X = -6.0)
+      createWall(-6.0, wallHeight/2, 0, wallThick, wallHeight, 10.2, outerWallMat);
+      // East Wall (X = +6.0)
+      createWall(6.0, wallHeight/2, 0, wallThick, wallHeight, 10.2, outerWallMat);
+
+      // Inner Partition Walls
+      // Horizontal Partition 1 (Z = -1.8) between Top Row & Middle Row
+      createWall(-0.35, wallHeight/2, -1.8, 11.3, wallHeight, 0.12, innerWallMat);
+      // Horizontal Partition 2 (Z = +1.8) between Middle Row & Bottom Row
+      createWall(-0.35, wallHeight/2, 1.8, 11.3, wallHeight, 0.12, innerWallMat);
+
+      // Vertical Partitions
+      // X = -0.5 (Separating Master Bed & Master Bath)
+      createWall(-0.5, wallHeight/2, -3.4, 0.12, wallHeight, 3.2, innerWallMat);
+      // X = 2.5 (Separating Bathrooms/Entrance from Living/Rooms)
+      createWall(2.5, wallHeight/2, -3.4, 0.12, wallHeight, 3.2, innerWallMat);
+      createWall(2.5, wallHeight/2, 0.0, 0.12, wallHeight, 3.6, innerWallMat);
+      createWall(2.5, wallHeight/2, 3.4, 0.12, wallHeight, 3.2, innerWallMat);
+      // X = -2.8 (Separating Room B & Kitchen)
+      createWall(-2.8, wallHeight/2, 3.4, 0.12, wallHeight, 3.2, innerWallMat);
+
+      // Front Entrance Door (Interactive)
+      const doorGeo = new THREE.BoxGeometry(1.2, 2.1, 0.08);
+      const doorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 });
+      doorMesh = new THREE.Mesh(doorGeo, doorMat);
+      doorMesh.position.set(4.25 - 0.6, 1.05, 5.0);
+      doorGeo.translate(0.6, 0, 0); // Pivot hinge at left edge
+      houseGroup.add(doorMesh);
+    }
+
+    // Wall Helper
+    function createWall(x, y, z, w, h, d, mat) {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      houseGroup.add(mesh);
+      return mesh;
+    }
+
+    // --- PROCEDURAL 3D FURNITURE ---
+    function buildFurniture() {
+      // 1. 안방 (Master Bedroom)
+      const masterBedGroup = new THREE.Group();
+      // Double Bed
+      const bedFrame = createBoxMesh(2.0, 0.4, 2.2, 0x334155);
+      const mattress = createBoxMesh(1.9, 0.25, 2.0, 0xffffff);
+      mattress.position.y = 0.32;
+      const headboard = createBoxMesh(2.0, 0.9, 0.15, 0x1e293b);
+      headboard.position.set(0, 0.45, -1.05);
+      const pillow1 = createBoxMesh(0.6, 0.12, 0.4, 0x38bdf8);
+      pillow1.position.set(-0.45, 0.48, -0.75);
+      const pillow2 = pillow1.clone();
+      pillow2.position.x = 0.45;
+      masterBedGroup.add(bedFrame, mattress, headboard, pillow1, pillow2);
+      masterBedGroup.position.set(-3.5, 0, -3.8);
+      houseGroup.add(masterBedGroup);
+
+      // Wardrobe Closet
+      const wardrobe = createBoxMesh(1.4, 2.2, 0.6, 0x475569);
+      wardrobe.position.set(-5.1, 1.1, -3.4);
+      houseGroup.add(wardrobe);
+
+      // 2. 안방 욕실 (Master Bath)
+      const tub = createBoxMesh(1.6, 0.6, 0.8, 0xffffff);
+      tub.position.set(1.0, 0.3, -4.4);
+      const vanity1 = createBoxMesh(0.9, 0.7, 0.5, 0x0f172a);
+      vanity1.position.set(1.8, 0.35, -2.4);
+      houseGroup.add(tub, vanity1);
+
+      // 3. 방A (Room A)
+      const roomAGroup = new THREE.Group();
+      const singleBed = createBoxMesh(1.2, 0.35, 1.9, 0x64748b);
+      const desk = createBoxMesh(1.4, 0.75, 0.6, 0x334155);
+      desk.position.set(1.0, 0, 0.8);
+      const chair = createBoxMesh(0.4, 0.45, 0.4, 0x38bdf8);
+      chair.position.set(1.0, 0, 0.3);
+      roomAGroup.add(singleBed, desk, chair);
+      roomAGroup.position.set(4.25, 0.18, -3.6);
+      houseGroup.add(roomAGroup);
+
+      // 4. 거실 (Living Room)
+      const livingGroup = new THREE.Group();
+      // Sectional Sofa
+      const sofaBase = createBoxMesh(3.2, 0.4, 1.0, 0x334155);
+      const sofaCorner = createBoxMesh(1.0, 0.4, 1.4, 0x334155);
+      sofaCorner.position.set(-1.1, 0, 1.0);
+      const sofaBack = createBoxMesh(3.2, 0.5, 0.25, 0x1e293b);
+      sofaBack.position.set(0, 0.4, -0.4);
+      // Area Rug
+      const rug = createBoxMesh(3.6, 0.02, 2.4, 0x94a3b8);
+      rug.position.set(0, -0.18, 0.8);
+      // Coffee Table
+      const coffeeTable = createBoxMesh(1.4, 0.35, 0.7, 0x0f172a);
+      coffeeTable.position.set(0, 0, 0.8);
+      // TV Console Unit & Widescreen OLED TV
+      const tvConsole = createBoxMesh(2.8, 0.4, 0.45, 0x0f172a);
+      tvConsole.position.set(-1.8, 0.2, -1.4);
+      const tvScreen = createBoxMesh(2.2, 1.2, 0.08, 0x020617);
+      tvScreen.position.set(-1.8, 1.2, -1.4);
+
+      livingGroup.add(sofaBase, sofaCorner, sofaBack, rug, coffeeTable, tvConsole, tvScreen);
+      livingGroup.position.set(-1.5, 0.2, 0.0);
+      houseGroup.add(livingGroup);
+
+      // 5. 공용 욕실 (Shared Bath)
+      const showerGlass = createBoxMesh(0.04, 2.0, 1.0, 0x38bdf8);
+      showerGlass.position.set(3.2, 1.0, -0.6);
+      const vanity2 = createBoxMesh(1.1, 0.7, 0.5, 0x1e293b);
+      vanity2.position.set(4.25, 0.35, 0.6);
+      houseGroup.add(showerGlass, vanity2);
+
+      // 6. 방B (Room B)
+      const roomBGroup = new THREE.Group();
+      const bedB = createBoxMesh(1.3, 0.35, 1.9, 0xf43f5e);
+      const closetB = createBoxMesh(1.0, 2.0, 0.5, 0x334155);
+      closetB.position.set(-1.0, 0.8, -0.6);
+      roomBGroup.add(bedB, closetB);
+      roomBGroup.position.set(-4.4, 0.18, 3.4);
+      houseGroup.add(roomBGroup);
+
+      // 7. 주방 & 가스 (Kitchen & Gas)
+      const kitchenGroup = new THREE.Group();
+      // Countertop Island
+      const counter = createBoxMesh(3.2, 0.85, 0.7, 0x1e293b);
+      counter.position.set(0, 0.42, 0);
+      // Stove with glowing red gas burner visual
+      const stove = createBoxMesh(0.8, 0.05, 0.5, 0xef4444);
+      stove.position.set(-0.8, 0.87, 0);
+      // Dining Table & Chairs
+      const diningTable = createBoxMesh(1.6, 0.75, 0.9, 0x475569);
+      diningTable.position.set(0, 0.37, -1.3);
+      for(let i = -0.6; i <= 0.6; i += 1.2) {
+        const chair1 = createBoxMesh(0.4, 0.45, 0.4, 0x38bdf8);
+        chair1.position.set(i, 0.22, -1.9);
+        const chair2 = chair1.clone();
+        chair2.position.z = -0.7;
+        kitchenGroup.add(chair1, chair2);
+      }
+      kitchenGroup.add(counter, stove, diningTable);
+      kitchenGroup.position.set(-0.15, 0, 3.4);
+      houseGroup.add(kitchenGroup);
+
+      // 8. 현관문 (Entrance)
+      const shoeCabinet = createBoxMesh(1.2, 1.0, 0.45, 0x334155);
+      shoeCabinet.position.set(5.2, 0.5, 3.2);
+      const entranceMat = createBoxMesh(1.2, 0.02, 0.8, 0x64748b);
+      entranceMat.position.set(4.25, 0.05, 4.2);
+      houseGroup.add(shoeCabinet, entranceMat);
+    }
+
+    // Helper Mesh Creator
+    function createBoxMesh(w, h, d, colorHex) {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      const mat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.4 });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      return mesh;
+    }
+
+    // --- ROOF MODELING ---
+    function buildRoof() {
+      roofGroup = new THREE.Group();
+
+      // Slanted Roof Pitch (Gable Roof)
+      const roofMat = new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.3,
+        metalness: 0.2
+      });
+
+      // Left Roof Slope
+      const slope1Geo = new THREE.BoxGeometry(6.8, 0.2, 11.6);
+      const slope1 = new THREE.Mesh(slope1Geo, roofMat);
+      slope1.position.set(-3.2, 4.0, 0);
+      slope1.rotation.z = Math.PI / 10;
+      roofGroup.add(slope1);
+
+      // Right Roof Slope
+      const slope2Geo = new THREE.BoxGeometry(6.8, 0.2, 11.6);
+      const slope2 = new THREE.Mesh(slope2Geo, roofMat);
+      slope2.position.set(3.2, 4.0, 0);
+      slope2.rotation.z = -Math.PI / 10;
+      roofGroup.add(slope2);
+
+      roofGroup.visible = isRoofVisible;
+      houseGroup.add(roofGroup);
+    }
+
+    // --- VIEWPORT & CAMERA PRESETS ---
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      document.querySelectorAll('.btn-tool').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`btn-view-${mode}`)?.classList.add('active');
+
+      let targetCamPos, targetLookAt;
+
+      if (mode === 'dollhouse') {
+        // 3D Cutaway Dollhouse View (Top angled)
+        isRoofVisible = false;
+        roofGroup.visible = false;
+        targetCamPos = { x: 16, y: 18, z: 20 };
+        targetLookAt = { x: 0, y: 0, z: 0 };
+      } else if (mode === 'full') {
+        // Full Exterior House View
+        isRoofVisible = true;
+        roofGroup.visible = true;
+        targetCamPos = { x: 20, y: 15, z: 22 };
+        targetLookAt = { x: 0, y: 1.5, z: 0 };
+      } else if (mode === 'top') {
+        // 2D Orthographic Top View
+        isRoofVisible = false;
+        roofGroup.visible = false;
+        targetCamPos = { x: 0.001, y: 26, z: 0 };
+        targetLookAt = { x: 0, y: 0, z: 0 };
+      } else if (mode === 'fpv') {
+        // First Person Living Room View
+        isRoofVisible = false;
+        roofGroup.visible = false;
+        targetCamPos = { x: -1.75, y: 1.6, z: 2.2 };
+        targetLookAt = { x: -1.75, y: 1.5, z: -2.0 };
+      }
+
+      document.getElementById('roof-btn-text').innerText = isRoofVisible ? '지붕 열기' : '지붕 닫기';
+
+      animateCamera(targetCamPos, targetLookAt);
+    }
+
+    // Smooth Camera Transition with TWEEN
+    function animateCamera(targetPos, targetTarget, duration = 1200) {
+      new TWEEN.Tween(camera.position)
+        .to(targetPos, duration)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .start();
+
+      new TWEEN.Tween(controls.target)
+        .to(targetTarget, duration)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .start();
+    }
+
+    // --- ROOM FOCUS NAVIGATION ---
+    function focusRoom(roomKey) {
+      const room = ROOMS[roomKey];
+      if (!room) return;
+
+      document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById(`card-${roomKey}`)?.classList.add('selected');
+
+      const [cx, cy, cz] = room.center;
+      const targetCamPos = { x: cx + 4, y: 7, z: cz + 6 };
+      const targetLookAt = { x: cx, y: 0.8, z: cz };
+
+      animateCamera(targetCamPos, targetLookAt);
+
+      // Show Room Banner
+      const banner = document.getElementById('room-info-banner');
+      document.getElementById('banner-room-name').innerText = room.name;
+      document.getElementById('banner-room-desc').innerText = room.desc;
+      banner.style.display = 'flex';
+    }
+
+    function closeRoomBanner() {
+      document.getElementById('room-info-banner').style.display = 'none';
+    }
+
+    // --- SMART HOME CONTROLS ---
+    function toggleRoomLight(roomKey) {
+      const light = roomLights[roomKey];
+      const dot = document.getElementById(`dot-${roomKey}`);
+      if (!light) return;
+
+      light.visible = !light.visible;
+      if (light.visible) {
+        dot?.classList.add('on');
+      } else {
+        dot?.classList.remove('on');
+      }
+    }
+
+    function toggleAllLights() {
+      const anyOn = Object.values(roomLights).some(l => l.visible);
+      Object.keys(roomLights).forEach(k => {
+        roomLights[k].visible = !anyOn;
+        const dot = document.getElementById(`dot-${k}`);
+        if (!anyOn) dot?.classList.add('on');
+        else dot?.classList.remove('on');
+      });
+    }
+
+    function toggleRoof() {
+      isRoofVisible = !isRoofVisible;
+      roofGroup.visible = isRoofVisible;
+      document.getElementById('roof-btn-text').innerText = isRoofVisible ? '지붕 열기' : '지붕 닫기';
+    }
+
+    function toggleDayNight() {
+      isNightMode = !isNightMode;
+      const badgeText = document.getElementById('time-mode-text');
+      const daynightText = document.getElementById('daynight-btn-text');
+
+      if (isNightMode) {
+        scene.background = new THREE.Color(0x030712);
+        scene.fog.color.setHex(0x030712);
+        sunLight.intensity = 0.15;
+        ambientLight.intensity = 0.25;
+        badgeText.innerText = '야간 모드';
+        daynightText.innerText = '주간 모드 전환';
+      } else {
+        scene.background = new THREE.Color(0x0b1120);
+        scene.fog.color.setHex(0x0b1120);
+        sunLight.intensity = 1.2;
+        ambientLight.intensity = 0.6;
+        badgeText.innerText = '주간 모드';
+        daynightText.innerText = '야간 모드 전환';
+      }
+    }
+
+    function toggleDoorLock() {
+      isDoorLocked = !isDoorLocked;
+      const btn = document.getElementById('btn-door-lock');
+      const text = document.getElementById('text-door-lock');
+      const icon = document.getElementById('icon-door-lock');
+
+      if (isDoorLocked) {
+        btn.classList.remove('unlocked');
+        text.innerText = '현관문: LOCKED';
+        // Close Door Animation
+        new TWEEN.Tween(doorMesh.rotation)
+          .to({ y: 0 }, 800)
+          .easing(TWEEN.Easing.Back.In)
+          .start();
+      } else {
+        btn.classList.add('unlocked');
+        text.innerText = '현관문: UNLOCKED';
+        // Open Door Animation
+        new TWEEN.Tween(doorMesh.rotation)
+          .to({ y: -Math.PI / 2.2 }, 800)
+          .easing(TWEEN.Easing.Back.Out)
+          .start();
+      }
+    }
+
+    // --- QUICK ORBIT ACTIONS ---
+    function rotateCamera(angleDeg) {
+      const rad = (angleDeg * Math.PI) / 180;
+      const x = camera.position.x - controls.target.x;
+      const z = camera.position.z - controls.target.z;
+
+      const newX = x * Math.cos(rad) - z * Math.sin(rad);
+      const newZ = x * Math.sin(rad) + z * Math.cos(rad);
+
+      animateCamera(
+        { x: newX + controls.target.x, y: camera.position.y, z: newZ + controls.target.z },
+        { x: controls.target.x, y: controls.target.y, z: controls.target.z },
+        600
+      );
+    }
+
+    function pitchCamera(angleDeg) {
+      const newY = Math.max(3, Math.min(30, camera.position.y + angleDeg * 0.3));
+      animateCamera(
+        { x: camera.position.x, y: newY, z: camera.position.z },
+        { x: controls.target.x, y: controls.target.y, z: controls.target.z },
+        600
+      );
+    }
+
+    function resetCameraView() {
+      setViewMode('dollhouse');
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // --- MAIN ANIMATION LOOP ---
+    function animate(time) {
+      requestAnimationFrame(animate);
+      TWEEN.update();
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Start 3D Engine on load
+    window.addEventListener('DOMContentLoaded', init3D);
+  </script>
+</body>
+</html>
