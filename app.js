@@ -1,6 +1,6 @@
 /* =====================================================================
    스마트홈 3D 시뮬레이터 — app.js
-   No Interior Doors, No Doorlock, Roll-up Blinds, Soft Particles
+   No Roof, Sky Blue Wind Particles for AC, Roll-up Blinds, Soft Particles
    ===================================================================== */
 
 'use strict';
@@ -21,7 +21,6 @@ const S = {
     currentHumidity: 52
   },
   gas: { open: false },
-  roof: false,
   labels: true,
   fpsMode: false,
   panelOpen: true
@@ -68,7 +67,6 @@ class SmartHomeSimulator {
     this.lamps        = {};
     this.curtains3d   = {};
     this.doorPivot    = null;
-    this.roofGroup    = null;
     this.flameMesh    = null;
     this.acParticles  = null;
     this.mistParticles= null;
@@ -142,7 +140,6 @@ class SmartHomeSimulator {
     this._buildExteriorDoor();
     this._buildWindows();
     this._buildFurniture();
-    this._buildRoof();
     this._buildLamps();
     this._buildCurtains();
     this._buildEffects();
@@ -310,30 +307,6 @@ class SmartHomeSimulator {
     this._box(10, 12, 3.5, this._mat(0x1e293b, 0.4), 70, 6, -45); 
   }
 
-  // ── Pyramid Roof ──────────────────────────────────────────────────
-  _buildRoof() {
-    this.roofGroup = new THREE.Group();
-    const eave = new THREE.Mesh(new THREE.BoxGeometry(166, 2, 146), this._mat(0x0f172a, 0.6));
-    eave.position.set(0, 32, 0);
-    this.roofGroup.add(eave);
-
-    const hw = 84, hd = 74, base = 33, peak = 72;
-    const roofMat = this._mat(0x1e293b, 0.55, 0.15);
-    const apex = [0, peak, 0];
-    const corners = [ [-hw, base, -hd], [ hw, base, -hd], [ hw, base, hd], [-hw, base, hd] ];
-
-    const makeFace = (a, b, c) => {
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([...a, ...b, ...c]), 3));
-      geo.computeVertexNormals();
-      return new THREE.Mesh(geo, roofMat);
-    };
-
-    [ [0,1], [1,2], [2,3], [3,0] ].forEach(([i, j]) => this.roofGroup.add(makeFace(corners[i], corners[j], apex)));
-    this.roofGroup.visible = false;
-    this.scene.add(this.roofGroup);
-  }
-
   // ── Lamps ─────────────────────────────────────────────────────────
   _buildLamps() {
     const rooms = {
@@ -394,17 +367,66 @@ class SmartHomeSimulator {
     return new THREE.CanvasTexture(canvas);
   }
 
+  _createWindTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.strokeStyle = '#38bdf8'; // Sky blue
+    ctx.shadowColor = '#0284c7';
+    ctx.shadowBlur = 6;
+
+    // Top gentle wave
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(8, 18);
+    ctx.bezierCurveTo(22, 10, 38, 26, 56, 16);
+    ctx.stroke();
+
+    // Middle main wind swirl
+    ctx.lineWidth = 4.5;
+    ctx.beginPath();
+    ctx.moveTo(4, 32);
+    ctx.bezierCurveTo(20, 20, 38, 44, 52, 30);
+    ctx.bezierCurveTo(58, 24, 60, 18, 50, 20);
+    ctx.stroke();
+
+    // Bottom breeze wave
+    ctx.lineWidth = 3.0;
+    ctx.beginPath();
+    ctx.moveTo(12, 46);
+    ctx.bezierCurveTo(26, 38, 42, 54, 56, 44);
+    ctx.stroke();
+
+    return new THREE.CanvasTexture(canvas);
+  }
+
   _buildEffects() {
     const pTex = this._createParticleTexture();
+    const wTex = this._createWindTexture();
 
-    // AC stream
-    let geo = new THREE.BufferGeometry(), pos = new Float32Array(500 * 3);
-    for (let i=0; i<500; i++) { pos[i*3] = -25+(Math.random()-0.5)*4; pos[i*3+1] = 24.5-Math.random()*5; pos[i*3+2] = 35+(Math.random()-0.5)*5; }
+    // AC Wind Stream (Sky blue wind symbols)
+    let geo = new THREE.BufferGeometry(), pos = new Float32Array(350 * 3);
+    for (let i=0; i<350; i++) {
+      pos[i*3]   = -25 + Math.random() * 45;
+      pos[i*3+1] = 25.5 - Math.random() * 10;
+      pos[i*3+2] = 35 + (Math.random() - 0.5) * 20;
+    }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    this.acParticles = new THREE.Points(geo, new THREE.PointsMaterial({ map: pTex, color: 0x7dd3fc, size: 1.5, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    this.acParticles = new THREE.Points(geo, new THREE.PointsMaterial({
+      map: wTex,
+      color: 0x38bdf8,
+      size: 4.2,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    }));
     this.scene.add(this.acParticles);
 
-    // Mist stream
+    // Mist stream (Humidifier)
     geo = new THREE.BufferGeometry(); pos = new Float32Array(300 * 3);
     for (let i=0; i<300; i++) { pos[i*3] = (Math.random()-0.5)*3; pos[i*3+1] = 4+Math.random()*8; pos[i*3+2] = 35+(Math.random()-0.5)*3; }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -451,7 +473,6 @@ class SmartHomeSimulator {
       this.lamps[key].bulb.material   = S.lights[key] ? this.bulbMatOn : this.bulbMatOff;
     });
   }
-  syncRoof() { if (this.roofGroup) this.roofGroup.visible = S.roof; }
   syncLabels() { if (this.labelGroup) this.labelGroup.visible = S.labels; }
   syncGas() { if (this.flameMesh) this.flameMesh.material.opacity = S.gas.open ? 0.85 : 0; }
 
@@ -564,12 +585,19 @@ class SmartHomeSimulator {
     this.ondolPlanes.forEach(p => { p.material.opacity += ((S.climate.boiler ? (0.28 + 0.18 * Math.sin(t * 4)) : 0) - p.material.opacity) * 0.08; });
 
     if (this.acParticles) {
-      this.acParticles.material.opacity += ((S.climate.ac ? 0.8 : 0) - this.acParticles.material.opacity) * 0.08;
+      this.acParticles.material.opacity += ((S.climate.ac ? 0.9 : 0) - this.acParticles.material.opacity) * 0.08;
       if (S.climate.ac || this.acParticles.material.opacity > 0.01) {
-        const pos = this.acParticles.geometry.attributes.position.array, spd = S.climate.acWind === 'high' ? 0.35 : (S.climate.acWind === 'med' ? 0.22 : 0.12);
+        const pos = this.acParticles.geometry.attributes.position.array;
+        const spd = S.climate.acWind === 'high' ? 0.55 : (S.climate.acWind === 'med' ? 0.35 : 0.20);
         for (let i = 0; i < pos.length; i += 3) {
-          pos[i] += spd; pos[i+2] -= Math.sin(t * 3 + i) * 0.02;
-          if (pos[i] > 15) { pos[i] = -25+(Math.random()-0.5)*4; pos[i+1] = 24.5-Math.random()*5; pos[i+2] = 35+(Math.random()-0.5)*5; }
+          pos[i] += spd;
+          pos[i+1] -= 0.02 + Math.sin(t * 4 + i) * 0.015;
+          pos[i+2] += Math.sin(t * 3 + i) * 0.03;
+          if (pos[i] > 20 || pos[i+1] < 12) {
+            pos[i]   = -25 + (Math.random() - 0.5) * 3;
+            pos[i+1] = 25.5 - Math.random() * 3;
+            pos[i+2] = 35 + (Math.random() - 0.5) * 16;
+          }
         }
         this.acParticles.geometry.attributes.position.needsUpdate = true;
       }
@@ -627,7 +655,6 @@ function initUI() {
   });
   qs('#btn-view-fps').addEventListener('click', () => { if (S.fpsMode) { sim._exitFPS(); setActiveCam('btn-view-iso'); sim.setView('iso'); } else { sim._enterFPS(); setActiveCam('btn-view-fps'); } });
 
-  qs('#btn-roof-toggle').addEventListener('click', () => { S.roof = !S.roof; sim.syncRoof(); qs('#btn-roof-toggle').classList.toggle('active', S.roof); toast(S.roof ? '🏠 지붕 ON' : '🏠 지붕 OFF'); });
   qs('#btn-labels-toggle').addEventListener('click', () => { S.labels = !S.labels; sim.syncLabels(); toast(S.labels ? '🏷 방 이름 ON' : '🏷 이름 OFF'); });
 
   qs('#brightness-slider').addEventListener('input', e => { S.brightness = parseInt(e.target.value); qs('#brightness-val').textContent = `${S.brightness}%`; sim.syncLights(); });
